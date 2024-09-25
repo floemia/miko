@@ -14,6 +14,7 @@ export const droid_tracking = async () => {
         while (true) {
             tracking_users = await DroidAccountTrackModel.find()
             for await (const user of tracking_users) {
+                console.log(`tracking - buscnado plays de ${user.username} - UID ${user.uid}`)
                 await new Promise(resolve => setTimeout(resolve, 20000))
                 const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user.guild }))?.channel.track}`)
                 if (!track_channel || track_channel.type != ChannelType.GuildText) return
