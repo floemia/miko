@@ -5,7 +5,7 @@ import type { Command, GlobClient } from "../types"
 import { loadFiles } from "../lib/files"
 
 export async function handleCommands(client: GlobClient): Promise<void> {
-  const table = new Table("Nombre del comando", "Estado")
+  const table = new Table(" Slash Command ", " Status ")
 
   client.commands.clear()
   const commands: RESTPostAPIApplicationCommandsJSONBody[] = []
@@ -16,9 +16,10 @@ export async function handleCommands(client: GlobClient): Promise<void> {
     try {
       client.commands.set(command.data.name, command)
       commands.push(command.data.toJSON())
-      table.addRow(command.data.name, "Cargado")
+      table.addRow(command.data.name, " ✔️ ")
     } catch (error) {
-      table.addRow(command.data.name, "Error")
+      table.addRow(command.data.name, " ❌ ")
+      console.log(error)
     }
   })
 

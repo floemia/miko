@@ -4,18 +4,23 @@
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
-    "dev": "nodemon",
-    "build": "tsc",
-    "start": "node ."
+    "start": "tsc && node ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@rian8337/osu-base": "^3.3.0",
+    "@rian8337/osu-difficulty-calculator": "^3.3.2",
+    "@rian8337/osu-rebalance-difficulty-calculator": "^3.3.2",
+    "axios": "^1.7.7",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
+    "fast-average-color-node": "^3.1.0",
     "glob": "^11.0.0",
     "mongoose": "^8.5.2",
+    "osu-api-extended": "^2.8.52",
+    "rosu-pp-js": "^1.1.0",
     "tablifier": "^1.2.1"
   },
   "devDependencies": {
