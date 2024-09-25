@@ -69,8 +69,6 @@ const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceDat
             stats: stats,
             
         });
-        console.log(rating)
-        //console.log(rating)
         const accuracy = new Accuracy({
             nmiss: recent.misses,
             percent: recent.accuracy,
@@ -89,7 +87,6 @@ const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceDat
             accPercent: accuracy,
         });
 
-        console.log(droid_perf)
         if (recent.misses > 0) {
             const accuracy_fc = new Accuracy({
                 nmiss: 0,
@@ -133,7 +130,6 @@ const test = async () => {
         rating.droid.attributes
     ).calculate();
 
-    console.log(droidPerformance)
 }
 
 

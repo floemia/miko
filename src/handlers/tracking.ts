@@ -8,7 +8,6 @@ import GuildConfigModel from "../schemas/guild"
 
 export const droid_tracking = async () => {
 
-    console.log("a")
     var tracking_users = await DroidAccountTrackModel.find()
     setInterval(async () => {
        tracking_users = await DroidAccountTrackModel.find()
@@ -28,6 +27,7 @@ export const droid_tracking = async () => {
                     
                     const play = recents[0]
                     const beatmap = await MapInfo.getInformation(play.hash)
+                    console.log(`creando track para ${play.user.username}\n${play.fallback_title}\n\n`)
                     
                     if (beatmap?.title) {
                         play.beatmap = beatmap
