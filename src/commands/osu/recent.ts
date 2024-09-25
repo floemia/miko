@@ -21,7 +21,7 @@ export const command: Command = {
     ),
 
   async execute(client, interaction) {
-    await interaction.deferReply({ephemeral: true})
+    await interaction.deferReply()
     const recent = await droid.recent(interaction.options.getInteger("uid", true))
 
     if (!recent) return await interaction.editReply({
