@@ -5,6 +5,7 @@ import DroidAccountTrackModel from "../schemas/droidtracking"
 import { ChannelType } from "discord.js"
 import { getAverageColor } from "fast-average-color-node"
 import GuildConfigModel from "../schemas/guild"
+import { setTimeout as delay} from "timers/promises"
 
 export const droid_tracking = async () => {
 
@@ -15,14 +16,13 @@ export const droid_tracking = async () => {
             tracking_users = await DroidAccountTrackModel.find()
             for await (const user of tracking_users) {
                 console.log(`tracking - buscnado plays de ${user.username} - UID ${user.uid}`)
-                await new Promise(resolve => setTimeout(resolve, 20000))
                 const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user.guild }))?.channel.track}`)
                 if (!track_channel || track_channel.type != ChannelType.GuildText) return
-
+                
                 const recents = await droid.recent(user.uid)
-                if (!recents) return
-                if (!recents[0]) return
-                if (recents[0].timestamp == user.timestamp) return
+                if (!recents) continue;
+                if (!recents[0]) continue;
+                if (recents[0].timestamp == user.timestamp) continue;
 
                 const play = recents[0]
                 await DroidAccountTrackModel.findOneAndUpdate({ uid: play.user.id }, {
@@ -32,7 +32,6 @@ export const droid_tracking = async () => {
 
                 const beatmap = await MapInfo.getInformation(play.hash)
                 console.log(`creando track para ${play.user.username}\n${play.fallback_title}\n${play.accuracy}, ${play.mods}, ${play.scraped_pp}dpp\n`)
-
                 if (beatmap?.title) {
                     play.beatmap = beatmap
                     try {
@@ -48,6 +47,7 @@ export const droid_tracking = async () => {
                 }
                 const embed = await droid.embed.score(play)
                 track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid** | Score reciente de  **:flag_${user.country.toLowerCase()}:  ${user.username}**\n-# Los valores de DPP y PP pueden no ser precisos.`, embeds: [embed] })
+                await delay(5000)
             }
         }
     }
