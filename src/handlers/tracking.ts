@@ -18,8 +18,9 @@ export const droid_tracking = async () => {
         setInterval(async () => {
             tracking_users.forEach(async (user, i) => {
                 setTimeout(async () => {
-                    const track_channel =  client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user.guild }))?.channel.logs}`)
+                    const track_channel =  client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user.guild }))?.channel.track}`)
                     if (!track_channel || track_channel.type != ChannelType.GuildText) return
+
                     const recents = await droid.recent(user.uid)
                     if (!recents) return
                     if (!recents[0]) return
