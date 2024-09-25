@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { Client, Collection } from "discord.js"
-
+import { express} from "express"
 import type { GlobClient } from "./types"
 import { handleEvents } from "./handlers/events"
 import { CONFIG } from "./consts"
@@ -24,3 +24,14 @@ client.login(process.env.TOKEN)
 
 osu_api_connect()
 connect_mongoose()
+
+const app = express()
+const port = process.env.PORT || 4000;
+
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
