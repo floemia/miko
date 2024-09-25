@@ -14,8 +14,7 @@ export const droid_tracking = async () => {
         while (true) {
             tracking_users = await DroidAccountTrackModel.find()
             for await (const user of tracking_users) {
-                await new Promise(resolve => setTimeout(resolve, 25000))
-
+                await new Promise(resolve => setTimeout(resolve, 20000))
                 const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user.guild }))?.channel.track}`)
                 if (!track_channel || track_channel.type != ChannelType.GuildText) return
 
@@ -25,13 +24,12 @@ export const droid_tracking = async () => {
                 if (recents[0].timestamp == user.timestamp) return
 
                 const play = recents[0]
-                const beatmap = await MapInfo.getInformation(play.hash)
-
                 await DroidAccountTrackModel.findOneAndUpdate({ uid: play.user.id }, {
                     timestamp: play.timestamp,
                     last_score: play.score
                 })
 
+                const beatmap = await MapInfo.getInformation(play.hash)
                 console.log(`creando track para ${play.user.username}\n${play.fallback_title}\n${play.accuracy}, ${play.mods}, ${play.scraped_pp}dpp\n`)
 
                 if (beatmap?.title) {
