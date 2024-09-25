@@ -18,7 +18,7 @@ export const droid_tracking = async () => {
                 console.log(`tracking - buscnado plays de ${user.username} - UID ${user.uid}`)
                 const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user.guild }))?.channel.track}`)
                 if (!track_channel || track_channel.type != ChannelType.GuildText) return
-                
+
                 const recents = await droid.recent(user.uid)
                 if (!recents) continue;
                 if (!recents[0]) continue;
@@ -47,7 +47,7 @@ export const droid_tracking = async () => {
                 }
                 const embed = await droid.embed.score(play)
                 track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid** | Score reciente de  **:flag_${user.country.toLowerCase()}:  ${user.username}**\n-# Los valores de DPP y PP pueden no ser precisos.`, embeds: [embed] })
-                await delay(5000)
+                await delay(20000)
             }
         }
     }
