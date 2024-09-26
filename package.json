@@ -4,16 +4,16 @@
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node ."
+    "start": "tsc && node ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@rian8337/osu-base": "^3.3.0",
-    "@rian8337/osu-difficulty-calculator": "^3.3.2",
-    "@rian8337/osu-rebalance-difficulty-calculator": "^3.3.2",
+    "@ptkdev/logger": "^1.8.0",
+    "@rian8337/osu-base": "^4.0.0-beta.25",
+    "@rian8337/osu-difficulty-calculator": "^4.0.0-beta.25",
+    "@rian8337/osu-rebalance-difficulty-calculator": "^4.0.0-beta.25",
     "axios": "^1.7.7",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",

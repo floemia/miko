@@ -1,6 +1,6 @@
-import { Accuracy, MapInfo, MapStats, ModUtil } from "@rian8337/osu-base"
+import { Accuracy, MapInfo,  ModUtil } from "@rian8337/osu-base"
 import { DroidScoreScraped, scrape } from "./scrape"
-import { DroidDifficultyCalculator, DroidPerformanceCalculator, MapStars, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
+import { DifficultyCalculator, DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
 import { embed } from "./embeds"
 type DroidMods = {
     str: string,
@@ -58,30 +58,31 @@ const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceDat
 
     const mods_all = await droid.mods(recent.mods)
     const mods = ModUtil.pcStringToMods(mods_all.str)
-    const stats = new MapStats({
-        speedMultiplier: mods_all.speed,
-        mods: mods,
-    });
+
 
     if (recent.beatmap?.beatmap) {
-        const rating = new MapStars(recent.beatmap.beatmap, {
-            mods: mods,
-            stats: stats,
-            
-        });
+		const stats_droid = new DroidDifficultyCalculator(recent.beatmap.beatmap).calculate({
+			mods: mods,
+			customSpeedMultiplier:mods_all.speed
+		})
+		const stats_osu = new OsuDifficultyCalculator(recent.beatmap.beatmap).calculate({
+			mods: mods,
+			customSpeedMultiplier:mods_all.speed
+		})
+
         const accuracy = new Accuracy({
             nmiss: recent.misses,
             percent: recent.accuracy,
             nobjects: recent.beatmap.objects
         })
 
-        const droid_perf = new DroidPerformanceCalculator(rating.droid.attributes).calculate({
+        const droid_perf = new DroidPerformanceCalculator(stats_droid.attributes).calculate({
             miss: recent.misses,
             combo: recent.combo,
             accPercent: accuracy,
         });
 
-        const osu_perf = new OsuPerformanceCalculator(rating.osu.attributes).calculate({
+        const osu_perf = new OsuPerformanceCalculator(stats_osu.attributes).calculate({
             miss: recent.misses,
             combo: recent.combo,
             accPercent: accuracy,
@@ -91,20 +92,18 @@ const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceDat
             const accuracy_fc = new Accuracy({
                 nmiss: 0,
                 n300: accuracy.n300 + recent.misses,
+				n100: accuracy.n100,
+				n50: accuracy.n50,
                 nobjects: recent.beatmap.objects
             })
+			const droid_perf_fc = new DroidPerformanceCalculator(stats_droid.attributes).calculate({
+				accPercent: accuracy_fc,
+			});
+	
+			const osu_perf_fc = new OsuPerformanceCalculator(stats_osu.attributes).calculate({
+				accPercent: accuracy,
+			});
 
-            const droid_perf_fc = new DroidPerformanceCalculator(rating.droid.attributes).calculate({
-                accPercent: accuracy_fc,
-                aimSliderCheesePenalty: 0,
-                flashlightSliderCheesePenalty: 0,
-                visualSliderCheesePenalty: 0,
-                tapPenalty: 0,
-            });
-
-            const osu_perf_fc = new OsuPerformanceCalculator(rating.osu.attributes).calculate({
-                accPercent: accuracy_fc,
-            });
             recent.performance_fc.dpp = droid_perf_fc.total
             recent.performance_fc.pp = osu_perf_fc.total
             recent.performance_fc.accuracy = accuracy_fc.value() * 100
@@ -121,16 +120,6 @@ const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceDat
     }
 }
 
-const test = async () => {
-    const beatmapInfo = await MapInfo.getInformation(4303461)
-    if (!beatmapInfo?.beatmap) return
-
-    const rating = new MapStars(beatmapInfo.beatmap);
-    const droidPerformance = new DroidPerformanceCalculator(
-        rating.droid.attributes
-    ).calculate();
-
-}
 
 
-export const droid = { user, recent, mods, calculate, embed, test }
+export const droid = { user, recent, mods, calculate, embed }

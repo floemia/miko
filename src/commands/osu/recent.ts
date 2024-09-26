@@ -38,10 +38,10 @@ export const command: Command = {
       recent[index].performance_fc = calc.performance_fc
 
       try {
-        const average = await getAverageColor(`https://assets.ppy.sh/beatmaps/${recent[index].beatmap?.beatmapsetID}/covers/cover.jpg`)
+        const average = await getAverageColor(`https://assets.ppy.sh/beatmaps/${recent[index].beatmap?.beatmapSetId}/covers/cover.jpg`)
         recent[index].embed_color = average.hex
       } catch (error) {
-        console.log(`invalid beatmap / no bg ${recent[index].beatmap?.beatmapsetID} `)
+        console.log(`invalid beatmap / no bg ${recent[index].beatmap?.beatmapSetId} `)
       }
     }
 
