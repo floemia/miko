@@ -84,8 +84,8 @@ const calculate = async (score: response): Promise<ScoreDifficultyData | undefin
 	beatmap.convert(score.beatmap.mode_int)
 	const fc_data = new rosu.Performance({
 		mods: score.mods,
-		nGeki: score.beatmap.mode == "mania" ? statistics.perfect + (statistics.miss || 0): undefined,
-		n300: score.beatmap.mode == "mania" ? statistics.great : statistics.great + (statistics.miss || 0),
+		nGeki: score.beatmap.mode == "mania" ? statistics.perfect || 0 + (statistics.miss || 0): undefined,
+		n300: score.beatmap.mode == "mania" ? statistics.great : statistics.great || 0 + (statistics.miss || 0),
 		nKatu: statistics.small_tick_miss || statistics.good,
 		n100: statistics.ok,
 		n50: statistics.meh,
@@ -95,6 +95,11 @@ const calculate = async (score: response): Promise<ScoreDifficultyData | undefin
 		mods: score.mods,
 		misses: score.statistics.miss,
 		accuracy: score.accuracy * 100,
+		nGeki: statistics.perfect,
+		n300: statistics.great,
+		nKatu: statistics.small_tick_miss || statistics.good,
+		n100: statistics.ok,
+		n50: statistics.meh,
 		combo: score.max_combo,
 	}).calculate(fc_data);
 	beatmap.free()
