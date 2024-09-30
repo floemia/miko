@@ -1,0 +1,2 @@
+[2024-09-28 17:09:02] [ERROR] COMMANDS: 1 command(s) failed to load => test - Error: Expected a string primitive
+[2024-09-28 19:36:40] [ERROR] COMMANDS: 1 command(s) failed to load => tracking - Error: Expected a string primitive

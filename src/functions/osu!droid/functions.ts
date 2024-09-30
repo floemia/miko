@@ -1,25 +1,8 @@
-import { Accuracy, MapInfo,  ModUtil } from "@rian8337/osu-base"
-import { DroidScoreScraped, scrape } from "./scrape"
-import { DifficultyCalculator, DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
+import { Accuracy, ModUtil } from "@rian8337/osu-base"
+import { scrape } from "./scrape"
+import { DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
 import { embed } from "./embeds"
-type DroidMods = {
-    str: string,
-    speed: number
-}
-
-export type ScorePerformanceData = {
-    performance: {
-        pp: number | undefined,
-        dpp: number | undefined,
-        stars_dr: number | undefined,
-        stars_pc: number | undefined,
-    },
-    performance_fc: {
-        pp: number | undefined,
-        dpp: number | undefined,
-        accuracy: number | undefined
-    }
-}
+import { DroidScoreScraped, DroidMods, ScorePerformanceData } from "./types"
 const user = async (uid: number) => {
     return await scrape.user(uid)
 }
@@ -110,7 +93,6 @@ const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceDat
         }
         recent.performance.dpp = droid_perf.total
         recent.performance.stars_dr = droid_perf.difficultyAttributes.starRating 
-
         recent.performance.pp = osu_perf.total
         recent.performance.stars_pc = osu_perf.difficultyAttributes.starRating
     }

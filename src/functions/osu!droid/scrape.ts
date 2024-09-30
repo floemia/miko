@@ -3,48 +3,8 @@ import { getAverageColor } from "fast-average-color-node"
 import { response as beatmap_response } from "osu-api-extended/dist/types/v2_beatmap_id_details"
 import { v2 } from "osu-api-extended"
 import { MapInfo, Mod } from "@rian8337/osu-base"
-export type DroidUser = {
-    username: string,
-    avatar_url: string,
-    color: string,
-    id: number,
-    rank: {
-        score: number,
-        pp: number,
-    },
-    country: string,
-    score: number,
-    pp: number,
-    accuracy: number,
-    playcount: number,
-}
+import { DroidScoreScraped, DroidUser } from "./types"
 
-export type DroidScoreScraped = {
-    fallback_title: string,
-    rank: string,
-    score: number,
-    embed_color: string | undefined,
-    timestamp: number,
-    performance: {
-        pp: number | undefined,
-        dpp: number | undefined,
-        stars_dr: number | undefined,
-        stars_pc: number | undefined
-    },
-    performance_fc:{
-        pp: number | undefined,
-        dpp: number | undefined,
-        accuracy: number | undefined
-    },
-    scraped_pp: number
-    accuracy: number,
-    mods: string[],
-    combo: number
-    misses: number,
-    hash: string,
-    user: DroidUser,
-    beatmap: MapInfo | undefined
-}
 
 const user = async (uid: number, data?: any): Promise<DroidUser | undefined> => {
     var html

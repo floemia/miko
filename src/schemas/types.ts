@@ -8,6 +8,17 @@ export type DroidTrackingUser = {
     timestamp: number
 }
 
+export type OsuTrackingUser = {
+	username: string,
+    uid: number,
+	country: string,
+    discord_id: string,
+    guild: string,
+	mode: string,
+	mode_int: number,
+	last_score_id: number
+}
+
 export type GuildConfig = {
     id: string,
     channel: {

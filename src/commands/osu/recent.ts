@@ -46,6 +46,6 @@ export const command: Command = {
     }
 
     const embed_score = await droid.embed.score(recent[index])
-    await interaction.editReply({content: `<:droid_simple:1021473577951821824>  **osu!droid** | Score #${index + 1} de  :flag_${recent[0].user.country.toLowerCase()}:  **${recent[0].user.username}**:\n-# Los valores de DPP y PP pueden no ser precisos.`, embeds: [embed_score]})
+    await interaction.editReply({content: `<:droid_simple:1021473577951821824>  **osu!droid・**Score #${index + 1} de  :flag_${recent[0].user.country.toLowerCase()}:  **${recent[0].user.username}**:\n-# Los valores de DPP y PP pueden no ser precisos.`, embeds: [embed_score]})
   },
 }

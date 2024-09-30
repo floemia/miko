@@ -7,6 +7,7 @@ export const command: Command = {
     data: new SlashCommandBuilder()
         .setName("config")
         .setDescription("a")
+		.setDMPermission(false)
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addSubcommand(subcommand =>
             subcommand

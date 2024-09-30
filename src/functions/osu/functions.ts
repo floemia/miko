@@ -1,26 +1,31 @@
+import { response } from "osu-api-extended/dist/types/v2_scores_user_category";
 import { client } from "../..";
+import { OsuCodeGamemodes, OsuGamemodes, ScoreDifficultyData } from "./types";
+import { embed } from "./embeds";
+import * as rosu from "rosu-pp-js"
+import * as fs from "fs"
+import { tools } from "osu-api-extended";
 
-export const int_short_gamemode = (int: number) =>  {
+export const code = (int: number): OsuCodeGamemodes =>  {
     switch (int) {
-        case 1: return "osu"; break
-        case 2: return "taiko"; break
-        case 3: return "fruits"; break
-        case 4: return "mania"; break
+        case 0: return "osu"; break
+        case 1: return "taiko"; break
+        case 2: return "fruits"; break
+        case 3: return "mania"; break
         default: return "osu"; break
     }
 }
-export const int_long_gamemode = (int: number) =>  {
+export const full = (int: number) =>  {
     switch (int) {
-        case 0: return "osu!droid"
-        case 1: return "osu!";
-        case 2: return "osu!taiko"; 
-        case 3: return "osu!catch";
-        case 4: return "osu!mania";
-        default: return "osu";
+        case 0: return "<:osu:955183369954680922>  osu!";
+        case 1: return "<:taiko:955183369912721428>  osu!taiko"; 
+        case 2: return "<:ctb:955183369740775504>  osu!catch";
+        case 3: return "<:mania:955183369816256523>  osu!mania";
+        default: return "<:osu:955183369954680922>  osu!";
     }
 }
 
-export const difficulty_emoji = (mode: "osu" | "taiko" | "fruits" | "mania", SR: number) => {
+export const difficulty = (mode: "osu" | "taiko" | "fruits" | "mania", SR: number) => {
     var rank = 1
     if (SR < 1.70) {
         rank = 1
@@ -45,35 +50,73 @@ export const difficulty_emoji = (mode: "osu" | "taiko" | "fruits" | "mania", SR:
     return emoji;
 }
 
-export const rank_emoji = (rank: string) => {
+export const rank = (rank: string) => {
     switch (rank) {
-        case 'A':
-            rank = '<:a:954909322503155722>'
-            break
+        case "A":
+            return client.emojis.cache.get('954909322503155722')
         case 'B':
-            rank = '<:b_:954909322540879892>'
-            break
+            return client.emojis.cache.get('954909322540879892')
         case 'C':
-            rank = '<:c_:954909322515738654>'
-            break
+            return client.emojis.cache.get('954909322515738654')
         case 'D':
-            rank = '<:d_:954909322117275719>'
-            break
+            return client.emojis.cache.get('954909322117275719')
         case 'S':
-            rank = '<:s_:954909322167599125>'
-            break
+            return client.emojis.cache.get('954909322167599125')
         case 'SH':
-            rank = '<:sh:954909322515738624>'
-            break
+            return client.emojis.cache.get('954909322515738624')
         case 'X':
-            rank = '<:x_:954909954995798066>'
-            break
+            return client.emojis.cache.get('954909954995798066')
         case 'XH':
-            rank = '<:xh:954909954966425631>'
-            break
+            return client.emojis.cache.get('954909954966425631')
         case 'F':
-            rank = '<:F_:966098768908914778>'
-            break
+            return client.emojis.cache.get('966098768908914778')
     }
-    return rank
 }
+
+const calculate = async (score: response): Promise<ScoreDifficultyData | undefined> => {
+	const path = await tools.download.difficulty(score.beatmap.id, `./`, `${score.beatmap.id}`)
+	if (!path) return
+	const buffer_beatmap = fs.readFileSync(path)
+	const beatmap = new rosu.Beatmap(buffer_beatmap)
+	const statistics: any = score.statistics
+	// any bc this api module doesnt care about other gamemodes, great.
+
+	beatmap.convert(score.beatmap.mode_int)
+	const fc_data = new rosu.Performance({
+		mods: score.mods,
+		nGeki: score.beatmap.mode == "mania" ? statistics.perfect + (statistics.miss || 0): undefined,
+		n300: score.beatmap.mode == "mania" ? statistics.great : statistics.great + (statistics.miss || 0),
+		nKatu: statistics.small_tick_miss || statistics.good,
+		n100: statistics.ok,
+		n50: statistics.meh,
+	}).calculate(beatmap)
+
+	const score_data = new rosu.Performance({
+		mods: score.mods,
+		misses: score.statistics.miss,
+		accuracy: score.accuracy * 100,
+		combo: score.max_combo,
+	}).calculate(fc_data);
+	beatmap.free()
+	fs.unlinkSync(path)
+
+	const accuracy_fc = tools.accuracy({ 300: `${fc_data.state?.n300}`, 100: `${fc_data.state?.n100}`, 50: `${fc_data.state?.n50}`, geki: `${fc_data.state?.nGeki}`, katu: `${fc_data.state?.nKatu}`, 0: "0"}, osu.gamemode.code(score.beatmap.mode_int))
+	const performance_fc = {
+		pp: Math.abs(score.max_combo - fc_data.difficulty.maxCombo) > 5 || score_data.state?.misses ? fc_data.pp : undefined,
+		accuracy: accuracy_fc
+	}
+	return {
+		pp: score_data.pp,
+		fc: performance_fc,
+		stars: score_data.difficulty.stars,
+		combo: fc_data.difficulty.maxCombo
+	}
+
+	
+}
+
+
+const emoji = { rank, difficulty }
+const gamemode = { code, full }
+
+export const osu = { emoji, gamemode, calculate, embed }
