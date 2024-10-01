@@ -53,7 +53,7 @@ export const droid_tracking = async () => {
 					play.performance_fc = calc.performance_fc
 				}
 				const embed = await droid.embed.score(play)
-				track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid** | Score reciente de  **:flag_${user.country.toLowerCase()}:\n-# Los valores de DPP y PP pueden no ser precisos.`, embeds: [embed] })
+				track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid** | Score reciente de  **:flag_${user.country.toLowerCase()}  ${play.user.username}**:\n-# Los valores de DPP y PP pueden no ser precisos.`, embeds: [embed] })
 			}
 		}
 	}
