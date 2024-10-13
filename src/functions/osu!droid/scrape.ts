@@ -1,8 +1,5 @@
 import axios from "axios"
 import { getAverageColor } from "fast-average-color-node"
-import { response as beatmap_response } from "osu-api-extended/dist/types/v2_beatmap_id_details"
-import { v2 } from "osu-api-extended"
-import { MapInfo, Mod } from "@rian8337/osu-base"
 import { DroidScoreScraped, DroidUser } from "./types"
 
 
@@ -52,7 +49,7 @@ const recent = async (uid:number): Promise<DroidScoreScraped[] | undefined> => {
     const user = await scrape.user(uid, get.data)
     if (!user) return undefined
     
-    const html = get.data.replace(/\n/g, '')
+    const html = get.data.replace(/\n/g, '').split("Recent Plays</b>")[1]
     const scores = html.match(/(?<=class>)(.*?)(?=<\/span>)/g)
     const scores_arr: DroidScoreScraped[] = []
 

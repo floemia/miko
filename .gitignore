@@ -3,4 +3,5 @@ dist/
 
 .env
 
-*.log
+debug.log
+errors.log

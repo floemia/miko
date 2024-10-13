@@ -9,10 +9,10 @@ const score = async (recent: response, data: ScoreDifficultyData) => {
 	var difficulty_adjust = ''
 	for (const mod of recent.mods) {
 		if (mod.settings) {
-			if (mod.settings.approach_rate) { difficulty_adjust = difficulty_adjust.concat(difficulty_adjust ? `AR = ${mod.settings.approach_rate}` : `(AR = ${mod.settings.approach_rate}`) }
-			if (mod.settings.overall_difficulty) { difficulty_adjust = difficulty_adjust.concat(difficulty_adjust ? `OD = ${mod.settings.overall_difficulty}` : `(OD = ${mod.settings.overall_difficulty}`) }
-			if (mod.settings.circle_size) { difficulty_adjust = difficulty_adjust.concat(difficulty_adjust ? `CS = ${mod.settings.circle_size}` : `(CS = ${mod.settings.circle_size}`) }
-			if (mod.settings.drain_rate) { difficulty_adjust = difficulty_adjust.concat(difficulty_adjust ? `HP = ${mod.settings.drain_rate}` : `(HP = ${mod.settings.drain_rate}`) }
+			if (mod.settings.approach_rate) { difficulty_adjust = difficulty_adjust.concat(difficulty_adjust ? `, AR ${mod.settings.approach_rate}` : `(AR ${mod.settings.approach_rate}`) }
+			if (mod.settings.overall_difficulty) { difficulty_adjust = difficulty_adjust.concat(difficulty_adjust ? `, OD ${mod.settings.overall_difficulty}` : `(OD ${mod.settings.overall_difficulty}`) }
+			if (mod.settings.circle_size) { difficulty_adjust = difficulty_adjust.concat(difficulty_adjust ? `, CS ${mod.settings.circle_size}` : `(CS ${mod.settings.circle_size}`) }
+			if (mod.settings.drain_rate) { difficulty_adjust = difficulty_adjust.concat(difficulty_adjust ? `, HP ${mod.settings.drain_rate}` : `(HP ${mod.settings.drain_rate}`) }
 		}
 	}
 	if (difficulty_adjust) difficulty_adjust = difficulty_adjust.concat(")");
