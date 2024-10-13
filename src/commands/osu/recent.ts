@@ -36,7 +36,7 @@ export const command: Command = {
       const calc = await droid.calculate(recent[index])
       recent[index].performance = calc.performance
       recent[index].performance_fc = calc.performance_fc
-
+	
       try {
         const average = await getAverageColor(`https://assets.ppy.sh/beatmaps/${recent[index].beatmap?.beatmapSetId}/covers/cover.jpg`)
         recent[index].embed_color = average.hex

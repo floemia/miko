@@ -38,7 +38,7 @@ const user = async (uid: number, data?: any): Promise<DroidUser | undefined> => 
         country: part1[0],
         score: Number(part2[1].replace(/,/g, '')),
         pp: Number(part2[3].slice(0, -2).replace(/,/g, '')),
-        accuracy: Number(part2[5].slice(0, -1)),
+        accuracy: Number(part2[5].slice(0, -1)) / 1000,
         playcount: Number(part2[7]),
     }
 }

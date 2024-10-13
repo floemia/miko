@@ -30,6 +30,7 @@ const mods = async (mods_arr: string[]): Promise<DroidMods> => {
             case "suddendeath": mods.str = mods.str.concat("SD"); break;
             case "perfect": mods.str = mods.str.concat("PF"); break;
             case "precise": mods.str = mods.str.concat("PR"); break;
+			case "none": mods.str = ""; break;
             case "": break;
             default: mods.speed = Number(mod)
         }
