@@ -26,7 +26,7 @@ export const droid_tracking = async () => {
 				}
 				if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 
-				const recents = await droid.recent(user.uid)
+				const recents = await droid.scores.recent(user.uid)
 				if (!recents) continue
 				if (!recents[0]) continue
 				if (recents[0].timestamp == user.timestamp) continue

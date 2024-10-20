@@ -8,8 +8,14 @@ const user = async (uid: number) => {
 }
 
 const recent = async (uid: number) => {
-    return await scrape.recent(uid)
+    return await scrape.scores({uid: uid, type: "recent"})
 }
+
+const best = async (uid: number) => {
+    return await scrape.scores({uid: uid, type: "best"})
+}
+
+const scores = { recent, best }
 
 const mods = async (mods_arr: string[]): Promise<DroidMods> => {
     var mods = {
@@ -105,4 +111,4 @@ const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceDat
 
 
 
-export const droid = { user, recent, mods, calculate, embed }
+export const droid = { user, scores,  mods, calculate, embed }

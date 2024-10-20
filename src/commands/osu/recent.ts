@@ -22,7 +22,7 @@ export const command: Command = {
 
   async execute(client, interaction) {
     await interaction.deferReply()
-    const recent = await droid.recent(interaction.options.getInteger("uid", true))
+    const recent = await droid.scores.recent(interaction.options.getInteger("uid", true))
 
     if (!recent) return await interaction.editReply({
           embeds: [await embed.interaction("error", `El usuario no existe o no tiene scores recientes.`, interaction)]

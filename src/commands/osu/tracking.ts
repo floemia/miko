@@ -67,7 +67,7 @@ export const command: Command = {
 
 		if (subcommandgroup == "droid") {
 			const uid = interaction.options.getInteger("uid", true)
-			const data = await droid.recent(uid)
+			const data = await droid.scores.recent(uid)
 			if (!data) {
 				return interaction.editReply({ embeds: [await embed.interaction("error", `El usuario con UID \`${uid}\` no existe.`, interaction)] })
 			}

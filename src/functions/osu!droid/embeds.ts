@@ -1,8 +1,10 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, AttachmentBuilder } from "discord.js";
 import { DroidScoreScraped } from "./types";
 import { droid } from "./functions";
 import { osu } from "../osu/functions";
+import { generate_card } from "./card";
 import { client } from "../..";
+import * as fs from "fs"
 
 const score = async (recent: DroidScoreScraped) => {
 	const mods = await droid.mods(recent.mods)
@@ -27,4 +29,19 @@ const score = async (recent: DroidScoreScraped) => {
 	return embed
 }
 
-export const embed = { score }
+const card = async (recent_list: DroidScoreScraped[]) => {
+	const data = await generate_card(recent_list)
+	const user = recent_list[0].user
+
+	await fs.promises.writeFile(`./${user.id}-${user.username}.png`, data)
+	const embed = new EmbedBuilder()
+	.setColor(Number(`0x${user.color.slice(1)}`))
+	.setAuthor({name: user.username, iconURL: user.avatar_url, url: `https://osudroid.moe/profile.php?uid=${user.id}`})
+	.setDescription(`<:droid_simple:1021473577951821824>  **osu!droid・**Perfil de  :flag_${user.country.toLowerCase()}:  **${user.username}**`)
+	.setImage(`attachment://${user.id}-${user.username}.png`)
+	.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
+
+	return embed
+}
+
+export const embed = { score, card }
