@@ -2,6 +2,7 @@ import "dotenv/config"
 import { Client, Collection } from "discord.js"
 import type { GlobClient } from "./types"
 import { handleEvents } from "./handlers/events"
+import { presence_loop } from "./handlers/presence"
 import { osu_api_connect } from "./handlers/osu_api"
 import { connect_mongoose } from "./handlers/mongoose"
 import Logger, { LoggerOptions } from "@ptkdev/logger"
@@ -15,9 +16,7 @@ client.commands = new Collection()
 handleEvents(client)
 client.login(process.env.TOKEN)
 
-osu_api_connect()
 connect_mongoose()
-
 const options: LoggerOptions = {
 	language: "en",
 	colors: true,
@@ -41,4 +40,7 @@ const options: LoggerOptions = {
 
 export const logger = new Logger(options)
 
+client.on("ready", async () => {
+	await presence_loop(client)
+})
 
