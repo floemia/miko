@@ -39,7 +39,7 @@ const score = async (recent: response, data: ScoreDifficultyData) => {
 	const pp_string = `${data.pp?.toFixed(2)} PP・${(recent.accuracy * 100).toFixed(2)}%${data.fc.pp ? `・**( ${data.fc.pp?.toFixed(2)} PP ➜ FC ${data.fc.accuracy}% )**` : ''}\n> `
 
 	const embed = new EmbedBuilder()
-	embed.setAuthor({ name: `${recent.beatmapset.artist} - ${recent.beatmapset.title} [${recent.beatmap.version}] ${data.stars?.toFixed(2)}⭐ ${recent.mods ? `+${recent.mods.map(x => x.acronym).join('')}` : ''} ${difficulty_adjust}`, iconURL: recent.user.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${recent.beatmapset.id}#osu/${recent.beatmap.id}` })
+	embed.setAuthor({ name: `${recent.beatmapset.artist} - ${recent.beatmapset.title} [${recent.beatmap.version}] ${data.stars?.toFixed(2)}⭐ ${recent.mods ? `+${recent.mods.map(x => x.acronym).join('')}` : ''} ${difficulty_adjust}`, iconURL: recent.user.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${recent.beatmapset.id}#${recent.beatmap.mode}/${recent.beatmap.id}` })
 	embed.setDescription(`> ${rank}**・${pp_string}${recent.beatmap.mode == "mania" ? `${ratio}・` : ''}**${hits}**・**${recent.total_score.toLocaleString("en-US")}**・**${recent.max_combo.toLocaleString("en-US")}x / ${data.combo?.toLocaleString("en-US")}x`)
 	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
 	embed.setColor(Number(`0x${color?.slice(1)}`))
