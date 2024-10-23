@@ -1,59 +1,64 @@
 import axios from "axios"
-import { getAverageColor } from "fast-average-color-node"
-import { DroidScoreScraped, DroidUser } from "./types"
+import { DroidScore, DroidUser } from "./types"
+import { average_color } from "../utils"
 
 
-const user = async (uid: number, data?: any): Promise<DroidUser | undefined> => {
-    var html
-    if (!data){
-        const get = await axios.get(`https://osudroid.moe/profile.php?uid=${uid}`)
+const user = async (params: {uid: number, html_data?: any, type?: "basic" | "with_recents" | "with_top_plays" | "full"}): Promise<DroidUser | undefined> => {
+    var html: string
+	if (!params.type) params.type = "basic"
+
+    if (!params.html_data){
+        const get = await axios.get(`https://osudroid.moe/profile.php?uid=${params.uid}`)
         if (!get.data) return undefined
         html = get.data
     } else {
-        html = data
+        html = params.html_data
     }
+	if (html.includes("User not found")) return undefined
 
-    const part1 = html.match(/(?<=<a>)(.*?)(?=<\/a>)/g)
-    const part2 = html.match(/(?<=<td>)(.*?)(?=<\/td>)/g)
-    const part3 = html.match(/(?<=#EB2F96;">)(.*?)(?=<\/a>)/g)
-
-    if (!part1 || !part2 || !part3 || !part3[0]) return undefined
-    var color
-    try{
-        const average = await getAverageColor(`https://osudroid.moe/user/avatar/${uid}.png`)
-        color = average.hex
-    } catch {
-        color = `#dedede`
-    }
-
+	const avatar_url = `https://osudroid.moe/user/avatar/${html.match(/(?<=src=".\/user\/avatar\/)(.*?)(?=")/g)![0]}`
+    const color = await average_color(avatar_url)
+	html = html.replace(/\n/g, '')
+	const ranks = html.match(/(?<=<a>)(.*?)(?=<\/a>)/g)
+	const technical_data = html.match(/(?<=<td>)(.*?)(?=<\/td>)/g)
     return {
-        username: part3[0],
-        avatar_url: `https://osudroid.moe/user/avatar/${uid}.png`,
-        color: color,
-        id: uid,
+        username: html.match(/(?<=<a style="margin-top: 15px; color: #EB2F96;">)(.*?)(?=<\/a>)/g)![0],
+        avatar_url: avatar_url,
+        color: color.hex,
+        id: params.uid,
+		country: ranks![0],
         rank: {
-            score: Number(part1[1].substring(1)),
-            pp: Number(part1[2].substring(1))
+            score: Number(ranks![1].replace("#", "")),
+            dpp: Number(ranks![2].replace("#", ""))
         },
-        country: part1[0],
-        score: Number(part2[1].replace(/,/g, '')),
-        pp: Number(part2[3].slice(0, -2).replace(/,/g, '')),
-        accuracy: Number(part2[5].slice(0, -1)) / 1000,
-        playcount: Number(part2[7]),
+		total_score: Number(technical_data![1].replace(/,/g, '')),
+        dpp: Number(technical_data![3].replace(",", '').replace("pp", '')),
+        accuracy: Number(technical_data![5].slice(0, -1)) / 1000,
+        playcount: Number(technical_data![7]),
+		scores: {
+			recent: ["full", "with_recents"].includes(params.type) ? await scrape.scores({uid: params.uid, type: "recent"}) : undefined,
+			best: ["full", "with_top_plays"].includes(params.type) ? await scrape.scores({uid: params.uid, type: "best"}) : undefined
+		}
     }
 }
 
-const scores = async (params: {uid: number, type: "recent" | "best"}): Promise<DroidScoreScraped[] | undefined> => {
-	const uid = params.uid
-    const get = await axios.get(`https://osudroid.moe/profile.php?uid=${uid}`)
-    if (!get.data) return undefined
-    const user = await scrape.user(uid, get.data)
+const scores = async (params: {uid: number, type: "recent" | "best", html_data?: string}): Promise<DroidScore[] | undefined> => {
+	let html: string
+	if (!params.html_data){
+        const get = await axios.get(`https://osudroid.moe/profile.php?uid=${params.uid}`)
+        if (!get.data) return undefined
+        html = get.data
+    } else {
+        html = params.html_data
+    }
+    const user = await scrape.user({uid: params.uid, html_data: html})
     if (!user) return undefined
     
-    const html = get.data.replace(/\n/g, '').split("Recent Plays</b>")[params.type == "recent" ? 1 : 0]
+    html = html.replace(/\n/g, '').split("Recent Plays</b>")[params.type == "recent" ? 1 : 0]
+
     const scores = html.match(/(?<=class>)(.*?)(?=<\/span>)/g)
 	if (!scores) return []
-    const scores_arr: DroidScoreScraped[] = []
+    const scores_arr: DroidScore[] = []
 
     for await (const score of scores) {
         const hash = score.match(/(?<="hash":)(.*?)(?=})/g)![0]

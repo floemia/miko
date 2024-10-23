@@ -8,6 +8,7 @@ import { getAverageColor } from "fast-average-color-node"
 import GuildConfigModel from "../schemas/guild"
 import { v2 } from "osu-api-extended"
 import { osu } from "../functions/osu/functions"
+import { average_color } from "../functions/utils"
 
 export const droid_tracking = async () => {
 
@@ -41,13 +42,9 @@ export const droid_tracking = async () => {
 				logger.info(`Creating score embed for ${play.user.username}\n${play.fallback_title}\n${play.accuracy}, ${play.mods}, ${play.scraped_pp}dpp\n`, "TRACKING")
 				if (beatmap?.title) {
 					play.beatmap = beatmap
-					try {
-						const average = await getAverageColor(`https://assets.ppy.sh/beatmaps/${play.beatmap?.beatmapSetId}/covers/cover.jpg`)
-						play.embed_color = average.hex
-					} catch (error) {
-						logger.error(`invalid beatmap / no bg ${play.beatmap?.beatmapSetId}`, "TRACKING")
-					}
-
+					const color = await average_color(`https://assets.ppy.sh/beatmaps/${play.beatmap?.beatmapSetId}/covers/cover.jpg`)
+					play.embed_color = color.hex
+					
 					const calc = await droid.calculate(play)
 					play.performance = calc.performance
 					play.performance_fc = calc.performance_fc

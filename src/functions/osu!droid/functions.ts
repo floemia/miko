@@ -2,10 +2,11 @@ import { Accuracy, ModUtil } from "@rian8337/osu-base"
 import { scrape } from "./scrape"
 import { DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
 import { embed } from "./embeds"
-import { DroidScoreScraped, DroidMods, ScorePerformanceData } from "./types"
+import { DroidScore, DroidMods, ScorePerformanceData } from "./types"
 import { getAverageColor } from "fast-average-color-node"
-const user = async (uid: number) => {
-    return await scrape.user(uid)
+import { average_color } from "../utils"
+const user = async (params:{uid: number, html_data?: any, type?: "basic" | "with_recents" | "with_top_plays" | "full"}) => {
+    return await scrape.user(params)
 }
 
 const recent = async (uid: number) => {
@@ -45,12 +46,9 @@ const mods = async (mods_arr: string[]): Promise<DroidMods> => {
     return mods
 }
 
-const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceData> => {
-
+const calculate = async (recent: DroidScore): Promise<ScorePerformanceData> => {
     const mods_all = await droid.mods(recent.mods)
     const mods = ModUtil.pcStringToMods(mods_all.str)
-
-
     if (recent.beatmap?.beatmap) {
 		const stats_droid = new DroidDifficultyCalculator(recent.beatmap.beatmap).calculate({
 			mods: mods,
@@ -98,16 +96,9 @@ const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceDat
             recent.performance_fc.dpp = droid_perf_fc.total
             recent.performance_fc.pp = osu_perf_fc.total
             recent.performance_fc.accuracy = accuracy_fc.value() * 100
-			
         }
 
-		try {
-			const average = await getAverageColor(`https://assets.ppy.sh/beatmaps/${recent.beatmap.beatmapSetId}/covers/cover.jpg`)
-			recent.embed_color = average.hex
-		} catch (error) {
-			console.log(`invalid beatmap / no bg ${recent.beatmap.beatmapSetId} `)
-		}
-
+		recent.embed_color = (await average_color(`https://assets.ppy.sh/beatmaps/${recent.beatmap.beatmapSetId}/covers/cover.jpg`)).hex
         recent.performance.dpp = droid_perf.total
         recent.performance.stars_dr = droid_perf.difficultyAttributes.starRating 
         recent.performance.pp = osu_perf.total

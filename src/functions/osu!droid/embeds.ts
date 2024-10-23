@@ -1,5 +1,5 @@
-import { EmbedBuilder, AttachmentBuilder } from "discord.js";
-import { DroidScoreScraped } from "./types";
+import { EmbedBuilder,  } from "discord.js";
+import { DroidScore, DroidUser } from "./types";
 import { droid } from "./functions";
 import { osu } from "../osu/functions";
 import { generate_card } from "./card";
@@ -7,7 +7,7 @@ import { MapInfo } from "@rian8337/osu-base";
 import { client } from "../..";
 import * as fs from "fs"
 
-const score = async (data: DroidScoreScraped) => {
+const score = async (data: DroidScore) => {
 	if (!data.beatmap){
 		const beatmapInfo = await MapInfo.getInformation(data.hash);
 		if (beatmapInfo?.title) {
@@ -16,12 +16,9 @@ const score = async (data: DroidScoreScraped) => {
 		}
 	}
 
-	
 	const mods = await droid.mods(data.mods)
 	const rank = osu.emoji.rank(data.rank)
 	const pp_string = `${data.performance.dpp ? `${data.performance.dpp.toFixed(2)} DPP ❘ ${data.performance.pp?.toFixed(2)} PP` : `?? DPP ❘ ?? PP`}${data.performance_fc.dpp ? `・**( ${data.performance_fc.dpp.toFixed(2)} DPP ❘ ${data.performance_fc.pp?.toFixed(2)} PP ➜ FC ${data.performance_fc.accuracy?.toFixed(2)}% )**` : ''}\n> `
-
-	
 	const embed = new EmbedBuilder()
 	if (!data.beatmap) {
 		embed.setAuthor({ name: data.fallback_title, iconURL: data.user.avatar_url })
@@ -40,9 +37,8 @@ const score = async (data: DroidScoreScraped) => {
 	return embed
 }
 
-const card = async (score_list: DroidScoreScraped[]) => {
-	const data = await generate_card(score_list)
-	const user = score_list[0].user
+const card = async (user: DroidUser) => {
+	const data = await generate_card(user)
 
 	await fs.promises.writeFile(`./${user.id}-${user.username}.png`, data)
 	const embed = new EmbedBuilder()

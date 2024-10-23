@@ -7,16 +7,20 @@ export type DroidUser = {
     id: number,
     rank: {
         score: number,
-        pp: number,
+        dpp: number,
     },
     country: string,
-    score: number,
-    pp: number,
+    total_score: number,
+    dpp: number,
     accuracy: number,
     playcount: number,
+	scores:{
+		recent: DroidScore[] | undefined
+		best: DroidScore[] | undefined
+	}
 }
 
-export type DroidScoreScraped = {
+export type DroidScore = {
     fallback_title: string,
     rank: string,
     score: number,
