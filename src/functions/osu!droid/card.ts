@@ -166,6 +166,7 @@ export const generate_card = async (data: DroidScoreScraped[]): Promise<Buffer> 
 			
 			ctx.closePath()
 		} catch (error) {
+			console.log(error)
 			continue;
 		}
 
