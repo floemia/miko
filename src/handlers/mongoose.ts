@@ -9,10 +9,10 @@ export const connect_mongoose = async () => {
 		.then(async () => {
 			logger.info("MongoDB connection established.", "DATABASE")
 			if (process.env.OSU_TRACKING_ENABLED == "true") {
-				await osu_tracking()
+				osu_tracking()
 			}
 			if (process.env.DROID_TRACKING_ENABLED == "true") {
-				await droid_tracking()
+				droid_tracking()
 			}
 		})
 		.catch((error) => logger.error(`An error occurred while connecting to MongoDB - ${error}`, "DATABASE"))
