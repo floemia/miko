@@ -52,6 +52,7 @@ const scores = async (params: {uid: number, type: "recent" | "best"}): Promise<D
     
     const html = get.data.replace(/\n/g, '').split("Recent Plays</b>")[params.type == "recent" ? 1 : 0]
     const scores = html.match(/(?<=class>)(.*?)(?=<\/span>)/g)
+	if (!scores) return []
     const scores_arr: DroidScoreScraped[] = []
 
     for await (const score of scores) {

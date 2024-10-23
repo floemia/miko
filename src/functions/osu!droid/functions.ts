@@ -3,6 +3,7 @@ import { scrape } from "./scrape"
 import { DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
 import { embed } from "./embeds"
 import { DroidScoreScraped, DroidMods, ScorePerformanceData } from "./types"
+import { getAverageColor } from "fast-average-color-node"
 const user = async (uid: number) => {
     return await scrape.user(uid)
 }
@@ -97,7 +98,16 @@ const calculate = async (recent: DroidScoreScraped): Promise<ScorePerformanceDat
             recent.performance_fc.dpp = droid_perf_fc.total
             recent.performance_fc.pp = osu_perf_fc.total
             recent.performance_fc.accuracy = accuracy_fc.value() * 100
+			
         }
+
+		try {
+			const average = await getAverageColor(`https://assets.ppy.sh/beatmaps/${recent.beatmap.beatmapSetId}/covers/cover.jpg`)
+			recent.embed_color = average.hex
+		} catch (error) {
+			console.log(`invalid beatmap / no bg ${recent.beatmap.beatmapSetId} `)
+		}
+
         recent.performance.dpp = droid_perf.total
         recent.performance.stars_dr = droid_perf.difficultyAttributes.starRating 
         recent.performance.pp = osu_perf.total
