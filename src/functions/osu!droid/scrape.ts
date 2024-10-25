@@ -18,7 +18,7 @@ const user = async (params: {uid: number, html_data?: any, type?: "basic" | "wit
 
 	const avatar_url = `https://osudroid.moe/user/avatar/${html.match(/(?<=src=".\/user\/avatar\/)(.*?)(?=")/g)![0]}`
     const color = await average_color(avatar_url)
-	html = html.replace(/\n/g, '')
+	html = html.replace(/\n/g, '').replace(/ +(?= )/g, '').replace(/> </g, '><')
 	const ranks = html.match(/(?<=<a>)(.*?)(?=<\/a>)/g)
 	const technical_data = html.match(/(?<=<td>)(.*?)(?=<\/td>)/g)
     return {
@@ -54,16 +54,17 @@ const scores = async (params: {uid: number, type: "recent" | "best", html_data?:
     const user = await scrape.user({uid: params.uid, html_data: html})
     if (!user) return undefined
     
-    html = html.replace(/\n/g, '').split("Recent Plays</b>")[params.type == "recent" ? 1 : 0]
+    html = html.replace(/\n/g, '').replace(/ +(?= )/g, '').replace(/> </g, '><')
+	.split("Recent Plays</b>")[params.type == "recent" ? 1 : 0]
 
-    const scores = html.match(/(?<=class>)(.*?)(?=<\/span>)/g)
+    const scores = html.match(/(?<=<a class="">)(.*?)(?=<\/span>)/g)
 	if (!scores) return []
     const scores_arr: DroidScore[] = []
-
+	
     for await (const score of scores) {
         const hash = score.match(/(?<="hash":)(.*?)(?=})/g)![0]
         scores_arr.push({
-            fallback_title: score.match(/(?<=<strong class>)(.*?)(?=<\/strong>)/g)![0],
+            fallback_title: score.match(/(?<=<strong class="">)(.*?)(?=<\/strong>)/g)![0],
             rank: score.match(/(?<=\/assets\/img\/ranking-)(.*?)(?=.png")/g)![0],
             score: Number(score.match(/(?<=score: )(.*?)(?= \/ )/g)![0].replace(/,/g, '')),
             embed_color: "#dedede",

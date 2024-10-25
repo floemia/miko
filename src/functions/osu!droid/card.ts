@@ -1,3 +1,5 @@
+// this shit is so ass
+
 import { createCanvas, loadImage, GlobalFonts } from "@napi-rs/canvas"
 import { getAverageColor } from "fast-average-color-node"
 import { v2 } from "osu-api-extended"

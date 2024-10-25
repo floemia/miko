@@ -24,6 +24,7 @@ export const command: Command = {
 		if (!user) return await interaction.editReply({
 			embeds: [await embed.interaction("error", `El usuario no existe.`, interaction)]
 		})
+		//console.log(user)
 		if (!user.scores.recent || user.scores.recent.length == 0) return await interaction.editReply({
 			embeds: [await embed.interaction("error", `El usuario  :flag_${user.country.toLowerCase()}:  **${user.username}**  no ha subido ningún score.`, interaction)]
 		})
