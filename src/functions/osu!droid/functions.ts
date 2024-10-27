@@ -80,8 +80,8 @@ const calculate = async (recent: DroidScore) => {
 		recent.statistics = {
 			dpp: droid_perf.total,
 			stars: {
-				pc: droid_perf.difficultyAttributes.starRating,
-				droid: osu_perf.difficultyAttributes.starRating
+				pc: osu_perf.difficultyAttributes.starRating,
+				droid: droid_perf.difficultyAttributes.starRating
 			},
 			pp: osu_perf.total
 		}
