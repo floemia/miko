@@ -2,7 +2,7 @@ import type { RESTPostAPIApplicationCommandsJSONBody } from "discord.js"
 import { Table } from "tablifier"
 import { logger } from ".."
 import type { Command, GlobClient } from "../types"
-import { loadFiles } from "../lib/files"
+import { loadFiles } from "../functions/files"
 
 export async function handleCommands(client: GlobClient): Promise<void> {
   const table = new Table(" Slash Command ", " Status ")

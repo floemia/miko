@@ -1,5 +1,5 @@
 import type { Event, GlobClient } from "../types"
-import { loadFiles } from "../lib/files"
+import { loadFiles } from "../functions/files"
 import { logger } from ".."
 
 export async function handleEvents(client: GlobClient): Promise<void> {

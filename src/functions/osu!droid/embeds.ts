@@ -43,7 +43,7 @@ const card = async (user: DroidUser) => {
 	await fs.promises.writeFile(`./${user.id}-${user.username}.png`, score)
 	const embed = new EmbedBuilder()
 	.setColor(Number(`0x${user.color.slice(1)}`))
-	.setAuthor({name: `osu!droid・Perfil de ${user.username}`, iconURL: `https://cdn.discordapp.com/emojis/1021473577951821824.png?v=1`, url: `https://osudroid.moe/profile.php?uid=${user.id}`})
+	.setAuthor({name: `osu!droid・${user.username}`, iconURL: `https://cdn.discordapp.com/emojis/1021473577951821824.png?v=1`, url: `https://osudroid.moe/profile.php?uid=${user.id}`})
 	.setImage(`attachment://${user.id}-${user.username}.png`)
 	.setTimestamp()
 	.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })

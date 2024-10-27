@@ -12,8 +12,8 @@ export const event: Event<"ready"> = {
 	async execute(client) {
 		await osu_api_connect()
 		await connect_mongoose()
-		logger.info(`${client.user.username} is online!`)
 		await handleCommands(client)
 		await presence_loop(client)
+		logger.info(`${client.user.username} is online!`)
 	}
 }

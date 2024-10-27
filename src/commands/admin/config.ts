@@ -1,4 +1,4 @@
-import { ChannelType, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
+import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
 import { embed } from "../../functions/messages/embeds"
 import GuildConfigModel from "../../schemas/guild"
@@ -51,10 +51,7 @@ export const command: Command = {
         const log_channel = client.channels.cache.get(`${guild_db?.channel.logs}`)
 
         if (subcommand == "track") {
-            await guild_db?.updateOne({"$set": {
-                "channel.track": channel.id
-            }
-            })
+            await guild_db?.updateOne({ "$set" : { "channel.track": channel.id }})
             await interaction.editReply({
                 embeds:[
                     await embed.interaction(

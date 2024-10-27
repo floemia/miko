@@ -4,33 +4,24 @@ import { droid } from "../functions/osu!droid/functions"
 import DroidAccountTrackModel from "../schemas/droidtracking"
 import OsuAccountTrackModel from "../schemas/osutracking"
 import { ChannelType } from "discord.js"
-import { getAverageColor } from "fast-average-color-node"
 import GuildConfigModel from "../schemas/guild"
 import { v2 } from "osu-api-extended"
 import { osu } from "../functions/osu/functions"
 import { average_color } from "../functions/utils"
 
 export const droid_tracking = async () => {
-
 	var tracking_users = await DroidAccountTrackModel.find()
 	if (tracking_users) {
-		logger.sponsor(`osu!droid score tracking is running. Currently there are ${tracking_users.length} users.`, "TRACKING")
+		logger.info(`osu!droid score tracking is running. Currently there are ${tracking_users.length} users.`, "TRACKING")
 		while (true) {
 			tracking_users = await DroidAccountTrackModel.find()
 			for await (const user_data of tracking_users) {
 				await new Promise(resolve => setTimeout(resolve, 25000))
-				var track_channel
-				if (client.user.id == "1242645288305430678"){
-					track_channel = client.channels.cache.get("1025132694125957191")
-				} else {
-					track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user_data.guild }))?.channel.track}`)
-				}
+				const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user_data.guild }))?.channel.track}`)
 				if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 
 				const user = await droid.user({uid: user_data.uid, type: "with_recents", limit: 1})
-				if (!user || !user.scores) continue
-				if (user.scores[0].timestamp == user_data.timestamp) continue
-
+				if (!user || !user.scores || user.scores[0].timestamp == user_data.timestamp) continue
 				const play = user.scores[0]
 				await DroidAccountTrackModel.findOneAndUpdate({ uid: user.id }, {
 					timestamp: play.timestamp,
@@ -59,17 +50,12 @@ export const osu_tracking = async () => {
 
 	var tracking_users = await OsuAccountTrackModel.find()
 	if (tracking_users) {
-		logger.sponsor(`osu! score tracking is running. Currently there are ${tracking_users.length} users.`, "TRACKING")
+		logger.info(`osu! score tracking is running. Currently there are ${tracking_users.length} users.`, "TRACKING")
 		while (true) {
 			tracking_users = await OsuAccountTrackModel.find()
 			for await (const user of tracking_users) {
 				await new Promise(resolve => setTimeout(resolve, 25000))
-				var track_channel
-				if (client.user.id == "1242645288305430678"){
-					track_channel = client.channels.cache.get("1025132694125957191")
-				} else {
-					track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user.guild }))?.channel.track}`)
-				}
+				const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user.guild }))?.channel.track}`)
 				if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 				const recents = await v2.scores.user.category(user.uid, "recent", {mode: osu.gamemode.code(user.mode_int), limit: "1", include_fails: false})
 				if (!recents || !recents[0] || recents[0].id == user.last_score_id ) continue

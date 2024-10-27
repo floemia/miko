@@ -3,11 +3,6 @@ import { ActivityType, PresenceData } from "discord.js"
 import * as fs from "fs/promises"
 import { GlobClient } from "../types";
 export const presence_loop = async (client: GlobClient) => {
-	function random(min: number, max:number ) {
-		min = Math.ceil(min);
-		max = Math.floor(max);
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	}
 	const activities: PresenceData[] = [
 		{ activities: [{ name: `bangers`, type: ActivityType.Listening }], status: "idle"},
 		{ activities: [{ name: `osu!droid`, type: ActivityType.Playing }], status: "dnd"},
