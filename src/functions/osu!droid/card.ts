@@ -154,9 +154,9 @@ export const generate_card = async (user: DroidUser): Promise<Buffer> =>  {
 	var y = 322
 	var card_y = 290
 
-	if (user.scores.best){
-		if (user.scores.best.length > 3) user.scores.best.length = 3
-		for await (const score of user.scores.best) {
+	if (user.scores){
+		if (user.scores.length > 3) user.scores.length = 3
+		for await (const score of user.scores) {
 			ctx.save()
 			const beatmap = await v2.beatmap.id.lookup({ checksum: score.hash })
 			try{
@@ -196,7 +196,7 @@ export const generate_card = async (user: DroidUser): Promise<Buffer> =>  {
 			ctx.fillStyle = "rgba(255,255,255,1)";
 			ctx.font = "25px sftitle";
 			ctx.textAlign = "right"
-			ctx.fillText(`${score.scraped_pp}dpp`, 950,  y + 14)
+			ctx.fillText(`${score.scraped_dpp}dpp`, 950,  y + 14)
 			y += 77.5; card_y +=77.5;
 		}
 	}

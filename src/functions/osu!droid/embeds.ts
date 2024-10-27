@@ -7,40 +7,40 @@ import { MapInfo } from "@rian8337/osu-base";
 import { client } from "../..";
 import * as fs from "fs"
 
-const score = async (data: DroidScore) => {
-	if (!data.beatmap){
-		const beatmapInfo = await MapInfo.getInformation(data.hash);
+const score = async (score: DroidScore) => {
+	if (!score.beatmap){
+		const beatmapInfo = await MapInfo.getInformation(score.hash);
 		if (beatmapInfo?.title) {
-				data.beatmap = beatmapInfo
-				await droid.calculate(data)
+				score.beatmap = beatmapInfo
+				await droid.calculate(score)
 		}
 	}
 
-	const mods = await droid.mods(data.mods)
-	const rank = osu.emoji.rank(data.rank)
-	const pp_string = `${data.performance.dpp ? `${data.performance.dpp.toFixed(2)} DPP ❘ ${data.performance.pp?.toFixed(2)} PP` : `?? DPP ❘ ?? PP`}${data.performance_fc.dpp ? `・**( ${data.performance_fc.dpp.toFixed(2)} DPP ❘ ${data.performance_fc.pp?.toFixed(2)} PP ➜ FC ${data.performance_fc.accuracy?.toFixed(2)}% )**` : ''}\n> `
+	const mods = await droid.mods(score.mods)
+	const rank = osu.emoji.rank(score.rank)
+	const pp_string = `${score.statistics ? `${score.statistics.dpp.toFixed(2)} DPP ❘ ${score.statistics.pp.toFixed(2)} PP` : `?? DPP ❘ ?? PP`}${ score.statistics && score.statistics.fc ? `・**( ${score.statistics.fc.dpp.toFixed(2)} DPP ❘ ${score.statistics.fc.pp.toFixed(2)} PP ➜ FC ${score.statistics.fc.accuracy.toFixed(2)}% )**` : ''}\n> `
 	const embed = new EmbedBuilder()
-	if (!data.beatmap) {
-		embed.setAuthor({ name: data.fallback_title, iconURL: data.user.avatar_url })
+	if (!score.beatmap) {
+		embed.setAuthor({ name: score.fallback_title, iconURL: score.user.avatar_url })
 	} else {
-		embed.setAuthor({ name: `${data.beatmap.artist} - ${data.beatmap.title} [${data.beatmap.version}] ${data.performance.stars_pc ? `${data.performance.stars_pc.toFixed(2)}⭐` : ''} ${mods.str ? `+${mods.str}` : ''} ${mods.speed != 1 ? `(${mods.speed.toFixed(2)}x)` : ``} `, iconURL: data.user.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${data.beatmap.beatmapSetId}#osu/${data.beatmap.beatmapId}` })
+		embed.setAuthor({ name: `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] ${score.statistics ? `${score.statistics.stars.pc.toFixed(2)}⭐` : ''} ${mods.str ? `+${mods.str}` : ''} ${mods.speed != 1 ? `(${mods.speed.toFixed(2)}x)` : ``} `, iconURL: score.user.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}` })
 	}
 
-	embed.setDescription(`> ${rank}**・${pp_string}${data.accuracy.toFixed(2)}%・**${data.score.toLocaleString("en-US")}**・**${data.combo.toLocaleString("en-US")}x${data.beatmap?.maxCombo ? ` / ${data.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}**・**${data.misses} ❌`)
+	embed.setDescription(`> ${rank}**・${pp_string}${score.accuracy.toFixed(2)}%・**${score.score.toLocaleString("en-US")}**・**${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? ` / ${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}**・**${score.misses} ❌`)
 	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
-	embed.setColor(Number(`0x${data.embed_color?.slice(1)}`))
-	embed.setTimestamp(data.timestamp - 7200000)
-	if (data.embed_color != "#dedede") {
-		embed.setImage(`https://assets.ppy.sh/beatmaps/${data.beatmap?.beatmapSetId}/covers/cover.jpg`)
+	embed.setColor(Number(`0x${score.embed_color?.slice(1)}`))
+	embed.setTimestamp(score.timestamp - 7200000)
+	if (score.embed_color != "#dedede") {
+		embed.setImage(`https://assets.ppy.sh/beatmaps/${score.beatmap?.beatmapSetId}/covers/cover.jpg`)
 	}
 
 	return embed
 }
 
 const card = async (user: DroidUser) => {
-	const data = await generate_card(user)
+	const score = await generate_card(user)
 
-	await fs.promises.writeFile(`./${user.id}-${user.username}.png`, data)
+	await fs.promises.writeFile(`./${user.id}-${user.username}.png`, score)
 	const embed = new EmbedBuilder()
 	.setColor(Number(`0x${user.color.slice(1)}`))
 	.setAuthor({name: `osu!droid・Perfil de ${user.username}`, iconURL: `https://cdn.discordapp.com/emojis/1021473577951821824.png?v=1`, url: `https://osudroid.moe/profile.php?uid=${user.id}`})

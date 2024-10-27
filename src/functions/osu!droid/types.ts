@@ -14,10 +14,7 @@ export type DroidUser = {
     dpp: number,
     accuracy: number,
     playcount: number,
-	scores:{
-		recent: DroidScore[] | undefined
-		best: DroidScore[] | undefined
-	}
+	scores?: DroidScore []
 }
 
 export type DroidScore = {
@@ -26,25 +23,27 @@ export type DroidScore = {
     score: number,
     embed_color: string | undefined,
     timestamp: number,
-    performance: {
-        pp: number | undefined,
-        dpp: number | undefined,
-        stars_dr: number | undefined,
-        stars_pc: number | undefined
-    },
-    performance_fc:{
-        pp: number | undefined,
-        dpp: number | undefined,
-        accuracy: number | undefined
-    },
-    scraped_pp: number
+	statistics?:{
+		pp: number,
+		dpp: number,
+		stars:{
+			pc: number,
+			droid: number
+		} 
+		fc?:{
+			pp: number,
+			dpp: number,
+			accuracy: number
+		},
+	}
+    scraped_dpp: number
     accuracy: number,
     mods: string[],
     combo: number
     misses: number,
     hash: string,
-    user: DroidUser,
     beatmap: MapInfo | undefined
+	user: DroidUser
 }
 
 export type DroidMods = {

@@ -24,12 +24,11 @@ export const command: Command = {
 		if (!user) return await interaction.editReply({
 			embeds: [await embed.interaction("error", `El usuario no existe.`, interaction)]
 		})
-		//console.log(user)
-		if (!user.scores.recent || user.scores.recent.length == 0) return await interaction.editReply({
+		if (!user.scores || user.scores.length == 0) return await interaction.editReply({
 			embeds: [await embed.interaction("error", `El usuario  :flag_${user.country.toLowerCase()}:  **${user.username}**  no ha subido ningún score.`, interaction)]
 		})
 
-		const recents = user.scores.recent
+		const recents = user.scores
 		var index = (interaction.options?.getInteger("index") || 1) - 1
 		if (index > recents.length) index = recents.length - 1
 

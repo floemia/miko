@@ -3,7 +3,7 @@ import { DroidScore, DroidUser } from "./types"
 import { average_color } from "../utils"
 
 
-const user = async (params: {uid: number, html_data?: any, type?: "basic" | "with_recents" | "with_top_plays" | "full"}): Promise<DroidUser | undefined> => {
+const user = async (params: {uid: number, html_data?: any, type?: "basic" | "with_recents" | "with_top_plays", limit?: number}): Promise<DroidUser | undefined> => {
     var html: string
 	if (!params.type) params.type = "basic"
 
@@ -15,6 +15,9 @@ const user = async (params: {uid: number, html_data?: any, type?: "basic" | "wit
         html = params.html_data
     }
 	if (html.includes("User not found")) return undefined
+
+	if (!params.limit) params.limit = 50
+	if (params.limit < 1) params.limit = 1
 
 	const avatar_url = `https://osudroid.moe/user/avatar/${html.match(/(?<=src=".\/user\/avatar\/)(.*?)(?=")/g)![0]}`
     const color = await average_color(avatar_url)
@@ -35,14 +38,11 @@ const user = async (params: {uid: number, html_data?: any, type?: "basic" | "wit
         dpp: Number(technical_data![3].replace(",", '').replace("pp", '')),
         accuracy: Number(technical_data![5].slice(0, -1)) / 1000,
         playcount: Number(technical_data![7]),
-		scores: {
-			recent: ["full", "with_recents"].includes(params.type) ? await scrape.scores({uid: params.uid, type: "recent"}) : undefined,
-			best: ["full", "with_top_plays"].includes(params.type) ? await scrape.scores({uid: params.uid, type: "best"}) : undefined
-		}
+		scores: ["with_top_plays", "with_recents"].includes(params.type) ? await scrape.scores({uid: params.uid, type: params.type == "with_recents" ? "recent" : "best", limit: params.limit}) : undefined
     }
 }
 
-const scores = async (params: {uid: number, type: "recent" | "best", html_data?: string}): Promise<DroidScore[] | undefined> => {
+const scores = async (params: {uid: number, type: "recent" | "best", html_data?: string, limit?: number}): Promise<DroidScore[] | undefined> => {
 	let html: string
 	if (!params.html_data){
         const get = await axios.get(`https://osudroid.moe/profile.php?uid=${params.uid}`)
@@ -53,12 +53,17 @@ const scores = async (params: {uid: number, type: "recent" | "best", html_data?:
     }
     const user = await scrape.user({uid: params.uid, html_data: html})
     if (!user) return undefined
+	if (!params.limit) params.limit = 50
+	if (params.limit < 1) params.limit = 1
+	
     
     html = html.replace(/\n/g, '').replace(/ +(?= )/g, '').replace(/> </g, '><')
 	.split("Recent Plays</b>")[params.type == "recent" ? 1 : 0]
 
     const scores = html.match(/(?<=<a class="">)(.*?)(?=<\/span>)/g)
 	if (!scores) return []
+	if (scores.length > params.limit) scores.length = params.limit
+
     const scores_arr: DroidScore[] = []
 	
     for await (const score of scores) {
@@ -69,25 +74,14 @@ const scores = async (params: {uid: number, type: "recent" | "best", html_data?:
             score: Number(score.match(/(?<=score: )(.*?)(?= \/ )/g)![0].replace(/,/g, '')),
             embed_color: "#dedede",
             timestamp : new Date(score.match(/(?<=style="margin-left: 50px;">)(.*?)(?= \/)/g)![0]).getTime(),
-            performance:{
-                pp: undefined,
-                dpp: undefined,
-                stars_dr: undefined,
-                stars_pc: undefined
-            },
-            performance_fc :{
-                pp: undefined,
-                dpp: undefined,
-                accuracy: undefined
-            },
-            scraped_pp: Number(score.match(/(?<=pp:)(.*?)(?=\/)/g)![0].replace(/ /g, "")),
+            scraped_dpp: Number(score.match(/(?<=pp:)(.*?)(?=\/)/g)![0].replace(/ /g, "")),
             mods: score.match(/(?<=mod:)(.*?)(?=\/)/g)![0].replace(/ /g, "").replace("x", '').split(","),
             accuracy: Number(score.match(/(?<=accuracy: )(.*?)(?=%)/g)![0]),
             combo: Number(score.match(/(?<=combo: )(.*?)(?= x)/g)![0]),
             misses: Number(score.match(/(?<=miss: )(.*?)(?=<)/g)![0]),
             hash: hash,
-            user: user,
-            beatmap: undefined
+            beatmap: undefined,
+			user: user
         })
     }
     return scores_arr
