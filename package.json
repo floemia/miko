@@ -1,13 +1,13 @@
 {
-  "name": "discord-bot",
+  "name": "miko",
   "version": "1.0.0",
-  "description": "",
+  "description": "discord bot for Michi's Gang",
   "main": "./dist/index.js",
   "scripts": {
     "start": "tsc && node ."
   },
   "keywords": [],
-  "author": "",
+  "author": "floemia",
   "license": "ISC",
   "dependencies": {
     "@napi-rs/canvas": "^0.1.56",
