@@ -40,7 +40,7 @@ export const droid_tracking = async () => {
 
 				console.log(play)
 				const embed = await droid.embed.score(play)
-				track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid**・Score reciente de  **:flag_${user.country.toLowerCase()}:  ${user.username}**:\n-# Los valores de DPP y PP pueden no ser precisos.`, embeds: [embed] })
+				track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid**・Recent score from  **:flag_${user.country.toLowerCase()}:  ${user.username}**:`, embeds: [embed] })
 			}
 		}
 	}
@@ -68,7 +68,7 @@ export const osu_tracking = async () => {
 				const data = await osu.calculate(play)
 				if (!data) return
 				const embed = await osu.embed.score(play, data)
-				track_channel.send({ content: `**${osu.gamemode.full(user.mode_int)}・**Score reciente de  **:flag_${user.country.toLowerCase()}:  ${play.user.username}**:`, embeds: [embed] })
+				track_channel.send({ content: `**${osu.gamemode.full(user.mode_int)}・**Recent score from  **:flag_${user.country.toLowerCase()}:  ${play.user.username}**:`, embeds: [embed] })
 			}
 		}
 	}

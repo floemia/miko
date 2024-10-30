@@ -2,30 +2,38 @@ import { ButtonInteraction, ComponentType, SlashCommandBuilder } from "discord.j
 import type { Command } from "../../types"
 import { droid } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
-import { ButtonBuilder, ActionRowBuilder, ButtonStyle } from "discord.js"
+import { create_row } from "../../functions/utils"
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("recent")
-		.setDescription("osu!droid - Muestra tu score más reciente.")
+		.setDescription("osu!droid - Get recent scores from an osu!droid profile.")
+		.setDescriptionLocalization("es-ES", "osu!droid - Obtener scores recientes de un perfil de osu!droid.")
 		.addIntegerOption(opt => opt
 			.setName("uid")
-			.setDescription("UID del usuario")
+			.setDescription("UID of osu!droid profile.").setDescriptionLocalization("es-ES", "UID del perfil de osu!droid.")
 			.setRequired(true)
 		)
 		.addIntegerOption(opt => opt
-			.setName("index")
-			.setDescription("Indice de la play")
+			.setName("index").setNameLocalization("es-ES", "indice")
+			.setDescription("The n-th play to show (1 <= n <= 50). Defaults to 1.").setDescriptionLocalization("es-ES", "La n-ésima play a mostrar (1 <= n <= 50). 1 por defecto.")
 			.setMaxValue(50).setMinValue(1)
 		),
 
 	async execute(client, interaction) {
+		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		const response = await interaction.deferReply()
-		const user = await droid.user({ uid: interaction.options.getInteger("uid", true), type: "with_recents"})
-		if (!user) return await interaction.editReply({
-			embeds: [await embed.interaction("error", `El usuario no existe.`, interaction)]
-		})
-		if (!user.scores || user.scores.length == 0) return await interaction.editReply({
-			embeds: [await embed.interaction("error", `El usuario  :flag_${user.country.toLowerCase()}:  **${user.username}**  no ha subido ningún score.`, interaction)]
+		const user = await droid.user({ uid: interaction.options.getInteger("uid", true), type: "with_recents" })
+		if (!user || !user.scores || user.scores.length == 0) return await interaction.editReply({
+			embeds: [embed.response({
+				type: "error",
+				description:
+					user ?
+						spanish ? `El usuario  :flag_${user.country.toLowerCase()}:  **${user.username}**  no ha subido ningún score.` :
+							`The user  :flag_${user.country.toLowerCase()}:  **${user.username}**  has no submitted scores.`
+
+						: spanish ? `El usuario no existe.` : "User does not exist.",
+				interaction: interaction
+			})]
 		})
 
 		const recents = user.scores
@@ -33,32 +41,7 @@ export const command: Command = {
 		if (index > recents.length) index = recents.length - 1
 
 		const unique = `${interaction.user.id}-${Math.floor(Math.random() * 10000000)}`
-		const row = new ActionRowBuilder<ButtonBuilder>()
-			.setComponents(
-				new ButtonBuilder()
-					.setCustomId(`backAll-${unique}`)
-					.setDisabled(index == 0 ? true : false)
-					.setEmoji('<:lastarrowleft:968284085363568721>')
-					.setStyle(ButtonStyle.Primary),
-				new ButtonBuilder()
-					.setEmoji('<:arrowleft:968284085472616469>')
-					.setCustomId(`back-${unique}`)
-					.setStyle(ButtonStyle.Success),
-				new ButtonBuilder()
-					.setLabel(`${index + 1}/${recents.length}`)
-					.setDisabled(true)
-					.setCustomId('page')
-					.setStyle(ButtonStyle.Secondary),
-				new ButtonBuilder()
-					.setEmoji('<:arrowright:968284085342584912>')
-					.setCustomId(`go-${unique}`)
-					.setStyle(ButtonStyle.Success),
-				new ButtonBuilder()
-					.setCustomId(`goAll-${unique}`)
-					.setDisabled(index == recents.length - 1 ? true : false)
-					.setEmoji('<:lastarrowright:968284085652963368>')
-					.setStyle(ButtonStyle.Primary),
-			)
+		const row = create_row(unique, index, recents.length);
 
 		const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 120000 });
 		collector.on("collect", async (i: ButtonInteraction) => {
@@ -83,11 +66,12 @@ export const command: Command = {
 				row.components[2].setLabel(`${index + 1}/${recents.length}`)
 				row.components[4].setDisabled(index == recents.length - 1 ? true : false)
 				await i.update({
-					content: `<:droid_simple:1021473577951821824>  **osu!droid・**Score #${index + 1} de  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Los valores de DPP y PP pueden no ser precisos.`,
+					content: spanish ?
+						`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Los valores de DPP y PP pueden no ser 100% precisos.`
+						: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# DPP and PP values may not be 100% accurate.`,
 					embeds: [await droid.embed.score(recents[index])],
 					components: [row]
 				})
-
 			}
 		})
 
@@ -95,11 +79,14 @@ export const command: Command = {
 			for (const button of row.components) {
 				button.setDisabled(true)
 			}
-			interaction.editReply({
-				components: [row]
-			})
+			interaction.editReply({ components: [row] })
 		})
 		const embed_score = await droid.embed.score(recents[index])
-		await interaction.editReply({ content: `<:droid_simple:1021473577951821824>  **osu!droid・**Score #${index + 1} de  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Los valores de DPP y PP pueden no ser precisos.`, embeds: [embed_score], components: [row] })
+		await interaction.editReply({
+			content: spanish ?
+				`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Los valores de DPP y PP pueden no ser 100% precisos.`
+				: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# DPP and PP values may not be 100% accurate.`,
+			embeds: [embed_score], components: [row]
+		})
 	},
 }

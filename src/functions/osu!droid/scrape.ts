@@ -36,7 +36,7 @@ const user = async (params: {uid: number, html_data?: any, type?: "basic" | "wit
         },
 		total_score: Number(technical_data![1].replace(/,/g, '')),
         dpp: Number(technical_data![3].replace(",", '').replace("pp", '')),
-        accuracy: Number(technical_data![5].slice(0, -1)) / 1000,
+        accuracy: Number(technical_data![5].slice(0, -1)),
         playcount: Number(technical_data![7]),
 		scores: ["with_top_plays", "with_recents"].includes(params.type) ? await scrape.scores({uid: params.uid, type: params.type == "with_recents" ? "recent" : "best", limit: params.limit}) : undefined
     }

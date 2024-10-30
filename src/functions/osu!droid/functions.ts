@@ -5,6 +5,7 @@ import { embed } from "./embeds"
 import { DroidScore, DroidMods, ScorePerformanceData } from "./types"
 import { getAverageColor } from "fast-average-color-node"
 import { average_color } from "../utils"
+import { tracking } from "./tracking"
 const user = async (params: { uid: number, html_data?: any, type?: "basic" | "with_recents" | "with_top_plays", limit?: number }) => {
 	return await scrape.user(params)
 }
@@ -117,4 +118,4 @@ const calculate = async (recent: DroidScore) => {
 
 
 
-export const droid = { user, scores, mods, calculate, embed }
+export const droid = { user, scores, mods, calculate, embed, tracking }

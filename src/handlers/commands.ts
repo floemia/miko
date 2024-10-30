@@ -19,6 +19,7 @@ const files = await loadFiles("commands")
       commands.push(command.data.toJSON())
     } catch (error) {
 		error_commands.push(`${command.data.name} - ${error}`)
+		console.log(error)
     }
   })
 
