@@ -7,7 +7,6 @@ import { ChannelType } from "discord.js"
 import GuildConfigModel from "../schemas/guild"
 import { v2 } from "osu-api-extended"
 import { osu } from "../functions/osu/functions"
-import { average_color } from "../functions/utils"
 
 export const droid_tracking = async () => {
 	var tracking_users = await DroidAccountTrackModel.find()
@@ -29,15 +28,11 @@ export const droid_tracking = async () => {
 				})
 
 				const beatmap = await MapInfo.getInformation(play.hash)
-				logger.info(`Creating score embed for ${user.username}`)
-
+				logger.info(`Creating osu!droid score embed for ${user.username}`)
 				if (beatmap?.title) {
 					play.beatmap = beatmap
-					const color = await average_color(`https://assets.ppy.sh/beatmaps/${play.beatmap?.beatmapSetId}/covers/cover.jpg`)
-					play.embed_color = color.hex
 					await droid.calculate(play)
 				}
-
 				console.log(play)
 				const embed = await droid.embed.score(play)
 				track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid**・Score reciente de  **:flag_${user.country.toLowerCase()}:  ${user.username}**:`, embeds: [embed] })
