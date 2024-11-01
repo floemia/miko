@@ -1,3 +1,4 @@
+// holy fucking shit
 import axios from "axios"
 import { DroidScore, DroidUser } from "./types"
 import { average_color } from "../utils"
@@ -5,8 +6,6 @@ import { average_color } from "../utils"
 
 const user = async (params: {uid: number, html_data?: any, type?: "basic" | "with_recents" | "with_top_plays", limit?: number}): Promise<DroidUser | undefined> => {
     var html: string
-	if (!params.type) params.type = "basic"
-
     if (!params.html_data){
         const get = await axios.get(`https://osudroid.moe/profile.php?uid=${params.uid}`)
         if (!get.data) return undefined
@@ -38,7 +37,7 @@ const user = async (params: {uid: number, html_data?: any, type?: "basic" | "wit
         dpp: Number(technical_data![3].replace(",", '').replace("pp", '')),
         accuracy: Number(technical_data![5].slice(0, -1)),
         playcount: Number(technical_data![7]),
-		scores: ["with_top_plays", "with_recents"].includes(params.type) ? await scrape.scores({uid: params.uid, type: params.type == "with_recents" ? "recent" : "best", limit: params.limit}) : undefined
+		scores: params.type ? await scrape.scores({uid: params.uid, type: params.type == "with_recents" ? "recent" : "best", limit: params.limit}) : undefined
     }
 }
 
@@ -59,7 +58,6 @@ const scores = async (params: {uid: number, type: "recent" | "best", html_data?:
     
     html = html.replace(/\n/g, '').replace(/ +(?= )/g, '').replace(/> </g, '><')
 	.split("Recent Plays</b>")[params.type == "recent" ? 1 : 0]
-
     const scores = html.match(/(?<=<a class="">)(.*?)(?=<\/span>)/g)
 	if (!scores) return []
 	if (scores.length > params.limit) scores.length = params.limit

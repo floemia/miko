@@ -29,7 +29,7 @@ const score = async (score: DroidScore) => {
 	embed.setDescription(`> ${rank}**・${pp_string}${score.accuracy.toFixed(2)}%・**${score.score.toLocaleString("en-US")}**・**${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? ` / ${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}**・**${score.misses} ❌`)
 	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
 	embed.setColor(Number(`0x${score.embed_color?.slice(1)}`))
-	embed.setTimestamp(score.timestamp - 7200000)
+	embed.setTimestamp(score.timestamp - 3600000)
 	if (score.embed_color != "#dedede") {
 		embed.setImage(`https://assets.ppy.sh/beatmaps/${score.beatmap?.beatmapSetId}/covers/cover.jpg`)
 	}
