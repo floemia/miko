@@ -5,7 +5,7 @@ import { getAverageColor } from "fast-average-color-node"
 import { v2 } from "osu-api-extended"
 import { droid } from "./functions"
 import { DroidUser } from "./types"
-import { average_color } from "../utils"
+import { average_color, format_double_dec } from "../utils"
 const getFlagEmojiUrl = (countryCode: string) => {
     const codePoints = countryCode
         .toLowerCase()
@@ -192,7 +192,7 @@ export const generate_card = async (user: DroidUser): Promise<Buffer> =>  {
 			var mods_str = mods.str
 			if (mods.speed != 1.0) 
 				mods_str = mods_str.concat(` (${mods.speed.toFixed(2)}x)`)
-			ctx.fillText(`[${beatmap.version}] +${mods_str} ${score.accuracy}%`, 600, y + 26)
+			ctx.fillText(`[${beatmap.version}] ${mods_str? `+${mods_str}` : ''}${format_double_dec(score.accuracy)}%`, 600, y + 26)
 			ctx.fillStyle = "rgba(255,255,255,1)";
 			ctx.font = "25px sftitle";
 			ctx.textAlign = "right"

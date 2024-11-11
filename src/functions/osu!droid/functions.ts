@@ -20,12 +20,12 @@ const best = async (uid: number) => {
 
 const scores = { recent, best }
 
-const mods = async (mods_arr: string[]): Promise<DroidMods> => {
+const mods = (mods_arr: string[]) => {
 	var mods = {
 		str: '',
 		speed: 1.0,
 	}
-	for await (const mod of mods_arr) {
+	for (const mod of mods_arr) {
 
 		switch (mod.toLowerCase()) {
 			case "easy": mods.str = mods.str.concat("EZ"); break;
@@ -79,6 +79,7 @@ const calculate = async (recent: DroidScore) => {
 		});
 		recent.embed_color = (await average_color(`https://assets.ppy.sh/beatmaps/${recent.beatmap.beatmapSetId}/covers/cover.jpg`)).hex
 		recent.statistics = {
+			accuracy: droid_perf.computedAccuracy,
 			dpp: droid_perf.total,
 			stars: {
 				pc: osu_perf.difficultyAttributes.starRating,
@@ -87,7 +88,7 @@ const calculate = async (recent: DroidScore) => {
 			pp: osu_perf.total
 		}
 
-		if (recent.misses > 0) {
+		if (recent.misses > 0 || recent.combo - recent.beatmap.beatmap.maxCombo > 5 && recent.combo < recent.beatmap.beatmap.maxCombo) {
 			const accuracy_fc = new Accuracy({
 				nmiss: 0,
 				n300: accuracy.n300 + recent.misses,

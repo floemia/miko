@@ -1,4 +1,4 @@
-import { MapInfo } from "@rian8337/osu-base"
+import { Accuracy, MapInfo } from "@rian8337/osu-base"
 
 export type DroidUser = {
     username: string,
@@ -24,6 +24,7 @@ export type DroidScore = {
     embed_color: string | undefined,
     timestamp: number,
 	statistics?:{
+		accuracy?: Accuracy,
 		pp: number,
 		dpp: number,
 		stars:{
@@ -63,4 +64,23 @@ export type ScorePerformanceData = {
         dpp: number | undefined,
         accuracy: number | undefined
     }
+}
+
+export type DroidPPBoardUser = {
+	uid: number,
+	username: string,
+	pptotal: number,
+	pp: DroidPPBoardScore[],
+}
+
+export type DroidPPBoardScore = {
+	uid: number,
+	hash: string,
+	title: string,
+	pp: number,
+	mods: string,
+	accuracy: number,
+	combo: number,
+	miss: number,
+	speedMultiplier: number
 }

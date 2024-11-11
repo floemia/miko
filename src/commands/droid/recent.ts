@@ -84,8 +84,8 @@ export const command: Command = {
 		const embed_score = await droid.embed.score(recents[index])
 		await interaction.editReply({
 			content: spanish ?
-				`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Los valores de DPP y PP pueden no ser 100% precisos.`
-				: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# DPP and PP values may not be 100% accurate.`,
+				`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Las estadísticas pueden ser incorrectas.`
+				: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Score statistics may be inaccurate.`,
 			embeds: [embed_score], components: [row]
 		})
 	},

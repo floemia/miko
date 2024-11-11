@@ -4,7 +4,7 @@ import { osu } from "../osu/functions";
 import { client } from "../..";
 import { response } from "osu-api-extended/dist/types/v2_scores_user_category";
 import { getAverageColor } from "fast-average-color-node";
-import { average_color } from "../utils";
+import { average_color, format_double_dec } from "../utils";
 
 const score = async (recent: response, data: ScoreDifficultyData): Promise<EmbedBuilder> => {
 	var difficulty_adjust = ''
@@ -30,11 +30,12 @@ const score = async (recent: response, data: ScoreDifficultyData): Promise<Embed
 	}
 
 	const color = await average_color(`https://assets.ppy.sh/beatmaps/${recent.beatmapset.id}/covers/cover.jpg`)
-	const pp_string = `${data.pp?.toFixed(2)} PP・${(recent.accuracy * 100).toFixed(2)}%${data.fc.pp ? `・**( ${data.fc.pp?.toFixed(2)} PP ➜ FC ${data.fc.accuracy}% )**` : ''}\n> `
+	const pp_string = `${data.pp?.toFixed(2)} PP・${format_double_dec(recent.accuracy * 100)}%${data.fc.pp && data.fc.accuracy ? `・**( ${data.fc.pp?.toFixed(2)} PP ➜ FC ${format_double_dec(data.fc.accuracy)}% )**` : ''}`
+	
 
 	const embed = new EmbedBuilder()
 	embed.setAuthor({ name: `${recent.beatmapset.artist} - ${recent.beatmapset.title} [${recent.beatmap.version}] ${data.stars?.toFixed(2)}⭐ ${recent.mods ? `+${recent.mods.map(x => x.acronym).join('')}` : ''} ${difficulty_adjust}`, iconURL: recent.user.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${recent.beatmapset.id}#${recent.beatmap.mode}/${recent.beatmap.id}` })
-	embed.setDescription(`> ${rank}**・${pp_string}${recent.beatmap.mode == "mania" ? `${ratio}・` : ''}**${hits}**・**${recent.total_score.toLocaleString("en-US")}**・**${recent.max_combo.toLocaleString("en-US")}x / ${data.combo?.toLocaleString("en-US")}x`)
+	embed.setDescription(`> ${rank}**・${pp_string}・${recent.beatmap.mode == "mania" ? `${ratio}・` : ''}**${hits}**・**${recent.total_score.toLocaleString("en-US")}**・**${recent.max_combo.toLocaleString("en-US")}x/${data.combo?.toLocaleString("en-US")}x`)
 	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
 	embed.setColor(Number(`0x${color.hex.slice(1)}`))
 	embed.setTimestamp(new Date(recent.ended_at))

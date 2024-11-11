@@ -16,7 +16,6 @@ const user = async (params: {uid: number, html_data?: any, type?: "basic" | "wit
 	if (html.includes("User not found")) return undefined
 
 	if (!params.limit) params.limit = 50
-	if (params.limit < 1) params.limit = 1
 
 	const avatar_url = `https://osudroid.moe/user/avatar/${html.match(/(?<=src=".\/user\/avatar\/)(.*?)(?=")/g)![0]}`
     const color = await average_color(avatar_url)
@@ -72,7 +71,7 @@ const scores = async (params: {uid: number, type: "recent" | "best", html_data?:
             score: Number(score.match(/(?<=score: )(.*?)(?= \/ )/g)![0].replace(/,/g, '')),
             embed_color: "#dedede",
             timestamp : new Date(score.match(/(?<=style="margin-left: 50px;">)(.*?)(?= \/)/g)![0]).getTime(),
-            scraped_dpp: Number(score.match(/(?<=pp:)(.*?)(?=\/)/g)![0].replace(/ /g, "")),
+            scraped_dpp: Number(score.match(/(?<=pp:)(.*?)(?=\/)/g)![0]),
             mods: score.match(/(?<=mod:)(.*?)(?=\/)/g)![0].replace(/ /g, "").replace("x", '').split(","),
             accuracy: Number(score.match(/(?<=accuracy: )(.*?)(?=%)/g)![0]),
             combo: Number(score.match(/(?<=combo: )(.*?)(?= x)/g)![0]),

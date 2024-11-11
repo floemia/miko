@@ -45,3 +45,7 @@ export const create_row = (unique: string, index: number, length: number) => {
 			.setStyle(ButtonStyle.Primary),
 	)
 } 
+
+export const format_double_dec = (int: number) => {
+	return int.toLocaleString("en", {minimumFractionDigits:2, maximumFractionDigits: 2})
+}

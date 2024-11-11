@@ -1,12 +1,12 @@
 import { ChannelType, PermissionsBitField, SlashCommandBuilder } from "discord.js"
-import type { Command } from "../../types"
-import { droid } from "../../functions/osu!droid/functions"
-import { embed } from "../../functions/messages/embeds"
-import OsuAccountTrackModel from "../../schemas/osutracking"
-import DroidAccountTrackModel from "../../schemas/droidtracking"
-import GuildConfigModel from "../../schemas/guild"
+import type { Command } from "../types"
+import { droid } from "../functions/osu!droid/functions"
+import { embed } from "../functions/messages/embeds"
+import OsuAccountTrackModel from "../schemas/osutracking"
+import DroidAccountTrackModel from "../schemas/droidtracking"
+import GuildConfigModel from "../schemas/guild"
 import { v2 } from "osu-api-extended"
-import { osu } from "../../functions/osu/functions"
+import { osu } from "../functions/osu/functions"
 
 export const command: Command = {
 	data: new SlashCommandBuilder()
