@@ -9,12 +9,11 @@ export const command: Command = {
 		.addStringOption(opt => opt.setName("msg")
 			.setRequired(true)
 			.setDescription("Mensaje a mandar."))
-		.setDMPermission(false),
+		.setContexts(0),
 
 	async execute(client, interaction) {
 		await interaction.deferReply()
 		interaction.deleteReply()
 		if (interaction.user.id != "596481414426525696") return
-		await interaction.channel?.send({ content: interaction.options.getString("msg", true) })
 	},
 }
