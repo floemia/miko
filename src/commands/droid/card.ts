@@ -16,6 +16,7 @@ export const command: Command = {
 		),
 
 	async execute(client, interaction) {
+		
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		await interaction.deferReply()
 		const user = await droid.user({ uid: interaction.options.getInteger("uid", true), type: "with_top_plays" })

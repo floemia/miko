@@ -33,10 +33,13 @@ export const generate_card = async (user: DroidUser): Promise<Buffer> =>  {
 	ctx.shadowBlur=15;
 
 	const background = await loadImage("./assets/images/pxfuel.jpg")
-	const avatar = await loadImage(user.avatar_url)
+	
 	const flag = await loadImage(getFlagEmojiUrl(user.country))
 	const osu_logo = await loadImage("https://cdn.discordapp.com/emojis/1021473577951821824.png?v=1")
+
+	const avatar = await loadImage(user.avatar_url)
 	const color = await average_color(user.avatar_url)
+
 	ctx.fillStyle = "rgba(0,0,0,0)"
 	ctx.beginPath();
 	ctx.roundRect(0, 0, 1000, 550, 30)
@@ -188,7 +191,7 @@ export const generate_card = async (user: DroidUser): Promise<Buffer> =>  {
 			ctx.fillStyle = gradient
 			ctx.fillText(beatmap.beatmapset.title, 600, y)	
 			ctx.font = "13px sfbody";
-			const mods = await droid.mods(score.mods)
+			const mods = droid.mods(score.mods)
 			var mods_str = mods.str
 			if (mods.speed != 1.0) 
 				mods_str = mods_str.concat(` (${mods.speed.toFixed(2)}x)`)
