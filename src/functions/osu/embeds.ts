@@ -18,7 +18,7 @@ const score = async (recent: response, data: ScoreDifficultyData): Promise<Embed
 	}
 	if (difficulty_adjust) difficulty_adjust = difficulty_adjust.concat(")");
 
-	const rank = osu.emoji.rank(recent.rank)
+	const rank = await osu.emoji.rank(recent.rank)
 	const statistics: any = recent.statistics
 	var ratio = `${recent.beatmap.mode == "mania" ? `${(statistics.perfect/statistics.great).toFixed(2) || "∞"}:1` : ''}`
 	var hits = ''

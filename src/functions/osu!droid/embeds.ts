@@ -18,7 +18,7 @@ const score = async (score: DroidScore) => {
 	}
 
 	const mods = await droid.mods(score.mods)
-	const rank = osu.emoji.rank(score.rank)
+	const rank = await osu.emoji.rank(score.rank)
 	const count = score.statistics?.accuracy
 	const statistics = `[${count?.n300}/${count?.n100}/${count?.n50}/${count?.nmiss}]`
 	const pp_string = `${score.statistics ? `${score.statistics.dpp.toFixed(2)} DPP ❘ ${score.statistics.pp.toFixed(2)} PP` : `?? DPP ❘ ?? PP`}${ score.statistics && score.statistics.fc ? `・**( ${score.statistics.fc.dpp.toFixed(2)} DPP ❘ ${score.statistics.fc.pp.toFixed(2)} PP ➜ FC ${score.statistics.fc.accuracy.toFixed(2)}% )**` : ''}`
