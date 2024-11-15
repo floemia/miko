@@ -1,5 +1,6 @@
 import { response } from "osu-api-extended/dist/types/v2_scores_user_category";
 import { client } from "../..";
+import { ApplicationEmoji } from "discord.js";
 import { OsuCodeGamemodes, OsuGamemodes, ScoreDifficultyData } from "./types";
 import { embed } from "./embeds";
 import * as rosu from "rosu-pp-js"
@@ -74,21 +75,21 @@ export const difficulty = (mode: "osu" | "taiko" | "fruits" | "mania", SR: numbe
 export const rank = (rank: string) => {
 	switch (rank) {
 		case "A":
-			return client.emojis.cache.get('1307062427304591480')
+			return client.application.emojis.fetch('1307062427304591480')
 		case 'B':
-			return client.emojis.cache.get('1307062442542760007')
+			return client.application.emojis.fetch('1307062442542760007')
 		case 'C':
-			return client.emojis.cache.get('1307062454806777937')
+			return client.application.emojis.fetch('1307062454806777937')
 		case 'D':
-			return client.emojis.cache.get('1307062469964861510')
+			return client.application.emojis.fetch('1307062469964861510')
 		case 'S':
-			return client.emojis.cache.get('1307062491225788456')
+			return client.application.emojis.fetch('1307062491225788456')
 		case 'SH':
-			return client.emojis.cache.get('1307062505444610058')
+			return client.application.emojis.fetch('1307062505444610058')
 		case 'X':
-			return client.emojis.cache.get('1307062520242114621')
+			return client.application.emojis.fetch('1307062520242114621')
 		case 'XH':
-			return client.emojis.cache.get('1307062405188030464')
+			return client.application.emojis.fetch('1307062405188030464')
 		case 'F':
 			return client.emojis.cache.get('966098768908914778')
 	}
