@@ -1,11 +1,11 @@
 import { ChannelType, ChatInputCommandInteraction, Guild, PermissionsBitField } from "discord.js";
-import { DroidUser } from "./types";
+import { DroidScore, DroidUser } from "./types";
 import { client } from "../..";
 import DroidAccountTrackModel from "../../schemas/droidtracking";
 import GuildConfigModel from "../../schemas/guild";
 import { embed } from "../messages/embeds";
 
-const add = async (user: DroidUser, interaction: ChatInputCommandInteraction) => {
+const add = async (user: DroidUser, last_score: DroidScore | undefined, interaction: ChatInputCommandInteraction) => {
 	const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 	const guild_id = interaction.guild?.id;
 	const user_id = interaction.user.id;
@@ -41,13 +41,12 @@ const add = async (user: DroidUser, interaction: ChatInputCommandInteraction) =>
 		});
 	}
 
-	const recent = user.scores?.[0];
 	await new DroidAccountTrackModel({
 		username: user.username,
 		uid: user.id,
-		timestamp: recent?.timestamp || 0,
+		timestamp: last_score ? last_score.timestamp :  0,
 		country: user.country,
-		last_score: recent?.score || 0,
+		last_score: last_score ? last_score.score :  0,
 		discord_id: user_id,
 		guild: guild_id
 	}).save();

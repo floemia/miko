@@ -59,7 +59,7 @@ export const command: Command = {
 										{ name: "osu!mania", value: 3 },
 									]
 								))
-							
+
 				)
 		)
 		.addSubcommandGroup(group =>
@@ -82,11 +82,11 @@ export const command: Command = {
 						.setName('delete').setNameLocalization("es-ES", "eliminar")
 						.setDescription("osu!droid - Delete an user from the score tracking system.")
 						.setDescriptionLocalization("es-ES", "osu!droid - Eliminar a un usuario del sistema de score tracking.")
-						.addIntegerOption(option => 
+						.addIntegerOption(option =>
 							option.setName('uid')
-							.setDescription('UID of the osu!droid profile.')
-							.setDescriptionLocalization("es-ES", "UID del perfil de osu!droid.")
-							.setRequired(true))
+								.setDescription('UID of the osu!droid profile.')
+								.setDescriptionLocalization("es-ES", "UID del perfil de osu!droid.")
+								.setRequired(true))
 				)
 		),
 
@@ -99,9 +99,8 @@ export const command: Command = {
 		if (!interaction.guild || !interaction.channel) return
 		if (subcommandgroup == "droid") {
 			const uid = interaction.options.getInteger("uid", true)
-			const user = await droid.user({ uid: uid, type: "with_recents", limit: 1 })
-			
-			if (!user) return interaction.editReply({
+			const data = await droid.request(uid)
+			if (!data) return interaction.editReply({
 				embeds: [
 					embed.response({
 						type: "error",
@@ -110,9 +109,13 @@ export const command: Command = {
 					})
 				]
 			})
-
-			if (subcommand == "add") return droid.tracking.add(user, interaction)
-			else return droid.tracking.remove(user, interaction)
+			const user = await droid.user({ uid: uid })
+			const scores = await droid.scores({ uid: uid, type: "recent", response: data})
+			let score
+			if (scores && scores.length) score = scores[0]
+			else score = undefined
+			if (subcommand == "add") return droid.tracking.add(user!, score, interaction)
+			else return droid.tracking.remove(user!, interaction)
 
 		} else {
 

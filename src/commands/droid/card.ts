@@ -19,11 +19,13 @@ export const command: Command = {
 		
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		await interaction.deferReply()
-		const user = await droid.user({ uid: interaction.options.getInteger("uid", true), type: "with_top_plays" })
-		if (!user) return await interaction.editReply({
+		const id = interaction.options.getInteger("uid", true)
+		const data = await droid.request(id)
+		if (!data) return await interaction.editReply({
 			embeds: [embed.response({type: "error", description: spanish ?  `El usuario no existe.` : "That user doesn't exist.", interaction: interaction})]
 		})
-
+		const user = (await droid.user({ uid: id, response: data }))!
+		const scores = (await droid.scores({ uid: id, type: "top", response: data }))!
 		const embed_wait = new EmbedBuilder()
 		.setColor(0xdedede)
 		.setDescription(spanish ?
@@ -33,7 +35,7 @@ export const command: Command = {
 
 		await interaction.editReply({ embeds: [embed_wait] })
 
-		const embed_card = await droid.embed.card(user)
+		const embed_card = await droid.embed.card(user, scores)
 		const attachment = new AttachmentBuilder(`./${user.id}-${user.username}.png`, { name: `${user.id}-${user.username}.png` });
 
 		await interaction.editReply({ embeds: [embed_card], files: [attachment] })

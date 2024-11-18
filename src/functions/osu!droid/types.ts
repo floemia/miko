@@ -1,28 +1,11 @@
 import { Accuracy, MapInfo } from "@rian8337/osu-base"
+import { DroidScore as ScrapedDroidScore, DroidUser as ScrapedDroidUser } from "osu-droid-scraping"
 
-export type DroidUser = {
-    username: string,
-    avatar_url: string,
-    color: string,
-    id: number,
-    rank: {
-        score: number,
-        dpp: number,
-    },
-    country: string,
-    total_score: number,
-    dpp: number,
-    accuracy: number,
-    playcount: number,
-	scores?: DroidScore []
+export interface DroidUser extends ScrapedDroidUser {
+	color: string
 }
-
-export type DroidScore = {
-    fallback_title: string,
-    rank: string,
-    score: number,
-    embed_color: string | undefined,
-    timestamp: number,
+export interface DroidScore extends ScrapedDroidScore {
+	color: string,
 	statistics?:{
 		accuracy?: Accuracy,
 		pp: number,
@@ -37,19 +20,7 @@ export type DroidScore = {
 			accuracy: number
 		},
 	}
-    scraped_dpp: number
-    accuracy: number,
-    mods: string[],
-    combo: number
-    misses: number,
-    hash: string,
     beatmap: MapInfo | undefined
-	user: DroidUser
-}
-
-export type DroidMods = {
-    str: string,
-    speed: number
 }
 
 export type ScorePerformanceData = {

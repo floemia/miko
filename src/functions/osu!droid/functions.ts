@@ -1,64 +1,44 @@
 import { Accuracy, ModUtil } from "@rian8337/osu-base"
-import { scrape } from "./scrape"
-import { DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
+import { DifficultyCalculator, DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
 import { embed } from "./embeds"
-import { DroidScore, DroidMods, ScorePerformanceData } from "./types"
+import { DroidScore, DroidUser } from "./types"
 import { getAverageColor } from "fast-average-color-node"
 import { average_color } from "../utils"
 import { tracking } from "./tracking"
-const user = async (params: { uid: number, html_data?: any, type?: "basic" | "with_recents" | "with_top_plays", limit?: number }) => {
-	return await scrape.user(params)
+import { droid as droidModule, DroidScoreParameters, DroidUserParameters } from "osu-droid-scraping"
+import { card } from "osu-droid-card"
+
+const user = async (params: DroidUserParameters): Promise<DroidUser | undefined> => {
+	const data = await droidModule.user(params)
+	if (!data) return undefined
+	const color = await average_color(data.avatar_url)
+	const user: DroidUser = { ...data, color: color.hex }
+	return user
 }
-
-const recent = async (uid: number) => {
-	return await scrape.scores({ uid: uid, type: "recent" })
-}
-
-const best = async (uid: number) => {
-	return await scrape.scores({ uid: uid, type: "best" })
-}
-
-const scores = { recent, best }
-
-const mods = (mods_arr: string[]) => {
-	var mods = {
-		str: '',
-		speed: 1.0,
+const scores = async (params: DroidScoreParameters): Promise<DroidScore[] | undefined> => {
+	const scores = await droidModule.scores(params)
+	if (!scores) return undefined
+	const arr_scores: DroidScore[] = []
+	for (const score of scores) {
+		arr_scores.push({
+			...score,
+			color: "#dedede",
+			beatmap: undefined,
+			statistics: undefined
+		})
 	}
-	for (const mod of mods_arr) {
-
-		switch (mod.toLowerCase()) {
-			case "easy": mods.str = mods.str.concat("EZ"); break;
-			case "nofail": mods.str = mods.str.concat("NF"); break;
-			case "halftime": mods.str = mods.str.concat("HT"); break;
-			case "hardrock": mods.str = mods.str.concat("HR"); break;
-			case "hidden": mods.str = mods.str.concat("HD"); break;
-			case "doubletime": mods.str = mods.str.concat("DT"); break;
-			case "nightcore": mods.str = mods.str.concat("NC"); break;
-			case "flashlight": mods.str = mods.str.concat("FL"); break;
-			case "suddendeath": mods.str = mods.str.concat("SD"); break;
-			case "perfect": mods.str = mods.str.concat("PF"); break;
-			case "precise": mods.str = mods.str.concat("PR"); break;
-			case "none": mods.str = ""; break;
-			case "": break;
-			default: mods.speed = Number(mod)
-		}
-	}
-	return mods
+	return arr_scores
 }
 
 const calculate = async (recent: DroidScore) => {
-	const mods_all = await droid.mods(recent.mods)
-	const mods = ModUtil.pcStringToMods(mods_all.str)
+	const mods = ModUtil.pcStringToMods(recent.mods.acronyms.join(""))
 	if (recent.beatmap?.beatmap) {
-		const stats_droid = new DroidDifficultyCalculator(recent.beatmap.beatmap).calculate({
+		let options = {
 			mods: mods,
-			customSpeedMultiplier: mods_all.speed
-		})
-		const stats_osu = new OsuDifficultyCalculator(recent.beatmap.beatmap).calculate({
-			mods: mods,
-			customSpeedMultiplier: mods_all.speed
-		})
+			customSpeedMultiplier: recent.mods.speed
+		}
+		const stats_droid = new DroidDifficultyCalculator(recent.beatmap.beatmap).calculate(options)
+		const stats_osu = new OsuDifficultyCalculator(recent.beatmap.beatmap).calculate(options)
 
 		const accuracy = new Accuracy({
 			nmiss: recent.misses,
@@ -77,7 +57,7 @@ const calculate = async (recent: DroidScore) => {
 			combo: recent.combo,
 			accPercent: accuracy,
 		});
-		recent.embed_color = (await average_color(`https://assets.ppy.sh/beatmaps/${recent.beatmap.beatmapSetId}/covers/cover.jpg`)).hex
+		recent.color = (await average_color(`https://assets.ppy.sh/beatmaps/${recent.beatmap.beatmapSetId}/covers/cover.jpg`)).hex
 		recent.statistics = {
 			accuracy: droid_perf.computedAccuracy,
 			dpp: droid_perf.total,
@@ -117,6 +97,5 @@ const calculate = async (recent: DroidScore) => {
 	}
 }
 
-
-
-export const droid = { user, scores, mods, calculate, embed, tracking }
+const request = droidModule.request
+export const droid = { user, scores, calculate, embed, tracking, request, card }

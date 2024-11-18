@@ -18,10 +18,12 @@ export const droid_tracking = async () => {
 				await new Promise(resolve => setTimeout(resolve, 25000))
 				const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user_data.guild }))?.channel.track}`)
 				if (!track_channel || track_channel.type != ChannelType.GuildText) continue
-
-				const user = await droid.user({uid: user_data.uid, type: "with_recents", limit: 1})
-				if (!user || !user.scores || user.scores[0].timestamp == user_data.timestamp) continue
-				const play = user.scores[0]
+				const data = await droid.request(user_data.uid)
+				if (!data) continue
+				const user = await droid.user({uid: user_data.uid, response: data })
+				const scores = await droid.scores({ uid: user_data.uid, type: "recent", response: data})
+				if (!user || !scores || scores[0].timestamp == user_data.timestamp) continue
+				const play = scores[0]
 				await DroidAccountTrackModel.findOneAndUpdate({ uid: user.id }, {
 					timestamp: play.timestamp,
 					last_score: play.score

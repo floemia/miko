@@ -22,21 +22,26 @@ export const command: Command = {
 	async execute(client, interaction) {
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		const response = await interaction.deferReply()
-		const user = await droid.user({ uid: interaction.options.getInteger("uid", true), type: "with_recents" })
-		if (!user || !user.scores || user.scores.length == 0) return await interaction.editReply({
+		const id = interaction.options.getInteger("uid", true)
+		const data = await droid.request(id)
+		if (!data) return await interaction.editReply({
 			embeds: [embed.response({
 				type: "error",
-				description:
-					user ?
-						spanish ? `El usuario  :flag_${user.country.toLowerCase()}:  **${user.username}**  no ha subido ningún score.` :
-							`The user  :flag_${user.country.toLowerCase()}:  **${user.username}**  has no submitted scores.`
-
-						: spanish ? `El usuario no existe.` : "User does not exist.",
+				description: spanish ? `El usuario no existe.` : "User does not exist.",
+				interaction: interaction
+			})]
+		})
+		const user = (await droid.user({ uid: id, response: data }))!
+		const recents = await droid.scores({ uid: id, response: data, type: "recent" })
+		if (!recents?.length) return await interaction.editReply({
+			embeds: [embed.response({
+				type: "error",
+				description: spanish ? `El usuario  :flag_${user.country.toLowerCase()}:  **${user.username}**  no ha subido ningún score.` :
+					`The user  :flag_${user.country.toLowerCase()}:  **${user.username}**  has no submitted scores.`,
 				interaction: interaction
 			})]
 		})
 
-		const recents = user.scores
 		var index = (interaction.options?.getInteger("index") || 1) - 1
 		if (index > recents.length) index = recents.length - 1
 
