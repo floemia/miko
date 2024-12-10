@@ -110,7 +110,7 @@ export const command: Command = {
 				]
 			})
 			const user = await droid.user({ uid: uid })
-			const scores = await droid.scores({ uid: uid, type: "recent", response: data})
+			const scores = await droid.scores({ uid: uid, type: "recent", response: data })
 			let score
 			if (scores && scores.length) score = scores[0]
 			else score = undefined

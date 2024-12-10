@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
-import { droid } from "../../functions/osu!droid/functions"
+import { droid, NewDroidResponse } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
 import { DroidUser } from "osu-droid-scraping"
 import DroidUserBindModel from "../../schemas/osudroid-userbind"
@@ -23,11 +23,14 @@ export const command: Command = {
 		let uid = interaction.options.getInteger("uid")
 		let username = interaction.options.getString("username")
 		let user: DroidUser | undefined
+		let request: NewDroidResponse | undefined
 		await interaction.deferReply()
 		if (uid) {
 			user = await droid.user({ uid: uid })
 		} else if (username) {
-			uid = await droid.get_uid(username) || null
+			request = await droid.request_newdroid({ username: username })
+
+			uid = await droid.get_uid(request) || null
 			if (uid) user = await droid.user({ uid: uid })
 		} else {
 			return await interaction.editReply({

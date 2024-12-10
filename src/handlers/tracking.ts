@@ -20,8 +20,9 @@ export const droid_tracking = async () => {
 				if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 				const data = await droid.request(user_data.uid)
 				if (!data) continue
-				const user = await droid.user({uid: user_data.uid, response: data })
-				const scores = await droid.scores({ uid: user_data.uid, type: "recent", response: data})
+				const user = await droid.user({ uid: user_data.uid, response: data })
+				const request = await droid.request_newdroid({ uid: user_data.uid })
+				const scores = await droid.scores({ uid: user_data.uid, type: "recent", response: data, newdroid_response: request })
 				if (!user || !scores || scores[0].timestamp == user_data.timestamp) continue
 				const play = scores[0]
 				await DroidAccountTrackModel.findOneAndUpdate({ uid: user.id }, {

@@ -4,8 +4,17 @@ import { DroidScore as ScrapedDroidScore, DroidUser as ScrapedDroidUser } from "
 export interface DroidUser extends ScrapedDroidUser {
 	color: string
 }
+export interface HitStatistics {
+	nGeki: number,
+	n300: number,
+	nKatu: number,
+	n100: number,
+	n50: number,
+	nMiss: number
+}
 export interface DroidScore extends ScrapedDroidScore {
 	color: string,
+	count?: HitStatistics,
 	statistics?:{
 		accuracy?: Accuracy,
 		pp: number,
@@ -19,7 +28,7 @@ export interface DroidScore extends ScrapedDroidScore {
 			dpp: number,
 			accuracy: number
 		},
-	}
+	},
     beatmap: MapInfo | undefined
 }
 

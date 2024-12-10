@@ -1,11 +1,13 @@
 import { Accuracy, ModUtil } from "@rian8337/osu-base"
 import { DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
 import { embed } from "./embeds"
-import { DroidScore, DroidUser } from "./types"
+import { DroidScore, DroidUser, HitStatistics } from "./types"
 import { average_color } from "../utils"
 import { tracking } from "./tracking"
 import { droid as droidModule, DroidScoreParameters, DroidUserParameters } from "osu-droid-scraping"
 import { card } from "osu-droid-card"
+
+
 
 const user = async (params: DroidUserParameters): Promise<DroidUser | undefined> => {
 	const data = await droidModule.user(params)
@@ -14,16 +16,25 @@ const user = async (params: DroidUserParameters): Promise<DroidUser | undefined>
 	const user: DroidUser = { ...data, color: color.hex }
 	return user
 }
-const scores = async (params: DroidScoreParameters): Promise<DroidScore[] | undefined> => {
+
+interface DroidScoresParametersExtended extends DroidScoreParameters {
+	newdroid_response?: NewDroidResponse
+}
+const scores = async (params: DroidScoresParametersExtended): Promise<DroidScore[] | undefined> => {
 	const scores = await droidModule.scores(params)
+	
 	if (!scores) return undefined
 	const arr_scores: DroidScore[] = []
+	let statistics: HitStatistics[] | undefined
+	if (params.newdroid_response) statistics = (await droid.get_statistics(params.newdroid_response))[params.type == "recent" ? 1 : 0]
+	let i = 0
 	for (const score of scores) {
 		arr_scores.push({
 			...score,
 			color: "#dedede",
 			beatmap: undefined,
-			statistics: undefined
+			statistics: undefined,
+			count: statistics ? statistics[i++] : undefined
 		})
 	}
 	return arr_scores
@@ -95,19 +106,57 @@ const calculate = async (recent: DroidScore) => {
 		}
 	}
 }
-type response = {
+export type statistics = {
+	MapGeki: number,
+	MapPerfect: number,
+	MapKatu: number,
+	MapGood: number,
+	MapBad: number,
+	MapMiss: number,
+}
+export type NewDroidResponse = {
 	UserId: number,
 	error?: string
+	Top50Plays: statistics[],
+	Last50Scores: statistics[]
 }
-const get_uid = async (username: string) => {
-	const response = await fetch(`https://new.osudroid.moe/apitest/profile-username/${username}`)
+const request_newdroid = async (params: {username?: string, uid?: number}): Promise<NewDroidResponse | undefined> => {
+	const response = await fetch(params.username? `https://new.osudroid.moe/apitest/profile-username/${params.username}`: `https://new.osudroid.moe/apitest/profile-uid/${params.uid}` )
 	if (!response.ok){
 		return undefined
 	}
-	const data: response =  JSON.parse(await response.text())
-	return data.error? undefined : data.UserId
+	return JSON.parse(await response.text())
+}
 
+const get_statistics = async (response: NewDroidResponse): Promise<HitStatistics[][]> => {
+	let top50: HitStatistics[] = []
+	let recent50: HitStatistics[] = []
+	for (const stats of response.Top50Plays) {
+		top50.push({
+			nGeki: stats.MapGeki,
+			n300: stats.MapPerfect,
+			nKatu: stats.MapKatu,
+			n100: stats.MapGood,
+			n50: stats.MapBad,
+			nMiss: stats.MapMiss
+		})
+	}
+	for (const stats of response.Last50Scores) {
+		recent50.push({
+			nGeki: stats.MapGeki,
+			n300: stats.MapPerfect,
+			nKatu: stats.MapKatu,
+			n100: stats.MapGood,
+			n50: stats.MapBad,
+			nMiss: stats.MapMiss
+		})
+	}
+	return [top50, recent50]
+}
+const get_uid = async (response: NewDroidResponse | undefined) => {
+	if (!response) return undefined
+	return response.error? undefined : response.UserId
 }
 
 const request = droidModule.request
-export const droid = { user, scores, calculate, embed, tracking, request, card, get_uid }
+export const droid = { user, scores, calculate, embed, tracking, request, card, get_uid, get_statistics, request_newdroid }

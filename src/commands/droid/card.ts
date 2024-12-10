@@ -1,6 +1,6 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
-import { droid } from "../../functions/osu!droid/functions"
+import { droid, NewDroidResponse } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
 import { unlinkSync } from "fs"
 import DroidUserBindModel from "../../schemas/osudroid-userbind"
@@ -30,9 +30,12 @@ export const command: Command = {
 		let id = interaction.options.getInteger("uid")
 		let username = interaction.options.getString("username")
 		let discord_user = interaction.options.getUser("user")
+		let request: NewDroidResponse | undefined
+
 		if (!id) {
 			if (username) {
-				id = await droid.get_uid(username) || null
+				request = await droid.request_newdroid({ username: username })
+				id = await droid.get_uid(request) || null
 			} else if (discord_user) {
 				id = (await DroidUserBindModel.findOne({ discord_id: discord_user.id }))?.uid || null
 			} else {

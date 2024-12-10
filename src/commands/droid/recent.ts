@@ -1,6 +1,6 @@
 import { ButtonInteraction, ComponentType, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
-import { droid } from "../../functions/osu!droid/functions"
+import { droid, NewDroidResponse } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
 import { create_row } from "../../functions/utils"
 import DroidUserBindModel from "../../schemas/osudroid-userbind"
@@ -33,9 +33,12 @@ export const command: Command = {
 		let id = interaction.options.getInteger("uid")
 		let username = interaction.options.getString("username")
 		let discord_user = interaction.options.getUser("user")
+		let request: NewDroidResponse | undefined
 		if (!id) {
 			if (username) {
-				id = await droid.get_uid(username) || null
+				request = await droid.request_newdroid({ username: username })
+
+				id = await droid.get_uid(request) || null
 			} else if (discord_user) {
 				id = (await DroidUserBindModel.findOne({ discord_id: discord_user.id }))?.uid || null
 			} else {
@@ -60,7 +63,9 @@ export const command: Command = {
 			})]
 		})
 		const user = (await droid.user({ uid: id, response: data }))!
-		const recents = await droid.scores({ uid: id, response: data, type: "recent" })
+		if (!request) request = await droid.request_newdroid({ uid: user.id })
+		const recents = await droid.scores({ uid: id, response: data, type: "recent", newdroid_response: request! })
+
 		if (!recents?.length) return await interaction.editReply({
 			embeds: [embed.response({
 				type: "error",
@@ -113,7 +118,7 @@ export const command: Command = {
 						break;
 				}
 				reset_timeout()
-				
+
 				row.components[0].setDisabled(index == 0 ? true : false)
 				row.components[2].setLabel(`${index + 1}/${recents.length}`)
 				row.components[4].setDisabled(index == recents.length - 1 ? true : false)

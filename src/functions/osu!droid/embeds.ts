@@ -17,8 +17,7 @@ const score = async (score: DroidScore) => {
 	}
 
 	const rank = await osu.emoji.rank(score.rank)
-	const count = score.statistics?.accuracy
-	const statistics = `[${count?.n300}/${count?.n100}/${count?.n50}/${count?.nmiss}]`
+	const statistics = `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]`
 	const pp_string = `${score.statistics ? `${score.statistics.dpp.toFixed(2)} DPP ❘ ${score.statistics.pp.toFixed(2)} PP` : `?? DPP ❘ ?? PP`}${ score.statistics && score.statistics.fc ? `・**( ${score.statistics.fc.dpp.toFixed(2)} DPP ❘ ${score.statistics.fc.pp.toFixed(2)} PP ➜ FC ${score.statistics.fc.accuracy.toFixed(2)}% )**` : ''}`
 	const embed = new EmbedBuilder()
 	if (!score.beatmap) {
@@ -26,7 +25,7 @@ const score = async (score: DroidScore) => {
 	} else {
 		embed.setAuthor({ name: `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] ${score.statistics ? `${score.statistics.stars.pc.toFixed(2)}⭐` : ''} ${score.mods.acronyms.length ? `+${score.mods.acronyms.join("")}` : ''} ${score.mods.speed != 1 ? `(${score.mods.speed.toFixed(2)}x)` : ``} `, iconURL: score.user.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}` })
 	}
-	embed.setDescription(`> ${rank}**・${pp_string}・${format_double_dec(score.accuracy)}%・**${score.score.toLocaleString("en-US")}**・${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? `/${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}・**${score.misses} ❌`)
+	embed.setDescription(`> ${rank}**・${pp_string}・${format_double_dec(score.accuracy)}%・${statistics}・**${score.score.toLocaleString("en-US")}**・${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? `/${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}・**${score.misses} ❌`)
 	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
 	embed.setColor(Number(`0x${score.color?.slice(1)}`))
 	embed.setTimestamp(score.timestamp - 3600000)
