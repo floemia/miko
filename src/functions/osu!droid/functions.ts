@@ -1,8 +1,7 @@
 import { Accuracy, ModUtil } from "@rian8337/osu-base"
-import { DifficultyCalculator, DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
+import { DroidDifficultyCalculator, DroidPerformanceCalculator, OsuDifficultyCalculator, OsuPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
 import { embed } from "./embeds"
 import { DroidScore, DroidUser } from "./types"
-import { getAverageColor } from "fast-average-color-node"
 import { average_color } from "../utils"
 import { tracking } from "./tracking"
 import { droid as droidModule, DroidScoreParameters, DroidUserParameters } from "osu-droid-scraping"
@@ -96,6 +95,19 @@ const calculate = async (recent: DroidScore) => {
 		}
 	}
 }
+type response = {
+	UserId: number,
+	error?: string
+}
+const get_uid = async (username: string) => {
+	const response = await fetch(`https://new.osudroid.moe/apitest/profile-username/${username}`)
+	if (!response.ok){
+		return undefined
+	}
+	const data: response =  JSON.parse(await response.text())
+	return data.error? undefined : data.UserId
+
+}
 
 const request = droidModule.request
-export const droid = { user, scores, calculate, embed, tracking, request, card }
+export const droid = { user, scores, calculate, embed, tracking, request, card, get_uid }

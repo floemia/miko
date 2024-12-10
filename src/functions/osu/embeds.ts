@@ -3,7 +3,6 @@ import { ScoreDifficultyData } from "./types";
 import { osu } from "../osu/functions";
 import { client } from "../..";
 import { response } from "osu-api-extended/dist/types/v2_scores_user_category";
-import { getAverageColor } from "fast-average-color-node";
 import { average_color, format_double_dec } from "../utils";
 
 const score = async (recent: response, data: ScoreDifficultyData): Promise<EmbedBuilder> => {

@@ -19,6 +19,13 @@ export type OsuTrackingUser = {
 	last_score_id: number
 }
 
+export type DroidUserBind = {
+    username: string,
+    uid: number,
+	avatar_url: string,
+    discord_id: string,
+}
+
 export type GuildConfig = {
     id: string,
     channel: {

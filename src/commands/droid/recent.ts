@@ -3,6 +3,7 @@ import type { Command } from "../../types"
 import { droid } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
 import { create_row } from "../../functions/utils"
+import DroidUserBindModel from "../../schemas/osudroid-userbind"
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("recent")
@@ -10,8 +11,15 @@ export const command: Command = {
 		.setDescriptionLocalization("es-ES", "osu!droid - Obtener scores recientes de un perfil de osu!droid.")
 		.addIntegerOption(opt => opt
 			.setName("uid")
-			.setDescription("UID of osu!droid profile.").setDescriptionLocalization("es-ES", "UID del perfil de osu!droid.")
-			.setRequired(true)
+			.setDescription("UID of the osu!droid profile.").setDescriptionLocalization("es-ES", "UID del perfil de osu!droid.")
+		)
+		.addStringOption(opt => opt
+			.setName("username")
+			.setDescription("Username of the osu!droid profile.").setDescriptionLocalization("es-ES", "UID del perfil de osu!droid.")
+		)
+		.addUserOption(opt => opt
+			.setName("user")
+			.setDescription("Discord user bound to the osu!droid profile.").setDescriptionLocalization("es-ES", "Usuario de Discord vinculado al perfil de osu!droid.")
 		)
 		.addIntegerOption(opt => opt
 			.setName("index").setNameLocalization("es-ES", "indice")
@@ -22,7 +30,27 @@ export const command: Command = {
 	async execute(client, interaction) {
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		const response = await interaction.deferReply()
-		const id = interaction.options.getInteger("uid", true)
+		let id = interaction.options.getInteger("uid")
+		let username = interaction.options.getString("username")
+		let discord_user = interaction.options.getUser("user")
+		if (!id) {
+			if (username) {
+				id = await droid.get_uid(username) || null
+			} else if (discord_user) {
+				id = (await DroidUserBindModel.findOne({ discord_id: discord_user.id }))?.uid || null
+			} else {
+				id = (await DroidUserBindModel.findOne({ discord_id: interaction.user.id }))?.uid || null
+			}
+		}
+		if (!id) return await interaction.editReply({
+			embeds: [embed.response({
+				type: "error",
+				description: spanish ? `No tienes una cuenta vinculada por \`/userbind\`. Vincula una o especifica un parámetro.` :
+					"You don't have a linked account through \`/userbind\`. Bind one or pass at least one parameter.",
+				interaction: interaction
+			})]
+		})
+
 		const data = await droid.request(id)
 		if (!data) return await interaction.editReply({
 			embeds: [embed.response({
@@ -86,6 +114,7 @@ export const command: Command = {
 			}
 			interaction.editReply({ components: [row] })
 		})
+
 		const embed_score = await droid.embed.score(recents[index])
 		await interaction.editReply({
 			content: spanish ?
