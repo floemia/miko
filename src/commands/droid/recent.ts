@@ -76,7 +76,24 @@ export const command: Command = {
 		const unique = `${interaction.user.id}-${Math.floor(Math.random() * 10000000)}`
 		const row = create_row(unique, index, recents.length);
 
-		const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 120000 });
+		const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button });
+		let collector_timeout: NodeJS.Timeout
+		const start_timeout = () => {
+			collector_timeout = setTimeout(() => {
+				collector.stop()
+				for (const button of row.components) {
+					button.setDisabled(true)
+				}
+				interaction.editReply({ components: [row] })
+			}, 120000)
+		}
+
+		const reset_timeout = async () => {
+			clearTimeout(collector_timeout)
+			start_timeout()
+		}
+
+		start_timeout()
 		collector.on("collect", async (i: ButtonInteraction) => {
 			if (i.user.id == interaction.user.id) {
 				switch (i.customId) {
@@ -95,6 +112,8 @@ export const command: Command = {
 						index = recents.length - 1;
 						break;
 				}
+				reset_timeout()
+				
 				row.components[0].setDisabled(index == 0 ? true : false)
 				row.components[2].setLabel(`${index + 1}/${recents.length}`)
 				row.components[4].setDisabled(index == recents.length - 1 ? true : false)
@@ -106,13 +125,6 @@ export const command: Command = {
 					components: [row]
 				})
 			}
-		})
-
-		collector.on("end", async () => {
-			for (const button of row.components) {
-				button.setDisabled(true)
-			}
-			interaction.editReply({ components: [row] })
 		})
 
 		const embed_score = await droid.embed.score(recents[index])
