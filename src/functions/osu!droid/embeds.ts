@@ -25,7 +25,7 @@ const score = async (score: DroidScore) => {
 	} else {
 		embed.setAuthor({ name: `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] ${score.statistics ? `${score.statistics.stars.pc.toFixed(2)}⭐` : ''} ${score.mods.acronyms.length ? `+${score.mods.acronyms.join("")}` : ''} ${score.mods.speed != 1 ? `(${score.mods.speed.toFixed(2)}x)` : ``} `, iconURL: score.user.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}` })
 	}
-	embed.setDescription(`> ${rank}**・${pp_string}・${format_double_dec(score.accuracy)}%・${statistics}・**${score.score.toLocaleString("en-US")}**・${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? `/${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}・**${score.misses} ❌`)
+	embed.setDescription(`> ${rank}**・${pp_string}・${format_double_dec(score.accuracy)}%・${statistics}・**${score.score.toLocaleString("en-US")}**・${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? `/${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}`)
 	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
 	embed.setColor(Number(`0x${score.color?.slice(1)}`))
 	embed.setTimestamp(score.timestamp - 3600000)
