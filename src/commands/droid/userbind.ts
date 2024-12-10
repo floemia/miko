@@ -71,7 +71,7 @@ export const command: Command = {
 				type: "success",
 				description: spanish ?
 					`El usuario  **:flag_${user.country.toLowerCase()}: ${user.username}**  de  <:droid_simple:1021473577951821824>  **osu!droid**  se vinculó correctamente a tu cuenta de Discord.`
-					: `The user  **:flag_${user.country.toLowerCase()}: ${user.username}**  from  <:droid_simple:1021473577951821824>  **osu!droid**  was successfully bound to your Discord account.`,
+					: `The user  **:flag_${user.country.toLowerCase()}: ${user.username}**  from  <:droid_simple:1021473577951821824>  **osu!droid**  was successfully linked to your Discord account.`,
 				interaction: interaction
 			}).setThumbnail(user.avatar_url)]
 		})
