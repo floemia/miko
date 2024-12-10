@@ -14,7 +14,6 @@ export const command: Command = {
 	async execute(client, interaction) {
 		await interaction.deferReply()
 		await interaction.deleteReply()
-		if (interaction.user.id != "596481414426525696") return
 		if (!interaction.channel) return
 		const channel = interaction.channel
 
