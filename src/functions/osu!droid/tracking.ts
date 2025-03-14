@@ -44,7 +44,7 @@ const add = async (user: NewDroidUser, last_score: DroidScoreExtended | undefine
 	await new DroidAccountTrackModel({
 		username: user.username,
 		uid: user.id,
-		timestamp: last_score ? last_score.played_date.getMilliseconds() :  0,
+		timestamp: last_score ? last_score.played_date.valueOf() :  0,
 		country: user.region,
 		last_score: last_score ? last_score.score :  0,
 		discord_id: user_id,

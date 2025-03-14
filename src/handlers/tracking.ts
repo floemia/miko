@@ -16,8 +16,7 @@ export const droid_tracking = async () => {
 		while (true) {
 			tracking_users = await DroidAccountTrackModel.find()
 			for await (const user_data of tracking_users) {
-				if(user_data.username != "MG_floemia" && user_data.guild != "976981749848473610") continue
-				await new Promise(resolve => setTimeout(resolve, 2000))
+				await new Promise(resolve => setTimeout(resolve, 25000))
 				const guild_config = await GuildConfigModel.findOne({ id: user_data.guild })
 				if (!guild_config || !guild_config.tracking_enabled) continue
 				const track_channel = client.channels.cache.get(`${guild_config?.channel.track}`)
