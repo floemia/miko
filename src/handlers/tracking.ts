@@ -17,9 +17,11 @@ export const droid_tracking = async () => {
 			tracking_users = await DroidAccountTrackModel.find()
 			for await (const user_data of tracking_users) {
 				if(user_data.username != "MG_floemia" && user_data.guild != "976981749848473610") continue
-				//console.log(user_data)
 				await new Promise(resolve => setTimeout(resolve, 2000))
-				const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user_data.guild }))?.channel.track}`)
+				const guild_config = await GuildConfigModel.findOne({ id: user_data.guild })
+				if (!guild_config || !guild_config.tracking_enabled) continue
+				const track_channel = client.channels.cache.get(`${guild_config?.channel.track}`)
+
 				if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 				const data = await miko.request ({ uid: user_data.uid })
 				if (data.error) continue
@@ -34,7 +36,6 @@ export const droid_tracking = async () => {
 				})
 				logger.info(`\nCreating osu!droid score embed for ${user.username}\nGUILD: ${user_data.guild}`)
 				await miko.calculate(play)
-				console.log(play)
 				const embed = await droid.embed.score(play)
 				track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid**・Score reciente de  **:flag_${user.region.toLowerCase()}:  ${user.username}**:`, embeds: [embed] })
 			}
@@ -51,7 +52,10 @@ export const osu_tracking = async () => {
 			tracking_users = await OsuAccountTrackModel.find()
 			for await (const user of tracking_users) {
 				await new Promise(resolve => setTimeout(resolve, 25000))
-				const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user.guild }))?.channel.track}`)
+				const guild_config = await GuildConfigModel.findOne({ id: user.guild })
+				if (!guild_config || !guild_config.tracking_enabled) continue
+
+				const track_channel = client.channels.cache.get(`${guild_config?.channel.track}`)
 				if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 				const recents = await v2.scores.user.category(user.uid, "recent", {mode: osu.gamemode.code(user.mode_int), limit: "1", include_fails: false})
 				if (!recents || !recents[0] || recents[0].id == user.last_score_id ) continue

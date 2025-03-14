@@ -1,6 +1,6 @@
 {
   "name": "miko",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "discord bot for Michi's Gang",
   "main": "./dist/index.js",
   "scripts": {
