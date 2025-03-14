@@ -1,9 +1,12 @@
 import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
-import { droid, NewDroidResponse } from "../../functions/osu!droid/functions"
+import { droid } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
 import { unlinkSync } from "fs"
 import DroidUserBindModel from "../../schemas/osudroid-userbind"
+import { miko } from "miko-modules"
+import { droid as droidModule } from "osu-droid-scraping"
+import { DroidScore } from "../../functions/osu!droid/types"
 
 export const command: Command = {
 	data: new SlashCommandBuilder()
@@ -24,45 +27,70 @@ export const command: Command = {
 		),
 
 	async execute(client, interaction) {
-		
+
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		await interaction.deferReply()
 		let id = interaction.options.getInteger("uid")
 		let username = interaction.options.getString("username")
 		let discord_user = interaction.options.getUser("user")
-		let request: NewDroidResponse | undefined
 
-		if (!id) {
-			if (username) {
-				request = await droid.request_newdroid({ username: username })
-				id = await droid.get_uid(request) || null
-			} else if (discord_user) {
-				id = (await DroidUserBindModel.findOne({ discord_id: discord_user.id }))?.uid || null
-			} else {
-				id = (await DroidUserBindModel.findOne({ discord_id: interaction.user.id }))?.uid || null
-			}
+		if (!id && !username && !discord_user) {
+			let db_get = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
+			if (!db_get) 
+				return await interaction.editReply({
+					embeds: [embed.response({
+						type: "error",
+						description: spanish ? `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.` :
+							`You don't have a linked osu!droid account. Use \`/userbind\`.`,
+						interaction: interaction
+					})]
+				})
+			else id = db_get.uid
 		}
-		if (!id) return await interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: spanish ? `No tienes una cuenta vinculada por \`/userbind\`. Vincula una o especifica un parámetro.` :
-					"You don't have a linked account through \`/userbind\`. Bind one or pass at least one parameter.",
-				interaction: interaction
-			})]
-		})
-
-		const data = await droid.request(id)
+		if (!id && !username && discord_user) {
+			let db_get = await DroidUserBindModel.findOne({ discord_id: discord_user.id })
+			if (!db_get) return await interaction.editReply({
+				embeds: [embed.response({
+					type: "error",
+					description: spanish ? "El usuario de Discord no tiene una cuenta vinculada por `/userbind`." :
+						"The Discord user doesn't have a linked account through `/userbind`.",
+					interaction: interaction
+				})]
+			})
+			else id = db_get.uid
+		}
+		if (username || id) {
+			let response = await miko.request({ username: username || undefined, uid: id || undefined })
+			if (response.error) return await interaction.editReply({
+				embeds: [embed.response({
+					type: "error",
+					description: spanish ? `El usuario no existe.` :
+						`The user does not exist.`,
+					interaction: interaction
+				})]
+			})
+		}
+		const data = await droid.request(id!)
 		if (!data) return await interaction.editReply({
-			embeds: [embed.response({type: "error", description: spanish ?  `El usuario no existe.` : "That user doesn't exist.", interaction: interaction})]
+			embeds: [embed.response({ type: "error", description: spanish ? `El usuario no existe.` : "That user doesn't exist.", interaction: interaction })]
 		})
-		const user = (await droid.user({ uid: id, response: data }))!
-		const scores = (await droid.scores({ uid: id, type: "top", response: data }))!
+		const user = (await droid.user({ uid: id!, response: data }))!
+		let scores: DroidScore[] = []
+		const scores_fetch = (await droidModule.scores({ uid: id!, type: "top", response: data }))!
+
+		for (const score of scores_fetch) {
+			scores.push({
+				...score,
+				beatmap: undefined,
+				color: "#dedede"
+			})
+		}
 		const embed_wait = new EmbedBuilder()
-		.setColor(0xdedede)
-		.setDescription(spanish ?
-			`> <:graycheck:903741976061567027> <:droid_simple:1021473577951821824>  **osu!droid・**Creando tarjeta de perfil de  :flag_${user.country.toLowerCase()}:  **${user.username}...**` 
-			: `> <:graycheck:903741976061567027> <:droid_simple:1021473577951821824>  **osu!droid・**Creating profile card of  :flag_${user.country.toLowerCase()}:  **${user.username}...**`)
-		
+			.setColor(0xdedede)
+			.setDescription(spanish ?
+				`> <:graycheck:903741976061567027> <:droid_simple:1021473577951821824>  **osu!droid・**Creando tarjeta de perfil de  :flag_${user.country.toLowerCase()}:  **${user.username}...**`
+				: `> <:graycheck:903741976061567027> <:droid_simple:1021473577951821824>  **osu!droid・**Creating profile card of  :flag_${user.country.toLowerCase()}:  **${user.username}...**`)
+
 
 		await interaction.editReply({ embeds: [embed_wait] })
 

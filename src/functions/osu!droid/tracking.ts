@@ -1,11 +1,11 @@
 import { ChannelType, ChatInputCommandInteraction, Guild, PermissionsBitField } from "discord.js";
-import { DroidScore, DroidUser } from "./types";
 import { client } from "../..";
 import DroidAccountTrackModel from "../../schemas/droidtracking";
 import GuildConfigModel from "../../schemas/guild";
 import { embed } from "../messages/embeds";
+import { NewDroidUser, DroidScoreExtended } from "miko-modules";
 
-const add = async (user: DroidUser, last_score: DroidScore | undefined, interaction: ChatInputCommandInteraction) => {
+const add = async (user: NewDroidUser, last_score: DroidScoreExtended | undefined, interaction: ChatInputCommandInteraction) => {
 	const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 	const guild_id = interaction.guild?.id;
 	const user_id = interaction.user.id;
@@ -44,8 +44,8 @@ const add = async (user: DroidUser, last_score: DroidScore | undefined, interact
 	await new DroidAccountTrackModel({
 		username: user.username,
 		uid: user.id,
-		timestamp: last_score ? last_score.timestamp :  0,
-		country: user.country,
+		timestamp: last_score ? last_score.played_date.getMilliseconds() :  0,
+		country: user.region,
 		last_score: last_score ? last_score.score :  0,
 		discord_id: user_id,
 		guild: guild_id
@@ -55,8 +55,8 @@ const add = async (user: DroidUser, last_score: DroidScore | undefined, interact
 		embeds: [embed.response({
 			type: "success",
 			description: spanish ?
-			`El usuario  **:flag_${user.country.toLowerCase()}: ${user.username}** fue añadido al sistema de tracking de  <:droid_simple:1021473577951821824>  **osu!droid**.`
-			: `The user  **:flag_${user.country.toLowerCase()}: ${user.username}** was successfully added to the  <:droid_simple:1021473577951821824>  **osu!droid**  score tracking system.`,
+			`El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}** fue añadido al sistema de tracking de  <:droid_simple:1021473577951821824>  **osu!droid**.`
+			: `The user  **:flag_${user.region.toLowerCase()}: ${user.username}** was successfully added to the  <:droid_simple:1021473577951821824>  **osu!droid**  score tracking system.`,
 			interaction: interaction
 		})]
 	});
@@ -66,14 +66,14 @@ const add = async (user: DroidUser, last_score: DroidScore | undefined, interact
 			embeds: [embed.logs({
 				type: "success",
 				title: "Se añadió un usuario al sistema de tracking de osu!droid.",
-				description: `El usuario **:flag_${user.country.toLowerCase()}: ${user.username}** fue añadido por <@${user_id}>`,
+				description: `El usuario **:flag_${user.region.toLowerCase()}: ${user.username}** fue añadido por <@${user_id}>`,
 				interaction
 			})]
 		});
 	}
 };
 
-const remove = async (user: DroidUser, interaction: ChatInputCommandInteraction) => {
+const remove = async (user: NewDroidUser, interaction: ChatInputCommandInteraction) => {
 	const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 	const guild_id = interaction.guild?.id;
 	const [found_in_sys, guild_config] = await Promise.all([
@@ -88,8 +88,8 @@ const remove = async (user: DroidUser, interaction: ChatInputCommandInteraction)
 			embeds: [embed.response({
 				type: "error",
 				description: spanish ?
-				`El usuario  **:flag_${user.country.toLowerCase()}:  ${user.username}**  no está en el sistema de score tracking.`
-				: `The user  **:flag_${user.country.toLowerCase()}:  ${user.username}**  isn't in the score tracking system.`,
+				`El usuario  **:flag_${user.region.toLowerCase()}:  ${user.username}**  no está en el sistema de score tracking.`
+				: `The user  **:flag_${user.region.toLowerCase()}:  ${user.username}**  isn't in the score tracking system.`,
 				interaction: interaction
 			})]
 		})
@@ -98,8 +98,8 @@ const remove = async (user: DroidUser, interaction: ChatInputCommandInteraction)
 			embeds: [embed.response({
 				type: "error",
 				description: spanish ?
-				`No puedes eliminar a  **:flag_${user.country.toLowerCase()}:  ${user.username}**  del sistema, porque no está asociado a tu cuenta de Discord.`
-				: `You can't delete  **:flag_${user.country.toLowerCase()}:  ${user.username}**  from the score tracking system, as the user isn't linked to your Discord account.`,
+				`No puedes eliminar a  **:flag_${user.region.toLowerCase()}:  ${user.username}**  del sistema, porque no está asociado a tu cuenta de Discord.`
+				: `You can't delete  **:flag_${user.region.toLowerCase()}:  ${user.username}**  from the score tracking system, as the user isn't linked to your Discord account.`,
 				interaction: interaction
 			})]
 		})
@@ -109,8 +109,8 @@ const remove = async (user: DroidUser, interaction: ChatInputCommandInteraction)
 			embeds: [embed.response({
 				type: "success",
 				description: spanish ?
-				`El usuario  **:flag_${user.country.toLowerCase()}:  ${user.username}**  fue eliminado del sistema de tracking de  <:droid_simple:1021473577951821824>  **osu!droid**.`
-				:`The user  **:flag_${user.country.toLowerCase()}:  ${user.username}** was deleted from the  <:droid_simple:1021473577951821824>  **osu!droid**  score tracking system.` ,
+				`El usuario  **:flag_${user.region.toLowerCase()}:  ${user.username}**  fue eliminado del sistema de tracking de  <:droid_simple:1021473577951821824>  **osu!droid**.`
+				:`The user  **:flag_${user.region.toLowerCase()}:  ${user.username}** was deleted from the  <:droid_simple:1021473577951821824>  **osu!droid**  score tracking system.` ,
 				interaction: interaction
 			})]
 		})
@@ -120,7 +120,7 @@ const remove = async (user: DroidUser, interaction: ChatInputCommandInteraction)
 				embeds: [embed.logs({
 					type: "warn",
 					title: "Se eliminó a un usuario del sistema de tracking de osu!droid.",
-					description: `El usuario  **:flag_${user.country.toLowerCase()}:  ${user.username}**  fue eliminado por <@${interaction.user.id}>`,
+					description: `El usuario  **:flag_${user.region.toLowerCase()}:  ${user.username}**  fue eliminado por <@${interaction.user.id}>`,
 					interaction: interaction
 				})]
 			})

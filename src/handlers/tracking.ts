@@ -7,6 +7,7 @@ import { ChannelType } from "discord.js"
 import GuildConfigModel from "../schemas/guild"
 import { v2 } from "osu-api-extended"
 import { osu } from "../functions/osu/functions"
+import { miko } from "miko-modules"
 
 export const droid_tracking = async () => {
 	var tracking_users = await DroidAccountTrackModel.find()
@@ -15,30 +16,27 @@ export const droid_tracking = async () => {
 		while (true) {
 			tracking_users = await DroidAccountTrackModel.find()
 			for await (const user_data of tracking_users) {
-				await new Promise(resolve => setTimeout(resolve, 25000))
+				if(user_data.username != "MG_floemia" && user_data.guild != "976981749848473610") continue
+				//console.log(user_data)
+				await new Promise(resolve => setTimeout(resolve, 2000))
 				const track_channel = client.channels.cache.get(`${(await GuildConfigModel.findOne({ id: user_data.guild }))?.channel.track}`)
 				if (!track_channel || track_channel.type != ChannelType.GuildText) continue
-				const data = await droid.request(user_data.uid)
-				if (!data) continue
-				const user = await droid.user({ uid: user_data.uid, response: data })
-				const request = await droid.request_newdroid({ uid: user_data.uid })
-				const scores = await droid.scores({ uid: user_data.uid, type: "recent", response: data, newdroid_response: request })
-				if (!user || !scores || scores[0].timestamp == user_data.timestamp) continue
+				const data = await miko.request ({ uid: user_data.uid })
+				if (data.error) continue
+				const user = (await miko.user({ response: data }))!
+				const scores = (await miko.scores({ uid: user_data.uid, type: "recent" }))!
+				if (!scores || scores[0].played_date.valueOf() == user_data.timestamp) continue
 				const play = scores[0]
-				await DroidAccountTrackModel.findOneAndUpdate({ uid: user.id }, {
-					timestamp: play.timestamp,
+
+				await DroidAccountTrackModel.findOneAndUpdate({ uid: user.id, guild: user_data.guild }, {
+					timestamp: play.played_date.valueOf(),
 					last_score: play.score
 				})
-
-				const beatmap = await MapInfo.getInformation(play.hash)
-				logger.info(`Creating osu!droid score embed for ${user.username}`)
-				if (beatmap?.title) {
-					play.beatmap = beatmap
-					await droid.calculate(play)
-				}
+				logger.info(`\nCreating osu!droid score embed for ${user.username}\nGUILD: ${user_data.guild}`)
+				await miko.calculate(play)
 				console.log(play)
 				const embed = await droid.embed.score(play)
-				track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid**・Score reciente de  **:flag_${user.country.toLowerCase()}:  ${user.username}**:`, embeds: [embed] })
+				track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid**・Score reciente de  **:flag_${user.region.toLowerCase()}:  ${user.username}**:`, embeds: [embed] })
 			}
 		}
 	}

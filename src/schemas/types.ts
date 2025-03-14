@@ -28,6 +28,7 @@ export type DroidUserBind = {
 
 export type GuildConfig = {
     id: string,
+	tracking_enabled: boolean,
     channel: {
         track: string,
         logs: string,

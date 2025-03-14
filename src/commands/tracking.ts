@@ -1,4 +1,4 @@
-import { ChannelType, PermissionsBitField, SlashCommandBuilder } from "discord.js"
+import { ChannelType, InteractionContextType, PermissionsBitField, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../types"
 import { droid } from "../functions/osu!droid/functions"
 import { embed } from "../functions/messages/embeds"
@@ -7,11 +7,12 @@ import DroidAccountTrackModel from "../schemas/droidtracking"
 import GuildConfigModel from "../schemas/guild"
 import { v2 } from "osu-api-extended"
 import { osu } from "../functions/osu/functions"
+import { miko } from "miko-modules"
 
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("tracking")
-		.setDMPermission(false)
+		.setContexts(InteractionContextType.Guild)
 		.setDescription("tracking yay")
 		.addSubcommandGroup(group =>
 			group
@@ -26,7 +27,7 @@ export const command: Command = {
 								.setDescription("Username of the osu! profile.").setDescriptionLocalization("es-ES", "Username del perfil de osu!")
 								.setRequired(true))
 						.addIntegerOption(option =>
-							option.setName("mode").setNameLocalization("es-ES", "modo")
+							option.setName("mode")
 								.setDescription("Gamemode to track.")
 								.setDescriptionLocalization("es-ES", "Modo de juego de osu!")
 								.addChoices(
@@ -85,10 +86,13 @@ export const command: Command = {
 						.addIntegerOption(option =>
 							option.setName('uid')
 								.setDescription('UID of the osu!droid profile.')
-								.setDescriptionLocalization("es-ES", "UID del perfil de osu!droid.")
-								.setRequired(true))
+								.setDescriptionLocalization("es-ES", "UID del perfil de osu!droid."))
+						.addStringOption(option =>
+							option.setName('username')
+								.setDescription('Username of the osu!droid profile.')
+								.setDescriptionLocalization("es-ES", "Username del perfil de osu!droid."))
 				)
-		),
+			),
 
 	async execute(client, interaction) {
 		const subcommandgroup = interaction.options.getSubcommandGroup()
@@ -99,8 +103,8 @@ export const command: Command = {
 		if (!interaction.guild || !interaction.channel) return
 		if (subcommandgroup == "droid") {
 			const uid = interaction.options.getInteger("uid", true)
-			const data = await droid.request(uid)
-			if (!data) return interaction.editReply({
+			const data = await miko.request({ uid: uid })
+			if (data.error) return interaction.editReply({
 				embeds: [
 					embed.response({
 						type: "error",
@@ -109,8 +113,8 @@ export const command: Command = {
 					})
 				]
 			})
-			const user = await droid.user({ uid: uid })
-			const scores = await droid.scores({ uid: uid, type: "recent", response: data })
+			const user = await miko.user({ response: data })
+			const scores = await miko.scores({ type: "recent", response: data })
 			let score
 			if (scores && scores.length) score = scores[0]
 			else score = undefined

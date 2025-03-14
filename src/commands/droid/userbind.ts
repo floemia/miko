@@ -1,9 +1,8 @@
 import { SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
-import { droid, NewDroidResponse } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
-import { DroidUser } from "osu-droid-scraping"
 import DroidUserBindModel from "../../schemas/osudroid-userbind"
+import { miko, NewDroidUser, NewDroidResponse } from "miko-modules"
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("userbind")
@@ -21,33 +20,31 @@ export const command: Command = {
 	async execute(client, interaction) {
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		let uid = interaction.options.getInteger("uid")
-		let username = interaction.options.getString("username")
-		let user: DroidUser | undefined
-		let request: NewDroidResponse | undefined
+		let username = interaction.options.getString("username")	
+		let user: NewDroidUser
+		let data: NewDroidResponse
 		await interaction.deferReply()
-		if (uid) {
-			user = await droid.user({ uid: uid })
-		} else if (username) {
-			request = await droid.request_newdroid({ username: username })
-
-			uid = await droid.get_uid(request) || null
-			if (uid) user = await droid.user({ uid: uid })
-		} else {
+		if (!uid && !username) {
 			return await interaction.editReply({
 				embeds: [embed.response({
 					type: "error",
-					description: spanish ? `Debes ingresar al menos un parámetro.` : "You must pass at least one parameter.",
+					description: spanish ? `Debes especificar un UID o un nombre de usuario.` :
+						`You must specify an UID or an username.`,
 					interaction: interaction
 				})]
 			})
+		} else {
+			data = await miko.request({ uid: uid || undefined, username: username || undefined })
+			if (data.error) return await interaction.editReply({
+				embeds: [embed.response({
+					type: "error",
+					description: spanish ? `El usuario no existe.` :
+						`The user does not exist.`,
+					interaction: interaction
+				})]
+			})
+			user = (await miko.user({ response: data }))!
 		}
-		if (!user) return await interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: spanish ? `El usuario no existe.` : "User does not exist.",
-				interaction: interaction
-			})]
-		})
 
 		const user_in_db = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
 		if (!user_in_db) {
@@ -73,8 +70,8 @@ export const command: Command = {
 			embeds: [embed.response({
 				type: "success",
 				description: spanish ?
-					`El usuario  **:flag_${user.country.toLowerCase()}: ${user.username}**  de  <:droid_simple:1021473577951821824>  **osu!droid**  se vinculó correctamente a tu cuenta de Discord.`
-					: `The user  **:flag_${user.country.toLowerCase()}: ${user.username}**  from  <:droid_simple:1021473577951821824>  **osu!droid**  was successfully linked to your Discord account.`,
+					`El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  de  <:droid_simple:1021473577951821824>  **osu!droid**  se vinculó correctamente a tu cuenta de Discord.`
+					: `The user  **:flag_${user.region.toLowerCase()}: ${user.username}**  from  <:droid_simple:1021473577951821824>  **osu!droid**  was successfully linked to your Discord account.`,
 				interaction: interaction
 			}).setThumbnail(user.avatar_url)]
 		})

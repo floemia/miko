@@ -1,9 +1,11 @@
 import { ButtonInteraction, ComponentType, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
-import { droid, NewDroidResponse } from "../../functions/osu!droid/functions"
+import { droid } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
 import { create_row } from "../../functions/utils"
 import DroidUserBindModel from "../../schemas/osudroid-userbind"
+import { DroidScoreExtended, miko, NewDroidUser } from "miko-modules"
+import { MapInfo } from "@rian8337/osu-base"
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("recent")
@@ -33,48 +35,54 @@ export const command: Command = {
 		let id = interaction.options.getInteger("uid")
 		let username = interaction.options.getString("username")
 		let discord_user = interaction.options.getUser("user")
-		let request: NewDroidResponse | undefined
-		if (!id) {
-			if (username) {
-				request = await droid.request_newdroid({ username: username })
-
-				id = await droid.get_uid(request) || null
-			} else if (discord_user) {
-				id = (await DroidUserBindModel.findOne({ discord_id: discord_user.id }))?.uid || null
-			} else {
-				id = (await DroidUserBindModel.findOne({ discord_id: interaction.user.id }))?.uid || null
-			}
+		let recents: DroidScoreExtended[] | undefined
+		let user: NewDroidUser | undefined
+		if (!id && !username) {
+			let db_get = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
+			if (!db_get)
+				return await interaction.editReply({
+					embeds: [embed.response({
+						type: "error",
+						description: spanish ? `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.` :
+							`You don't have a linked osu!droid account. Use \`/userbind\`.`,
+						interaction: interaction
+					})]
+				})
+			else id = db_get.uid
 		}
-		if (!id) return await interaction.editReply({
+		if (!id && !username && discord_user) {
+			let db_get = await DroidUserBindModel.findOne({ discord_id: discord_user.id })
+			if (!db_get) return await interaction.editReply({
+				embeds: [embed.response({
+					type: "error",
+					description: spanish ? "El usuario de Discord no tiene una cuenta vinculada por `/userbind`." :
+						"The Discord user doesn't have a linked account through `/userbind`.",
+					interaction: interaction
+				})]
+			})
+			else id = db_get.uid
+
+		}
+		if (id || username) {
+			recents = await miko.scores({ uid: id || undefined, username: username || undefined, type: "recent" })
+			if (!recents) return await interaction.editReply({
+				embeds: [embed.response({
+					type: "error",
+					description: spanish ? `El usuario no existe.` : "User does not exist.",
+					interaction: interaction
+				})]
+			})
+		}
+
+		if (!recents || !recents.length) return await interaction.editReply({
 			embeds: [embed.response({
 				type: "error",
-				description: spanish ? `No tienes una cuenta vinculada por \`/userbind\`. Vincula una o especifica un parámetro.` :
-					"You don't have a linked account through \`/userbind\`. Bind one or pass at least one parameter.",
+				description: spanish ? `El usuario no ha subido ningún score.` :
+					`The user has no submitted scores.`,
 				interaction: interaction
 			})]
 		})
-
-		const data = await droid.request(id)
-		if (!data) return await interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: spanish ? `El usuario no existe.` : "User does not exist.",
-				interaction: interaction
-			})]
-		})
-		const user = (await droid.user({ uid: id, response: data }))!
-		if (!request) request = await droid.request_newdroid({ uid: user.id })
-		const recents = await droid.scores({ uid: id, response: data, type: "recent", newdroid_response: request! })
-
-		if (!recents?.length) return await interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: spanish ? `El usuario  :flag_${user.country.toLowerCase()}:  **${user.username}**  no ha subido ningún score.` :
-					`The user  :flag_${user.country.toLowerCase()}:  **${user.username}**  has no submitted scores.`,
-				interaction: interaction
-			})]
-		})
-
+		user = recents[0].user!
 		var index = (interaction.options?.getInteger("index") || 1) - 1
 		if (index > recents.length) index = recents.length - 1
 
@@ -101,6 +109,7 @@ export const command: Command = {
 		start_timeout()
 		collector.on("collect", async (i: ButtonInteraction) => {
 			if (i.user.id == interaction.user.id) {
+				await i.deferUpdate()
 				switch (i.customId) {
 					case (`backAll-${unique}`):
 						index = 0
@@ -122,21 +131,24 @@ export const command: Command = {
 				row.components[0].setDisabled(index == 0 ? true : false)
 				row.components[2].setLabel(`${index + 1}/${recents.length}`)
 				row.components[4].setDisabled(index == recents.length - 1 ? true : false)
-				await i.update({
+
+				await miko.calculate(recents[index])
+				await i.editReply({
 					content: spanish ?
-						`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Los valores de DPP y PP pueden no ser 100% precisos.`
-						: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# DPP and PP values may not be 100% accurate.`,
+						`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
+						: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Some penalties were found." : ""}`,
 					embeds: [await droid.embed.score(recents[index])],
 					components: [row]
 				})
 			}
 		})
 
+		await miko.calculate(recents[index])
 		const embed_score = await droid.embed.score(recents[index])
 		await interaction.editReply({
 			content: spanish ?
-				`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Las estadísticas pueden ser incorrectas.`
-				: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.country.toLowerCase()}:  **${user.username}**:\n-# Score statistics may be inaccurate.`,
+			`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
+			: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Some penalties were found." : ""}`,
 			embeds: [embed_score], components: [row]
 		})
 	},

@@ -75,21 +75,29 @@ export const difficulty = (mode: "osu" | "taiko" | "fruits" | "mania", SR: numbe
 export const rank = async (rank: string) => {
 	switch (rank) {
 		case "A":
-			return await client.application.emojis.fetch('1307062427304591480')
+			return client.user.id == "953705293345325146" ? await client.application.emojis.fetch('1307062427304591480') : 
+			client.emojis.cache.get('954909322503155722')
 		case 'B':
-			return await client.application.emojis.fetch('1307062442542760007')
+			return client.user.id == "953705293345325146" ? await client.application.emojis.fetch('1307062442542760007') :
+			client.emojis.cache.get('954909322540879892')
 		case 'C':
-			return await client.application.emojis.fetch('1307062454806777937')
+			return client.user.id == "953705293345325146" ? await client.application.emojis.fetch('1307062454806777937') :
+			client.emojis.cache.get('954909322515738654')
 		case 'D':
-			return await client.application.emojis.fetch('1307062469964861510')
+			return client.user.id == "953705293345325146" ? await client.application.emojis.fetch('1307062469964861510') :
+			client.emojis.cache.get('954909322117275719')
 		case 'S':
-			return await client.application.emojis.fetch('1307062491225788456')
+			return client.user.id == "953705293345325146" ? await client.application.emojis.fetch('1307062491225788456') :
+			client.emojis.cache.get('954909322167599125')
 		case 'SH':
-			return await client.application.emojis.fetch('1307062505444610058')
+			return client.user.id == "953705293345325146" ? await client.application.emojis.fetch('1307062505444610058') :
+			client.emojis.cache.get('954909322515738624')
 		case 'X':
-			return await client.application.emojis.fetch('1307062520242114621')
+			return client.user.id == "953705293345325146" ? await client.application.emojis.fetch('1307062520242114621') :
+			client.emojis.cache.get('954909954995798066')
 		case 'XH':
-			return await client.application.emojis.fetch('1307062405188030464')
+			return client.user.id == "953705293345325146" ? await client.application.emojis.fetch('1307062405188030464') :
+			client.emojis.cache.get('954909954966425631')
 		case 'F':
 			return client.emojis.cache.get('966098768908914778')
 	}
