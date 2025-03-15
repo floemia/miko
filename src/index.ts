@@ -9,6 +9,7 @@ export const client = new Client({
 
 client.events = new Collection()
 client.commands = new Collection()
+client.cooldowns = new Collection();
 
 handleEvents(client)
 client.login(process.env.TOKEN)

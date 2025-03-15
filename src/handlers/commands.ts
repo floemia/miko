@@ -15,7 +15,6 @@ export async function handleCommands(client: GlobClient): Promise<void> {
 	files.forEach(file => {
 		const { command } = require(file) as { command: Command }
 		try {
-			if (command.data.name == "top") return
 			client.commands.set(command.data.name, command)
 			commands.push(command.data.toJSON())
 		} catch (error) {

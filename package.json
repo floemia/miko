@@ -1,6 +1,6 @@
 {
   "name": "miko",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "discord bot for Michi's Gang",
   "main": "./dist/index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "dotenv": "^16.4.5",
     "fast-average-color-node": "^3.1.0",
     "glob": "^11.0.0",
-    "miko-modules": "^1.0.4",
+    "miko-modules": "^1.0.5",
     "mongoose": "^8.5.2",
     "osu-api-extended": "^2.8.52",
     "osu-droid-card": "^0.0.7-beta",
