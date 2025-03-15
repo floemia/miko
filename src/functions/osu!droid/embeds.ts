@@ -13,10 +13,10 @@ const score = async (score: DroidScoreExtended) => {
 	let dpp = score.performance.dpp?.toFixed(2) || "--"
 	let pp = score.performance.pp?.toFixed(2) || "--"
 	let fc = score.beatmap ? score.count.nMiss != 0 || score.combo < score.beatmap?.maxCombo! - 10 : false
-	let if_fc = fc ? `**( ${score.performance.fc.dpp!.toFixed(2)} DPP ❘ ${score.performance.fc.pp!.toFixed(2)} PP ➜ FC ${score.performance.fc.accuracy!.toFixed(2)}% )**` : ""
+	let if_fc = fc ? `**( ${score.performance.fc.dpp!.toFixed(2)}dpp ❘ ${score.performance.fc.pp!.toFixed(2)}pp ➜ FC ${score.performance.fc.accuracy!.toFixed(2)}% )**` : ""
 
 	const statistics = `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]`
-	const pp_string = `${score.performance.penalty ? dpp_no_penalty : ""}${dpp} DPP ❘ ${pp} PP${fc ? ` ${if_fc}` : ``}`
+	const pp_string = `${score.performance.penalty ? dpp_no_penalty : ""}${dpp}dpp ❘ ${pp}pp${fc ? ` ${if_fc}` : ``}`
 	const mods_string = `${score.mods.acronyms.length ? `+${score.mods.acronyms.join("")}` : ''} ${score.mods.speed != 1 ? `(${score.mods.speed.toFixed(2)}x)` : ``}`
 	const stars_string = score.stars.droid ? `${score.stars.osu!.toFixed(2)}⭐` : ''
 	const embed = new EmbedBuilder()
@@ -55,27 +55,29 @@ const top = async (user: NewDroidUser, scores: DroidScoreExtended[], page: numbe
 	let embed = new EmbedBuilder()
 	let desc = ``
 	for (const score of scores) {
-		let url = `https://osu.ppy.sh/beatmapsets/${score.beatmap?.beatmapSetId}#osu/${score.beatmap?.beatmapId}`
 		const rank = await osu.emoji.rank(score.rank)
-		let dpp_no_penalty = `~~${score.performance.dpp_no_penalty?.toFixed(2)}~~ `
 		let dpp = score.performance.dpp?.toFixed(2) || "--"
-		let pp = score.performance.pp?.toFixed(2) || "--"
-		let fc = score.beatmap ? score.count.nMiss != 0 || score.combo < score.beatmap?.maxCombo! - 10 : false
-		let if_fc = fc ? `**( ${score.performance.fc.dpp!.toFixed(2)} DPP ❘ ${score.performance.fc.pp!.toFixed(2)} PP ➜ FC ${score.performance.fc.accuracy!.toFixed(2)}% )**` : ""
 		let score_amount = Intl.NumberFormat('en-US', {
 			notation: "compact",
 			maximumFractionDigits: 1
-		  }).format(score.score);
+		}).format(score.score);
 
+		const title = score.filename.slice( score.filename.indexOf(" - ") + 3, score.filename.length )
 		const statistics = `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]`
-		const pp_string = `${score.performance.penalty ? dpp_no_penalty : ""}${dpp} DPP ❘ ${pp} PP${fc ? ` ${if_fc}` : ``}`
-		const mods_string = ` ${score.mods.acronyms.length ? `+${score.mods.acronyms.join("")}` : ''} ${score.mods.speed != 1 ? `(${score.mods.speed.toFixed(2)}x)` : ``}`
-
-		desc = desc + `**#${i}・[${score.beatmap?.title} \[${score.beatmap?.version}\]](${url}) ${mods_string}** [${score.stars.osu?.toFixed(2)} :star:]\n> ${rank}**・${pp_string}・${format_double_dec(score.accuracy * 100)}%・**${statistics}・**\`${score_amount}\`・${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? `/${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}・**<t:${score.played_date.valueOf() / 1000}:R>\n\n`
+		let mods_string = `${score.mods.acronyms.length ? `+${score.mods.acronyms.join("")}` : ''}` || "+NM"
+		if (score.mods.speed != 1) mods_string = `${mods_string} (${score.mods.speed.toFixed(2)}x)`
+		desc = desc + `**#${i}・${title}** \`${mods_string}\`\n> ${rank}**・${dpp}dpp・${format_double_dec(score.accuracy * 100)}%・**${statistics}・**\`${score_amount}\`・${score.combo.toLocaleString("en-US")}x・**<t:${score.played_date.valueOf() / 1000}:R>\n\n`
 		i++
 	}
+	let dpp = user.dpp.toLocaleString("en-US", {maximumFractionDigits: 2})
+	let global_rank = user.rank.global.toLocaleString("en-US", {maximumFractionDigits: 2})
+	let country_rank = user.rank.country.toLocaleString("en-US", {maximumFractionDigits: 2})
+	let region = user.region.toUpperCase()
+	embed.setAuthor({ name: `osu!droid・${user.username}・${dpp}dpp (#${global_rank} | ${region}${country_rank})`, iconURL: `https://new.osudroid.moe/flags/${user.region.toUpperCase()}.png` })
 	embed.setColor(Number(`0x${user.color.slice(1)}`))
+	embed.setThumbnail(user.avatar_url)
 	embed.setDescription(desc)
+	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
 	return embed
 }
 export const embed = { score, card, top }

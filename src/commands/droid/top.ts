@@ -86,9 +86,6 @@ export const command: Command = {
 			let collector_timeout: NodeJS.Timeout
 			let scores = await miko.score_pagination({ scores: top, page: index, scores_per_page: 5 })
 			let embed_top = await droid.embed.top(user, scores, index)
-			embed_top.setAuthor({ name: 
-				spanish ? `osu!droid・Top plays de ${user.username}` : 
-				`osu!droid・Top plays from ${user.username}` , iconURL: user.avatar_url })
 			const start_timeout = () => {
 				collector_timeout = setTimeout(() => {
 					collector.stop()
@@ -132,10 +129,6 @@ export const command: Command = {
 
 					scores = await miko.score_pagination({ scores: top, page: index, scores_per_page: 5 })
 					embed_top = await droid.embed.top(user, scores, index)
-
-					embed_top.setAuthor({ name: 
-						spanish ? `osu!droid・Top plays de ${user.username}` : 
-						`osu!droid・Top plays from ${user.username}` , iconURL: user.avatar_url })
 
 					await i.editReply({
 						// content: spanish ?
