@@ -37,7 +37,7 @@ export const command: Command = {
 		let discord_user = interaction.options.getUser("user")
 		let recents: DroidScoreExtended[] | undefined
 		let user: NewDroidUser | undefined
-		if (!id && !username) {
+		if (!id && !username && !discord_user) {
 			let db_get = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
 			if (!db_get)
 				return await interaction.editReply({
@@ -55,8 +55,8 @@ export const command: Command = {
 			if (!db_get) return await interaction.editReply({
 				embeds: [embed.response({
 					type: "error",
-					description: spanish ? "El usuario de Discord no tiene una cuenta vinculada por `/userbind`." :
-						"The Discord user doesn't have a linked account through `/userbind`.",
+					description: spanish ? `<@${discord_user.id}> no tiene una cuenta vinculada por \`/userbind\`.` :
+						`<@${discord_user.id}> doesn't have a linked account through \`/userbind\`.`,
 					interaction: interaction
 				})]
 			})

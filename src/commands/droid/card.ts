@@ -52,8 +52,8 @@ export const command: Command = {
 			if (!db_get) return await interaction.editReply({
 				embeds: [embed.response({
 					type: "error",
-					description: spanish ? "El usuario de Discord no tiene una cuenta vinculada por `/userbind`." :
-						"The Discord user doesn't have a linked account through `/userbind`.",
+					description: spanish ? `<@${discord_user.id}> no tiene una cuenta vinculada por \`/userbind\`.` :
+						`<@${discord_user.id}> doesn't have a linked account through \`/userbind\`.`,
 					interaction: interaction
 				})]
 			})
