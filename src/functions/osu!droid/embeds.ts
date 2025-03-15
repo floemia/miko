@@ -73,10 +73,11 @@ const top = async (user: NewDroidUser, scores: DroidScoreExtended[], page: numbe
 	let global_rank = user.rank.global.toLocaleString("en-US", {maximumFractionDigits: 2})
 	let country_rank = user.rank.country.toLocaleString("en-US", {maximumFractionDigits: 2})
 	let region = user.region.toUpperCase()
-	embed.setAuthor({ name: `osu!droid・${user.username}・${dpp}dpp (#${global_rank} | ${region}${country_rank})`, iconURL: `https://new.osudroid.moe/flags/${user.region.toUpperCase()}.png` })
+	embed.setAuthor({ name: `${user.username}・${dpp}dpp (#${global_rank}・${region}${country_rank})`, iconURL: `https://new.osudroid.moe/flags/${user.region.toUpperCase()}.png` })
 	embed.setColor(Number(`0x${user.color.slice(1)}`))
 	embed.setThumbnail(user.avatar_url)
 	embed.setDescription(desc)
+	embed.setTimestamp()
 	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
 	return embed
 }
