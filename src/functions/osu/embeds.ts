@@ -29,7 +29,7 @@ const score = async (recent: response, data: ScoreDifficultyData): Promise<Embed
 	}
 
 	const color = await average_color(`https://assets.ppy.sh/beatmaps/${recent.beatmapset.id}/covers/cover.jpg`)
-	const pp_string = `${data.pp?.toFixed(2)} PP・${format_double_dec(recent.accuracy * 100)}%${data.fc.pp && data.fc.accuracy ? `・**( ${data.fc.pp?.toFixed(2)} PP ➜ FC ${format_double_dec(data.fc.accuracy)}% )**` : ''}`
+	const pp_string = `${data.pp?.toFixed(2)}pp・${format_double_dec(recent.accuracy * 100)}%${data.fc.pp && data.fc.accuracy ? `・**( ${data.fc.pp?.toFixed(2)}pp ➜ FC ${format_double_dec(data.fc.accuracy)}% )**` : ''}`
 	
 
 	const embed = new EmbedBuilder()

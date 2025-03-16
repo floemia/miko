@@ -16,7 +16,7 @@ const score = async (score: DroidScoreExtended) => {
 	let if_fc = fc ? `**( ${score.performance.fc.dpp!.toFixed(2)}dpp ❘ ${score.performance.fc.pp!.toFixed(2)}pp ➜ FC ${score.performance.fc.accuracy!.toFixed(2)}% )**` : ""
 
 	const statistics = `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]`
-	const pp_string = `${score.performance.penalty ? dpp_no_penalty : ""}${dpp}dpp ❘ ${pp}pp${fc ? ` ${if_fc}` : ``}`
+	const pp_string = `${score.performance.penalty ? dpp_no_penalty : ""}**${dpp}dpp ❘ ${pp}pp${fc ? ` ${if_fc}` : ``}`
 	const mods_string = `${score.mods.acronyms.length ? `+${score.mods.acronyms.join("")}` : ''} ${score.mods.speed != 1 ? `(${score.mods.speed.toFixed(2)}x)` : ``}`
 	const stars_string = score.stars.droid ? `${score.stars.osu!.toFixed(2)}⭐` : ''
 	const embed = new EmbedBuilder()
@@ -25,7 +25,7 @@ const score = async (score: DroidScoreExtended) => {
 	} else {
 		embed.setAuthor({ name: `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] ${stars_string} ${mods_string}`, iconURL: score.user.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}` })
 	}
-	embed.setDescription(`> ${rank}**・${pp_string}・${format_double_dec(score.accuracy * 100)}%・**${statistics}**・**${score.score.toLocaleString("en-US")}**・${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? `/${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}**`)
+	embed.setDescription(`> ${rank}**・**${pp_string}・${format_double_dec(score.accuracy * 100)}%・**${statistics}**・**${score.score.toLocaleString("en-US")}**・${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? `/${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}**`)
 	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
 	embed.setColor(Number(`0x${score.color.slice(1)}`))
 
@@ -53,7 +53,6 @@ const card = async (user: DroidUser, scores: DroidScore[]) => {
 const top = async (user: NewDroidUser, scores: DroidScoreExtended[], page: number) => {
 	let i = (5 * page) + 1
 	let embed = new EmbedBuilder()
-	let desc = ``
 	for (const score of scores) {
 		const rank = await osu.emoji.rank(score.rank)
 		let dpp = score.performance.dpp?.toFixed(2) || "--"
@@ -62,21 +61,28 @@ const top = async (user: NewDroidUser, scores: DroidScoreExtended[], page: numbe
 			maximumFractionDigits: 1
 		}).format(score.score);
 
-		const title = score.filename.slice( score.filename.indexOf(" - ") + 3, score.filename.length )
+		let title = score.filename.slice( score.filename.indexOf(" - ") + 3, score.filename.length )
+		const mapper = score.filename.slice(0, score.filename.indexOf("[")).slice(score.filename.lastIndexOf("("), score.filename.lastIndexOf(")") + 1)
+
+		title = title.replace(`${mapper} `, "")
+
+
 		const statistics = `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]`
 		let mods_string = `${score.mods.acronyms.length ? `+${score.mods.acronyms.join("")}` : ''}` || "+NM"
 		if (score.mods.speed != 1) mods_string = `${mods_string} (${score.mods.speed.toFixed(2)}x)`
-		desc = desc + `**#${i}・${title}** \`${mods_string}\`\n> ${rank}**・${dpp}dpp・${format_double_dec(score.accuracy * 100)}%・**${statistics}・**\`${score_amount}\`・${score.combo.toLocaleString("en-US")}x・**<t:${score.played_date.valueOf() / 1000}:R>\n\n`
+		embed.addFields({
+			name: `**#${i}・${title} \`${mods_string}\`**`,
+			value: `> ${rank}**・${dpp}dpp・${format_double_dec(score.accuracy * 100)}%・**${statistics}・**\`${score_amount}\`・${score.combo.toLocaleString("en-US")}x・**<t:${score.played_date.valueOf() / 1000}:R>`,
+		})
 		i++
 	}
 	let dpp = user.dpp.toLocaleString("en-US", {maximumFractionDigits: 2})
 	let global_rank = user.rank.global.toLocaleString("en-US", {maximumFractionDigits: 2})
 	let country_rank = user.rank.country.toLocaleString("en-US", {maximumFractionDigits: 2})
 	let region = user.region.toUpperCase()
-	embed.setAuthor({ name: `${user.username}・${dpp}dpp (#${global_rank}・${region}${country_rank})`, iconURL: `https://new.osudroid.moe/flags/${user.region.toUpperCase()}.png` })
+	embed.setAuthor({ name: `${user.username}・${dpp}dpp (#${global_rank}・${region}${country_rank})`, iconURL: `https://new.osudroid.moe/flags/${user.region.toUpperCase()}.png`, url: `https://osudroid.moe/profile.php?uid=${user.id}` })
 	embed.setColor(Number(`0x${user.color.slice(1)}`))
 	embed.setThumbnail(user.avatar_url)
-	embed.setDescription(desc)
 	embed.setTimestamp()
 	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
 	return embed
