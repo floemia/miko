@@ -5,7 +5,6 @@ import { embed } from "../../functions/messages/embeds"
 import { create_row } from "../../functions/utils"
 import DroidUserBindModel from "../../schemas/osudroid-userbind"
 import { DroidScoreExtended, miko, NewDroidUser } from "miko-modules"
-import { MapInfo } from "@rian8337/osu-base"
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("recent")

@@ -36,7 +36,7 @@ export const command: Command = {
 
 		if (!id && !username && !discord_user) {
 			let db_get = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
-			if (!db_get) 
+			if (!db_get)
 				return await interaction.editReply({
 					embeds: [embed.response({
 						type: "error",
@@ -58,18 +58,16 @@ export const command: Command = {
 				})]
 			})
 			else id = db_get.uid
+
 		}
-		if (username || id) {
-			let response = await miko.request({ username: username || undefined, uid: id || undefined })
+		if (id || username) {
+			const response = await miko.request({ uid: id || undefined, username: username || undefined })
 			if (response.error) return await interaction.editReply({
-				embeds: [embed.response({
-					type: "error",
-					description: spanish ? `El usuario no existe.` :
-						`The user does not exist.`,
-					interaction: interaction
-				})]
+				embeds: [embed.response({ type: "error", description: spanish ? `El usuario no existe.` : "That user doesn't exist.", interaction: interaction })]
 			})
+			id = response.UserId
 		}
+
 		const data = await droid.request(id!)
 		if (!data) return await interaction.editReply({
 			embeds: [embed.response({ type: "error", description: spanish ? `El usuario no existe.` : "That user doesn't exist.", interaction: interaction })]
