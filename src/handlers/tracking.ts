@@ -23,9 +23,11 @@ export const droid_tracking = async () => {
 
 				if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 				const data = await miko.request ({ uid: user_data.uid })
-				if (data.error) continue
+				if ("error" in data) continue
 				const user = (await miko.user({ response: data }))!
+				if ("error" in user) continue
 				const scores = (await miko.scores({ uid: user_data.uid, type: "recent" }))!
+				if ("error" in scores) continue
 				if (!scores || scores[0].played_date.valueOf() == user_data.timestamp) continue
 				const play = scores[0]
 

@@ -21,8 +21,8 @@ export const command: Command = {
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		let uid = interaction.options.getInteger("uid")
 		let username = interaction.options.getString("username")	
-		let user: NewDroidUser
-		let data: NewDroidResponse
+		let user: NewDroidUser | { error: string }
+		let data: NewDroidResponse | { error: string }
 		await interaction.deferReply()
 		if (!uid && !username) {
 			return await interaction.editReply({
@@ -35,17 +35,15 @@ export const command: Command = {
 			})
 		} else {
 			data = await miko.request({ uid: uid || undefined, username: username || undefined })
-			if (data.error) return await interaction.editReply({
-				embeds: [embed.response({
-					type: "error",
-					description: spanish ? `El usuario no existe.` :
-						`The user does not exist.`,
-					interaction: interaction
-				})]
+			if ("error" in data) return await interaction.editReply({
+				embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${data.error}\`\`\`` : `An error occurred.\n\n\`\`\`${data.error}\`\`\``, interaction: interaction })]
 			})
 			user = (await miko.user({ response: data }))!
 		}
 
+		if ("error" in user) return await interaction.editReply({
+			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${user.error}\`\`\`` : `An error occurred.\n\n\`\`\`${user.error}\`\`\``, interaction: interaction })]
+		})
 		const user_in_db = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
 		if (!user_in_db) {
 			new DroidUserBindModel({

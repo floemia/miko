@@ -7,9 +7,9 @@ import { tracking } from "./tracking"
 import { droid as droidModule, DroidScoreParameters, DroidUserParameters } from "osu-droid-scraping"
 import { card } from "osu-droid-card"
 
-const user = async (params: DroidUserParameters): Promise<DroidUser | undefined> => {
+const user = async (params: DroidUserParameters): Promise<DroidUser | { error: string }> => {
 	const data = await droidModule.user(params)
-	if (!data) return undefined
+	if ("error" in data) return data
 	const color = await average_color(data.avatar_url)
 	const user: DroidUser = { ...data, color: color.hex }
 	return user

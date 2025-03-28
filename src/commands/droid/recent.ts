@@ -34,8 +34,8 @@ export const command: Command = {
 		let id = interaction.options.getInteger("uid")
 		let username = interaction.options.getString("username")
 		let discord_user = interaction.options.getUser("user")
-		let recents: DroidScoreExtended[] | undefined
-		let user: NewDroidUser | undefined
+		let recents: DroidScoreExtended[] | { error: string }
+		let user: NewDroidUser | { error: string }
 		if (!id && !username && !discord_user) {
 			let db_get = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
 			if (!db_get)
@@ -64,16 +64,13 @@ export const command: Command = {
 		}
 		if (id || username) {
 			recents = await miko.scores({ uid: id || undefined, username: username || undefined, type: "recent" })
-			if (!recents) return await interaction.editReply({
-				embeds: [embed.response({
-					type: "error",
-					description: spanish ? `El usuario no existe.` : "User does not exist.",
-					interaction: interaction
-				})]
-			})
 		}
+		recents = recents!
+		if ("error" in recents) return await interaction.editReply({
+			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${recents.error}\`\`\`` : `An error occurred.\n\n\`\`\`${recents.error}\`\`\``, interaction: interaction })]
+		})
 
-		if (!recents || !recents.length) return await interaction.editReply({
+		if (!recents.length) return await interaction.editReply({
 			embeds: [embed.response({
 				type: "error",
 				description: spanish ? `El usuario no ha subido ningún score.` :
@@ -146,8 +143,8 @@ export const command: Command = {
 		const embed_score = await droid.embed.score(recents[index])
 		await interaction.editReply({
 			content: spanish ?
-			`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
-			: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Some penalties were found." : ""}`,
+				`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
+				: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Some penalties were found." : ""}`,
 			embeds: [embed_score], components: [row]
 		})
 	},

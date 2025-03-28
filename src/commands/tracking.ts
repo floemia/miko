@@ -104,17 +104,17 @@ export const command: Command = {
 		if (subcommandgroup == "droid") {
 			const uid = interaction.options.getInteger("uid", true)
 			const data = await miko.request({ uid: uid })
-			if (data.error) return interaction.editReply({
-				embeds: [
-					embed.response({
-						type: "error",
-						description: spanish ? `El usuario con UID \`${uid}\` no existe.` : `An osu!droid profile with UID \`${uid}\` doesn't exist.`,
-						interaction: interaction
-					})
-				]
+			if ("error" in data) return await interaction.editReply({
+				embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\`\`\`${data.error}\`\`\`` : `An error occurred.\n\`\`\`${data.error}\`\`\``, interaction: interaction })]
 			})
 			const user = await miko.user({ response: data })
+			if ("error" in user) return await interaction.editReply({
+				embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\`\`\`${user.error}\`\`\`` : `An error occurred.\n\`\`\`${user.error}\`\`\``, interaction: interaction })]
+			})
 			const scores = await miko.scores({ type: "recent", response: data })
+			if ("error" in scores) return await interaction.editReply({
+				embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\`\`\`${scores.error}\`\`\`` : `An error occurred.\n\`\`\`${scores.error}\`\`\``, interaction: interaction })]
+			})
 			let score
 			if (scores && scores.length) score = scores[0]
 			else score = undefined

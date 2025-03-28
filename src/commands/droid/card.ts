@@ -62,20 +62,26 @@ export const command: Command = {
 		}
 		if (id || username) {
 			const response = await miko.request({ uid: id || undefined, username: username || undefined })
-			if (response.error) return await interaction.editReply({
-				embeds: [embed.response({ type: "error", description: spanish ? `El usuario no existe.` : "That user doesn't exist.", interaction: interaction })]
+			if ("error" in response) return await interaction.editReply({
+				embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${response.error}\`\`\`` : `An error occurred.\n\n\`\`\`${response.error}\`\`\``, interaction: interaction })]
 			})
-			id = response.UserId
 		}
 
-		const data = await droid.request(id!)
-		if (!data) return await interaction.editReply({
-			embeds: [embed.response({ type: "error", description: spanish ? `El usuario no existe.` : "That user doesn't exist.", interaction: interaction })]
+		const data: string | { error: string } = await droid.request(id!)
+		if (typeof(data) != "string" && "error" in data) return await interaction.editReply({
+			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${data.error}\`\`\`` : `An error occurred.\n\n\`\`\`${data.error}\`\`\``, interaction: interaction })]
 		})
+
 		const user = (await droid.user({ uid: id!, response: data }))!
+		if ("error" in user) return await interaction.editReply({
+			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${user.error}\`\`\`` : `An error occurred.\n\n\`\`\`${user.error}\`\`\``, interaction: interaction })]
+		})
+
 		let scores: DroidScore[] = []
 		const scores_fetch = (await droidModule.scores({ uid: id!, type: "top", response: data }))!
-
+		if ("error" in scores_fetch) return await interaction.editReply({
+			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${scores_fetch.error}\`\`\`` : `An error occurred.\n\n\`\`\`${scores_fetch.error}\`\`\``, interaction: interaction })]
+		})
 		for (const score of scores_fetch) {
 			scores.push({
 				...score,
