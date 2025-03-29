@@ -65,6 +65,7 @@ export const command: Command = {
 			if ("error" in response) return await interaction.editReply({
 				embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${response.error}\`\`\`` : `An error occurred.\n\n\`\`\`${response.error}\`\`\``, interaction: interaction })]
 			})
+			id = response.UserId
 		}
 
 		const data: string | { error: string } = await droid.request(id!)

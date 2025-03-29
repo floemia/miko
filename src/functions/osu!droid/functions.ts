@@ -15,5 +15,8 @@ const user = async (params: DroidUserParameters): Promise<DroidUser | { error: s
 	return user
 }
 
+// const db_user = async (params: {uid?: number, username?: string, discord_user_id?: string})=> {
+
+// }
 const request = droidModule.request
 export const droid = { user, embed, tracking, request, card }
