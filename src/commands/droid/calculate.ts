@@ -6,6 +6,10 @@ import { miko } from "miko-modules"
 import { urlStorage } from "../../events/client/message"
 import { MapInfo } from "@rian8337/osu-base"
 import { DroidMods } from "osu-droid-scraping"
+import en from "../../locales/en"
+import es from "../../locales/es"
+const languages = { en, es };
+
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("calculate")
@@ -60,6 +64,7 @@ export const command: Command = {
 	async execute(client, interaction) {
 		await interaction.deferReply()
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
+		let response = spanish ? languages.es : languages.en
 		let storage = urlStorage.get(interaction.channelId)
 		let beatmap_value = interaction.options.getString("url") || storage
 		if (beatmap_value?.includes("::")) beatmap_value = beatmap_value.split("::")[0]
@@ -67,8 +72,7 @@ export const command: Command = {
 		if (!beatmap_value) return await interaction.editReply({
 			embeds: [embed.response({
 				type: "error",
-				description: spanish ? `No hay un beatmap en la cache.` :
-					`There is no beatmap in the cache.`,
+				description: response.command.calculate.no_cache,
 				interaction: interaction
 			})]
 		})
@@ -80,8 +84,7 @@ export const command: Command = {
 		if (!beatmap) return await interaction.editReply({
 			embeds: [embed.response({
 				type: "error",
-				description: spanish ? `El beatmap no existe.` :
-					`The beatmap does not exist.`,
+				description: response.command.calculate.no_beatmap,
 				interaction: interaction
 			})]
 		})

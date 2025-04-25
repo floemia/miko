@@ -8,6 +8,10 @@ import { miko } from "miko-modules"
 import { droid as droidModule } from "osu-droid-scraping"
 import { DroidScore } from "../../functions/osu!droid/types"
 
+import en from "../../locales/en"
+import es from "../../locales/es"
+const languages = { en, es };
+
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("card")
@@ -29,6 +33,7 @@ export const command: Command = {
 	async execute(client, interaction) {
 
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
+		let response = spanish ? languages.es : languages.en
 		await interaction.deferReply()
 		let id = interaction.options.getInteger("uid")
 		let username = interaction.options.getString("username")
@@ -40,8 +45,7 @@ export const command: Command = {
 				return await interaction.editReply({
 					embeds: [embed.response({
 						type: "error",
-						description: spanish ? `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.` :
-							`You don't have a linked osu!droid account. Use \`/userbind\`.`,
+						description: response.command.card.no_link,
 						interaction: interaction
 					})]
 				})
@@ -52,8 +56,7 @@ export const command: Command = {
 			if (!db_get) return await interaction.editReply({
 				embeds: [embed.response({
 					type: "error",
-					description: spanish ? `<@${discord_user.id}> no tiene una cuenta vinculada por \`/userbind\`.` :
-						`<@${discord_user.id}> doesn't have a linked account through \`/userbind\`.`,
+					description: response.command.card.mention_no_link(discord_user.id),
 					interaction: interaction
 				})]
 			})
@@ -61,27 +64,27 @@ export const command: Command = {
 
 		}
 		if (id || username) {
-			const response = await miko.request({ uid: id || undefined, username: username || undefined })
-			if ("error" in response) return await interaction.editReply({
-				embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${response.error}\`\`\`` : `An error occurred.\n\n\`\`\`${response.error}\`\`\``, interaction: interaction })]
+			const request = await miko.request({ uid: id || undefined, username: username || undefined })
+			if ("error" in request) return await interaction.editReply({
+				embeds: [embed.response({ type: "error", description: response.command.card.error(request.error), interaction: interaction })]
 			})
-			id = response.UserId
+			id = request.UserId
 		}
 
 		const data: string | { error: string } = await droid.request(id!)
 		if (typeof(data) != "string" && "error" in data) return await interaction.editReply({
-			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${data.error}\`\`\`` : `An error occurred.\n\n\`\`\`${data.error}\`\`\``, interaction: interaction })]
+			embeds: [embed.response({ type: "error", description: response.command.card.error(data.error), interaction: interaction })]
 		})
 
 		const user = (await droid.user({ uid: id!, response: data }))!
 		if ("error" in user) return await interaction.editReply({
-			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${user.error}\`\`\`` : `An error occurred.\n\n\`\`\`${user.error}\`\`\``, interaction: interaction })]
+			embeds: [embed.response({ type: "error", description: response.command.card.error(user.error), interaction: interaction })]
 		})
 
 		let scores: DroidScore[] = []
 		const scores_fetch = (await droidModule.scores({ uid: id!, type: "top", response: data }))!
 		if ("error" in scores_fetch) return await interaction.editReply({
-			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${scores_fetch.error}\`\`\`` : `An error occurred.\n\n\`\`\`${scores_fetch.error}\`\`\``, interaction: interaction })]
+			embeds: [embed.response({ type: "error", description: response.command.card.error(scores_fetch.error), interaction: interaction })]
 		})
 		for (const score of scores_fetch) {
 			scores.push({

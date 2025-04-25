@@ -75,10 +75,10 @@ const calculate = async (data: DroidCalculatedData) => {
 		mult_cs = 1.3
 		mult_hp = 1.4
 	}
-	let ar = oss.attributes.approachRate.toLocaleString("en-US", { maximumFractionDigits: 2 })
-	let od = oss.attributes.overallDifficulty.toLocaleString("en-US", { maximumFractionDigits: 2 })
-	let cs = Math.min(oss.beatmap.difficulty.cs * mult_cs, 10).toLocaleString("en-US", { maximumFractionDigits: 2 })
-	let hp = Math.min(oss.beatmap.difficulty.hp * mult_hp, 10).toLocaleString("en-US", { maximumFractionDigits: 2 })
+	let ar = oss.approachRate.toLocaleString("en-US", { maximumFractionDigits: 2 })
+	let od = oss.overallDifficulty.toLocaleString("en-US", { maximumFractionDigits: 2 })
+	let cs = Math.min(data.beatmap.cs * mult_cs, 10).toLocaleString("en-US", { maximumFractionDigits: 2 })
+	let hp = Math.min(data.beatmap.hp * mult_hp, 10).toLocaleString("en-US", { maximumFractionDigits: 2 })
 	let beatmap = await v2.beatmap.id.lookup({ id: data.beatmap.beatmapId })
 	let speed = 1
 	if (data.mods.acronyms.includes("HT")) speed = 0.75
@@ -93,7 +93,7 @@ const calculate = async (data: DroidCalculatedData) => {
 	if (data.mods.speed != 1) mods_string = `${mods_string} (${data.mods.speed.toFixed(2)}x)`	
 	let title = `${beatmap.beatmapset.artist} - ${beatmap.beatmapset.title}`
 	let beatmap_url = `https://osu.ppy.sh/beatmapsets/${beatmap.beatmapset_id}`
-	let star_rating = data.rating.osu.total
+	let star_rating = data.rating.osu.starRating
 	let diff_emoji = osu.emoji.difficulty("osu", star_rating)
 
 	let time_emoji = `<:time:1005980377304793190>`
