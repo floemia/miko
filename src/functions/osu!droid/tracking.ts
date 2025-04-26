@@ -6,6 +6,7 @@ import { embed } from "../messages/embeds";
 import { NewDroidUser, DroidScoreExtended } from "miko-modules";
 import en from "../../locales/en"
 import es from "../../locales/es"
+import { utils } from "../../utils";
 const languages = { en, es };
 
 const add = async (user: NewDroidUser, last_score: DroidScoreExtended | undefined, interaction: ChatInputCommandInteraction) => {
@@ -24,21 +25,13 @@ const add = async (user: NewDroidUser, last_score: DroidScoreExtended | undefine
 		let guilds = already_in_sys.guilds.map(guild => guild.id)
 		if (guilds.includes(guild_id)) {
 			return interaction.editReply({
-				embeds: [embed.response({
-					type: "error",
-					description: response.command.tracking.already_in(user),
-					interaction: interaction
-				})]
+				embeds: [utils.embeds.error({ description: response.command.tracking.already_in(user), interaction: interaction, spanish: spanish }).setThumbnail(user.avatar_url)]
 			});
 		}
 	}
 	if (user_double && !interaction.memberPermissions?.has(PermissionsBitField.Flags.ManageGuild)) {
 		return interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: response.command.tracking.double_user(user),
-				interaction: interaction
-			})]
+			embeds: [utils.embeds.error({ description: response.command.tracking.double_user(user), interaction: interaction, spanish: spanish }).setThumbnail(user.avatar_url)]
 		});
 	}
 
@@ -57,11 +50,7 @@ const add = async (user: NewDroidUser, last_score: DroidScoreExtended | undefine
 		}).save();
 	}
 	await interaction.editReply({
-		embeds: [embed.response({
-			type: "success",
-			description: response.command.tracking.success(user),
-			interaction: interaction
-		})]
+		embeds: [utils.embeds.success({ description: response.command.tracking.success(user), interaction: interaction, spanish: spanish }).setThumbnail(user.avatar_url)]
 	});
 
 
@@ -90,19 +79,11 @@ const remove = async (user: NewDroidUser, interaction: ChatInputCommandInteracti
 
 	if (!found_in_sys || !found_in_sys.guilds.map(guild => guild.id).includes(guild_id)) {
 		return await interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: response.command.tracking.not_found(user),
-				interaction: interaction
-			})]
+			embeds: [utils.embeds.error({ description: response.command.tracking.not_found(user), interaction: interaction, spanish: spanish }).setThumbnail(user.avatar_url)]
 		})
 	} else if (!found_in_sys.guilds.includes({ id: guild_id, owner_id: interaction.user.id }) && !interaction.memberPermissions?.has(PermissionsBitField.Flags.ManageGuild, true)) {
 		return await interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: response.command.tracking.not_yours(user),
-				interaction: interaction
-			})]
+			embeds: [utils.embeds.error({ description: response.command.tracking.not_yours(user), interaction: interaction, spanish: spanish }).setThumbnail(user.avatar_url)]
 		})
 	}
 	if (found_in_sys.guilds.length == 1) await found_in_sys.deleteOne()
@@ -110,11 +91,7 @@ const remove = async (user: NewDroidUser, interaction: ChatInputCommandInteracti
 		await found_in_sys.updateOne({ "$pull": { guilds: { id: guild_id, owner_id: interaction.user.id } } })
 	}
 	await interaction.editReply({
-		embeds: [embed.response({
-			type: "success",
-			description: response.command.tracking.deleted(user),
-			interaction: interaction
-		})]
+		embeds: [utils.embeds.success({ description: response.command.tracking.deleted(user), interaction: interaction, spanish: spanish }).setThumbnail(user.avatar_url)]
 	})
 
 	if (log_channel && log_channel?.type == ChannelType.GuildText) {

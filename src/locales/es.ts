@@ -1,4 +1,4 @@
-import { NewDroidUser } from "miko-modules";
+import { DroidRXUser, NewDroidUser } from "miko-modules";
 import { DroidUser } from "../functions/osu!droid/types";
 import { DroidTrackingUser } from "../schemas/types";
 
@@ -22,7 +22,7 @@ export default {
 			no_link: `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.`,
 			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada por \`/userbind\`.`,
 			no_user: "El usuario no existe.",
-			no_scores: "El usuario no ha subido ningún score.",
+			no_scores: (user: NewDroidUser) => `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  no ha subido ningún score.`,
 			score: (user: NewDroidUser, index: number, penalty: boolean = false) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
 		},
 		top: {
@@ -31,13 +31,16 @@ export default {
 			no_link: `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.`,
 			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada por \`/userbind\`.`,
 			no_user: "El usuario no existe.",
-			no_scores: "El usuario no ha subido ningún score.",
+			no_scores: (user: NewDroidUser) => `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  no ha subido ningún score.`,
 		},
 		userbind: {
 			error: (error: string) => `Ocurrió un error.\n> ${error}`,
 			no_params: "Debes proporcionar al menos uno de los siguientes parámetros: UID o nombre de usuario",
 			no_user: "El usuario no existe.",
-			linked: (user: NewDroidUser) => `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  de  <:droid_simple:1021473577951821824>  **osu!droid**  se vinculó correctamente a tu cuenta de Discord.`
+			linked: (user: NewDroidUser | DroidRXUser) => {
+				if ("online" in user) return `El usuario  **:flag_${user.country.toLowerCase()}: ${user.name}**  se vinculó correctamente a tu cuenta de Discord.`
+				return `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  se vinculó correctamente a tu cuenta de Discord.`
+			},
 		},
 		tracking: {
 			error: (error: string) => `Ocurrió un error.\n> ${error}`,
@@ -51,6 +54,7 @@ export default {
 		},
 	},
 	error: {
+		general: "Ocurrió un error.",
 		no_user: "El usuario no existe.",
 		no_params: "Debes proporcionar al menos uno de los siguientes parámetros: UID, nombre de usuario o usuario de Discord.",
 		no_linked: "No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.",

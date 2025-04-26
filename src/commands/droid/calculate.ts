@@ -8,6 +8,7 @@ import { MapInfo } from "@rian8337/osu-base"
 import { DroidMods } from "osu-droid-scraping"
 import en from "../../locales/en"
 import es from "../../locales/es"
+import { utils } from "../../utils"
 const languages = { en, es };
 
 export const command: Command = {
@@ -70,11 +71,7 @@ export const command: Command = {
 		if (beatmap_value?.includes("::")) beatmap_value = beatmap_value.split("::")[0]
 		if (beatmap_value?.includes("#osu/")) beatmap_value = beatmap_value.split("#osu/")[1]
 		if (!beatmap_value) return await interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: response.command.calculate.no_cache,
-				interaction: interaction
-			})]
+			embeds: [utils.embeds.error({ description: response.command.calculate.no_cache, interaction: interaction, spanish: spanish })]
 		})
 		let mods: DroidMods = {
 			speed: interaction.options.getNumber("speed") || 1,
@@ -82,11 +79,7 @@ export const command: Command = {
 		}
 		let beatmap = await MapInfo.getInformation(Number(beatmap_value))
 		if (!beatmap) return await interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: response.command.calculate.no_beatmap,
-				interaction: interaction
-			})]
+			embeds: [utils.embeds.error({ description: response.command.calculate.no_beatmap, interaction: interaction, spanish: spanish })]
 		})
 
 		let accuracy = interaction.options.getNumber("accuracy")

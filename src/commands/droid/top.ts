@@ -1,12 +1,11 @@
 import { ButtonInteraction, ComponentType, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
 import { droid } from "../../functions/osu!droid/functions"
-import { embed } from "../../functions/messages/embeds"
 import { create_row } from "../../functions/utils"
-import DroidUserBindModel from "../../schemas/DroidUserBindSchema"
 import { DroidScoreExtended, miko, NewDroidUser } from "miko-modules"
 import en from "../../locales/en"
 import es from "../../locales/es"
+import { utils } from "../../utils"
 const languages = { en, es };
 export const command: Command = {
 	data: new SlashCommandBuilder()
@@ -32,18 +31,14 @@ export const command: Command = {
 		const reply = await interaction.deferReply()
 		let data = await droid.get_response(interaction)
 		if ("error" in data) return await interaction.editReply({
-			embeds: [embed.response({ type: "error", description: response.command.top.error(data.error), interaction: interaction })]
+			embeds: [utils.embeds.error({ description: data.error, interaction: interaction, spanish: spanish })]
 		})
+		let user = await miko.user({ response: data }) as NewDroidUser
 		let top = await miko.scores({ type: "top", response: data }) as DroidScoreExtended[]
 
 		if (!top.length) return await interaction.editReply({
-			embeds: [embed.response({
-				type: "error",
-				description: response.command.top.no_scores,
-				interaction: interaction
-			})]
+			embeds: [utils.embeds.error({ description: response.command.top.no_scores(user), interaction: interaction, spanish: spanish })]
 		})
-		let user = top[0].user!
 
 		const unique = `${interaction.user.id}-${Math.floor(Math.random() * 10000000)}`
 		let index = 0

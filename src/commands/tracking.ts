@@ -5,6 +5,7 @@ import { embed } from "../functions/messages/embeds"
 import { DroidScoreExtended, miko, NewDroidUser } from "miko-modules"
 import en from "../locales/en"
 import es from "../locales/es"
+import { utils } from "../utils"
 const languages = { en, es };
 export const command: Command = {
 	data: new SlashCommandBuilder()
@@ -53,7 +54,7 @@ export const command: Command = {
 		if (subcommandgroup == "droid") {
 			let data = await droid.get_response(interaction)
 			if ("error" in data) return await interaction.editReply({
-				embeds: [embed.response({ type: "error", description: response.command.tracking.error(data.error) + `\n\`\`\`${data.error}\`\`\``, interaction: interaction })]
+				embeds: [utils.embeds.error({ description: data.error, interaction: interaction, spanish: spanish })]
 			})
 
 			const scores = await miko.scores({ type: "recent", response: data }) as DroidScoreExtended[]

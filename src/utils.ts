@@ -1,9 +1,13 @@
 import * as chalk from 'chalk';
 import { Color, LogCreatorParameters } from './types';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import en from './locales/en';
+import es from './locales/es';
+import { client } from '.';
+const languages = { en, es };
 
 
 export const log = {
-
 	out: (params: LogCreatorParameters) => {
 		let date = formatDate(new Date());
 		let reset = `\x1b[0m`;
@@ -79,5 +83,30 @@ const getHexColor = (color: Color) => {
 	}
 };
 
-
-export const utils = { log, getCircleEmoji, getHexColor };
+const embeds = {
+	error: (params: { description: string, interaction: ChatInputCommandInteraction, spanish: boolean }) => {
+		return new EmbedBuilder()
+			.setAuthor({ name: `${params.interaction.user.username}`, iconURL: params.interaction.user.displayAvatarURL() })
+			.setDescription(`> ${getCircleEmoji("Red")}   ${params.description}`)
+			.setFooter({ text: `${client.user.displayName}`, iconURL: client.user.displayAvatarURL() })
+			.setColor("Red")
+			.setTimestamp()
+	},
+	warning: (params: { description: string, interaction: ChatInputCommandInteraction, spanish: boolean }) => {
+		return new EmbedBuilder()
+			.setAuthor({ name: `${params.interaction.user.username}`, iconURL: params.interaction.user.displayAvatarURL() })
+			.setDescription(`> ${getCircleEmoji("Yellow")}   ${params.description}`)
+			.setFooter({ text: `${client.user.displayName}`, iconURL: client.user.displayAvatarURL() })
+			.setColor("Yellow")
+			.setTimestamp()
+	},
+	success: (params: { description: string, interaction: ChatInputCommandInteraction, spanish: boolean }) => {
+		return new EmbedBuilder()
+			.setAuthor({ name: `${params.interaction.user.username}`, iconURL: params.interaction.user.displayAvatarURL() })
+			.setDescription(`> ${getCircleEmoji("Blue")}   ${params.description}`)
+			.setFooter({ text: `${client.user.displayName}`, iconURL: client.user.displayAvatarURL() })
+			.setColor("Blue")
+			.setTimestamp()
+	}
+}
+export const utils = { log, getCircleEmoji, getHexColor, embeds };
