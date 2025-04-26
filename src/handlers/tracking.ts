@@ -3,7 +3,7 @@ import { droid } from "../functions/osu!droid/functions"
 import DroidAccountTrackModel from "../schemas/DroidAccountTrackSchema"
 import { ChannelType } from "discord.js"
 import GuildConfigModel from "../schemas/GuildConfigSchema"
-import { miko } from "miko-modules"
+import { DroidScoreExtended, miko, NewDroidUser } from "miko-modules"
 import { utils } from "../utils"
 
 export const droid_tracking = async () => {
@@ -13,15 +13,13 @@ export const droid_tracking = async () => {
 		while (true) {
 			tracking_users = await DroidAccountTrackModel.find()
 			for await (const user_data of tracking_users) {
-				if (user_data.username != "MG_floemia") continue
-				await new Promise(resolve => setTimeout(resolve, 1000))
+				await new Promise(resolve => setTimeout(resolve, 15000))
 				const data = await miko.request({ uid: user_data.uid })
 				if ("error" in data) continue
-				const user = (await miko.user({ response: data }))!
-				if ("error" in user) continue
-				const scores = (await miko.scores({ uid: user_data.uid, type: "recent" }))!
-				if ("error" in scores) continue
-				if (!scores || scores[0].played_date <= user_data.timestamp) continue
+				const user = await miko.user({ response: data }) as NewDroidUser
+				const scores = await miko.scores({ uid: user_data.uid, type: "recent" }) as DroidScoreExtended[]
+	
+				if (!scores.length || scores[0].played_date <= user_data.timestamp) continue
 				const play = scores[0]
 
 				console.log()
