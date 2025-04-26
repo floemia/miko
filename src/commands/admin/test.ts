@@ -15,7 +15,6 @@ export const command: Command = {
 	developer: true,
 	async execute(client, interaction) {
 		await interaction.deferReply()
-		let url = urlStorage.get(interaction.channelId)
-		await interaction.editReply({ content: `🔗 Beatmap URL of <#${interaction.channelId}>: ${url}` })
+
 	}
 }

@@ -1,7 +1,7 @@
 import { InteractionContextType, ChannelType, PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
 import { embed } from "../../functions/messages/embeds"
-import GuildConfigModel from "../../schemas/guild"
+import GuildConfigModel from "../../schemas/GuildConfigSchema"
 
 
 export const command: Command = {

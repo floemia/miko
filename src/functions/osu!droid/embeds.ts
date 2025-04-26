@@ -4,7 +4,7 @@ import { osu } from "../osu/functions";
 import { client } from "../..";
 import * as fs from "fs"
 import { format_double_dec } from "../utils";
-import { DroidCalculatedData, DroidScoreExtended, NewDroidUser, miko } from "miko-modules";
+import { DroidCalculatedData, DroidScoreExtended, NewDroidUser, } from "miko-modules";
 import { DroidScore, DroidUser } from "./types";
 import { v2 } from "osu-api-extended";
 
@@ -17,16 +17,19 @@ const score = async (score: DroidScoreExtended) => {
 
 	const statistics = `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]`
 	const pp_string = `${score.performance.penalty ? dpp_no_penalty : ""}${dpp}dpp ❘ ${pp}pp${score.performance.fc ? ` ${if_fc}` : ``}`
-	const mods_string = `${score.mods.acronyms.length ? `+${score.mods.acronyms.join("")}` : ''} ${score.mods.speed != 1 ? `(${score.mods.speed.toFixed(2)}x)` : ``}`
-	const stars_string = score.stars.droid ? `${score.stars.osu!.toFixed(2)}⭐` : ''
+	const mods_string = `+${score.mods.acronyms.join("")}${score.mods.speed != 1 ? ` (${score.mods.speed.toFixed(2)}x)` : ``}`
+	const stars_string = score.stars.droid ? `[${score.stars.osu!.toFixed(2)}⭐]` : ''
+	let iBancho = (score.server == "ibancho")
+	let server = iBancho ? "iBancho" : "osudroid!relax"
+	let server_icon = iBancho ? `https://cdn.discordapp.com/icons/316545691545501706/a_2e882927641c2b4bb15e514d4e2829c7.webp` : `https://cdn.discordapp.com/icons/1095653998389907468/a_82bf78e259e9cb4ba4d4ca355e28e0df.webp`
 	const embed = new EmbedBuilder()
 	if (!score.beatmap) {
 		embed.setAuthor({ name: `${score.filename} ${mods_string}`, iconURL: score.user!.avatar_url })
 	} else {
-		embed.setAuthor({ name: `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] ${mods_string} ${stars_string} `, iconURL: score.user!.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}` })
+		embed.setAuthor({ name: `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] ${stars_string} ${mods_string}`, iconURL: score.user!.avatar_url, url: `https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}` })
 	}
 	embed.setDescription(`> ${rank}**・${pp_string}・${format_double_dec(score.accuracy * 100)}%・**${statistics}**・**${score.score.toLocaleString("en-US")}**・${score.combo.toLocaleString("en-US")}x${score.beatmap?.maxCombo ? `/${score.beatmap.maxCombo.toLocaleString("en-US")}x` : ''}**`)
-	embed.setFooter({ text: `${client.user.username}`, iconURL: client.user.displayAvatarURL({ extension: "png" }) })
+	embed.setFooter({ text: `Server: ${server}`, iconURL: server_icon })
 	embed.setColor(Number(`0x${score.color.slice(1)}`))
 
 	embed.setTimestamp(score.played_date)
@@ -83,7 +86,8 @@ const calculate = async (data: DroidCalculatedData) => {
 	let speed = 1
 	if (data.mods.acronyms.includes("HT")) speed = 0.75
 	if (data.mods.acronyms.includes("DT") || data.mods.acronyms.includes("NC")) speed = 1.5
-	if (data.mods.speed != 1) speed *= data.mods.speed
+	
+	speed*= data.mods.speed
 	let total_length = beatmap.total_length / speed
 
 	let length_str = time_formatted(total_length)

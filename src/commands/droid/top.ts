@@ -3,8 +3,11 @@ import type { Command } from "../../types"
 import { droid } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
 import { create_row } from "../../functions/utils"
-import DroidUserBindModel from "../../schemas/osudroid-userbind"
+import DroidUserBindModel from "../../schemas/DroidUserBindSchema"
 import { DroidScoreExtended, miko, NewDroidUser } from "miko-modules"
+import en from "../../locales/en"
+import es from "../../locales/es"
+const languages = { en, es };
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("top")
@@ -24,61 +27,30 @@ export const command: Command = {
 		),
 	async execute(client, interaction) {
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
-		const response = await interaction.deferReply()
-		let id = interaction.options.getInteger("uid")
-		let username = interaction.options.getString("username")
-		let discord_user = interaction.options.getUser("user")
-		let top: DroidScoreExtended[] | { error: string }
-		let user: NewDroidUser | { error: string }
-		if (!id && !username && !discord_user) {
-			let db_get = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
-			if (!db_get)
-				return await interaction.editReply({
-					embeds: [embed.response({
-						type: "error",
-						description: spanish ? `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.` :
-							`You don't have a linked osu!droid account. Use \`/userbind\`.`,
-						interaction: interaction
-					})]
-				})
-			else id = db_get.uid
-		}
-		if (!id && !username && discord_user) {
-			let db_get = await DroidUserBindModel.findOne({ discord_id: discord_user.id })
-			if (!db_get) return await interaction.editReply({
-				embeds: [embed.response({
-					type: "error",
-					description: spanish ? `<@${discord_user.id}> no tiene una cuenta vinculada por \`/userbind\`.` :
-						`<@${discord_user.id}> doesn't have a linked account through \`/userbind\`.`,
-					interaction: interaction
-				})]
-			})
-			else id = db_get.uid
+		let response = spanish ? languages.es : languages.en
 
-		}
-		if (id || username) {
-			top = await miko.scores({ uid: id || undefined, username: username || undefined, type: "top" })
-		}
-		top = top!
-		if ("error" in top) return await interaction.editReply({
-			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${top.error}\`\`\`` : `An error occurred.\n\n\`\`\`${top.error}\`\`\``, interaction: interaction })]
+		const reply = await interaction.deferReply()
+		let data = await droid.get_response(interaction)
+		if ("error" in data) return await interaction.editReply({
+			embeds: [embed.response({ type: "error", description: response.command.top.error(data.error), interaction: interaction })]
 		})
+		let top = await miko.scores({ type: "top", response: data }) as DroidScoreExtended[]
+
 		if (!top.length) return await interaction.editReply({
 			embeds: [embed.response({
 				type: "error",
-				description: spanish ? `El usuario no ha subido ningún score.` :
-					`The user has no submitted scores.`,
+				description: response.command.top.no_scores,
 				interaction: interaction
 			})]
 		})
-		user = top[0].user!
+		let user = top[0].user!
 
 		const unique = `${interaction.user.id}-${Math.floor(Math.random() * 10000000)}`
 		let index = 0
 		let max_pages = Math.ceil(top.length / 5)
 		const row = create_row(unique, index, max_pages);
 
-		const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button });
+		const collector = reply.createMessageComponentCollector({ componentType: ComponentType.Button });
 		let collector_timeout: NodeJS.Timeout
 		let scores = await miko.score_pagination({ scores: top, page: index, scores_per_page: 5 })
 		let embed_top = await droid.embed.top(user, scores, index)
@@ -127,18 +99,12 @@ export const command: Command = {
 				embed_top = await droid.embed.top(user, scores, index)
 
 				await i.editReply({
-					// content: spanish ?
-					// 	`<:droid_simple:1021473577951821824>  **osu!droid・**Top play #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${top[index].performance.penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
-					// 	: `<:droid_simple:1021473577951821824>  **osu!droid・**Top play #${index + 1} from  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${top[index].performance.penalty ? "-# :warning: Some penalties were found." : ""}`,
 					embeds: [embed_top],
 					components: [row]
 				})
 			}
 		})
 		await interaction.editReply({
-			// content: spanish ?
-			// `<:droid_simple:1021473577951821824>  **osu!droid・**Top play #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${top[index].performance.penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
-			// : `<:droid_simple:1021473577951821824>  **osu!droid・**Top play #${index + 1} from  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${top[index].performance.penalty ? "-# :warning: Some penalties were found." : ""}`,
 			embeds: [embed_top], components: [row]
 		})
 	},

@@ -1,8 +1,12 @@
 import { SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
 import { embed } from "../../functions/messages/embeds"
-import DroidUserBindModel from "../../schemas/osudroid-userbind"
+import DroidUserBindModel from "../../schemas/DroidUserBindSchema"
 import { miko, NewDroidUser, NewDroidResponse } from "miko-modules"
+import en from "../../locales/en"
+import es from "../../locales/es"
+const languages = { en, es };
+
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("userbind")
@@ -19,31 +23,27 @@ export const command: Command = {
 
 	async execute(client, interaction) {
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
+		let response = spanish ? languages.es : languages.en
 		let uid = interaction.options.getInteger("uid")
-		let username = interaction.options.getString("username")	
-		let user: NewDroidUser | { error: string }
-		let data: NewDroidResponse | { error: string }
+		let username = interaction.options.getString("username")
+		let user: NewDroidUser
 		await interaction.deferReply()
 		if (!uid && !username) {
 			return await interaction.editReply({
 				embeds: [embed.response({
 					type: "error",
-					description: spanish ? `Debes especificar un UID o un nombre de usuario.` :
-						`You must specify an UID or an username.`,
+					description: response.command.userbind.no_params,
 					interaction: interaction
 				})]
 			})
-		} else {
-			data = await miko.request({ uid: uid || undefined, username: username || undefined })
-			if ("error" in data) return await interaction.editReply({
-				embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${data.error}\`\`\`` : `An error occurred.\n\n\`\`\`${data.error}\`\`\``, interaction: interaction })]
-			})
-			user = (await miko.user({ response: data }))!
 		}
 
-		if ("error" in user) return await interaction.editReply({
-			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${user.error}\`\`\`` : `An error occurred.\n\n\`\`\`${user.error}\`\`\``, interaction: interaction })]
+		let data = await miko.request({ uid: uid || undefined, username: username || undefined })
+		if ("error" in data) return await interaction.editReply({
+			embeds: [embed.response({ type: "error", description: response.command.userbind.error(data.error), interaction: interaction })]
 		})
+
+		user = await miko.user({ response: data }) as NewDroidUser
 		const user_in_db = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
 		if (!user_in_db) {
 			new DroidUserBindModel({
@@ -67,9 +67,7 @@ export const command: Command = {
 		await interaction.editReply({
 			embeds: [embed.response({
 				type: "success",
-				description: spanish ?
-					`El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  de  <:droid_simple:1021473577951821824>  **osu!droid**  se vinculó correctamente a tu cuenta de Discord.`
-					: `The user  **:flag_${user.region.toLowerCase()}: ${user.username}**  from  <:droid_simple:1021473577951821824>  **osu!droid**  was successfully linked to your Discord account.`,
+				description: response.command.userbind.linked(user),
 				interaction: interaction
 			}).setThumbnail(user.avatar_url)]
 		})

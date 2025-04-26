@@ -3,8 +3,11 @@ import type { Command } from "../../types"
 import { droid } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
 import { create_row } from "../../functions/utils"
-import DroidUserBindModel from "../../schemas/osudroid-userbind"
+import DroidUserBindModel from "../../schemas/DroidUserBindSchema"
 import { DroidScoreExtended, miko, NewDroidUser } from "miko-modules"
+import en from "../../locales/en"
+import es from "../../locales/es"
+const languages = { en, es };
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("recent")
@@ -30,62 +33,30 @@ export const command: Command = {
 
 	async execute(client, interaction) {
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
-		const response = await interaction.deferReply()
-		let id = interaction.options.getInteger("uid")
-		let username = interaction.options.getString("username")
-		let discord_user = interaction.options.getUser("user")
-		let recents: DroidScoreExtended[] | { error: string }
-		let user: NewDroidUser | { error: string }
-		if (!id && !username && !discord_user) {
-			let db_get = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
-			if (!db_get)
-				return await interaction.editReply({
-					embeds: [embed.response({
-						type: "error",
-						description: spanish ? `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.` :
-							`You don't have a linked osu!droid account. Use \`/userbind\`.`,
-						interaction: interaction
-					})]
-				})
-			else id = db_get.uid
-		}
-		if (!id && !username && discord_user) {
-			let db_get = await DroidUserBindModel.findOne({ discord_id: discord_user.id })
-			if (!db_get) return await interaction.editReply({
-				embeds: [embed.response({
-					type: "error",
-					description: spanish ? `<@${discord_user.id}> no tiene una cuenta vinculada por \`/userbind\`.` :
-						`<@${discord_user.id}> doesn't have a linked account through \`/userbind\`.`,
-					interaction: interaction
-				})]
-			})
-			else id = db_get.uid
+		let response = spanish ? languages.es : languages.en
+		const reply = await interaction.deferReply()
+		let data = await droid.get_response(interaction)
 
-		}
-		if (id || username) {
-			recents = await miko.scores({ uid: id || undefined, username: username || undefined, type: "recent" })
-		}
-		recents = recents!
-		if ("error" in recents) return await interaction.editReply({
-			embeds: [embed.response({ type: "error", description: spanish ? `Ocurrió un error.\n\n\`\`\`${recents.error}\`\`\`` : `An error occurred.\n\n\`\`\`${recents.error}\`\`\``, interaction: interaction })]
+		if ("error" in data) return await interaction.editReply({
+			embeds: [embed.response({ type: "error", description: response.command.recent.error(data.error), interaction: interaction })]
 		})
+		let recents = await miko.scores({ type: "recent", response: data }) as DroidScoreExtended[]
 
 		if (!recents.length) return await interaction.editReply({
 			embeds: [embed.response({
 				type: "error",
-				description: spanish ? `El usuario no ha subido ningún score.` :
-					`The user has no submitted scores.`,
+				description: response.command.recent.no_scores, 
 				interaction: interaction
 			})]
 		})
-		user = recents[0].user!
+		let user = recents[0].user!
 		var index = (interaction.options?.getInteger("index") || 1) - 1
 		if (index > recents.length) index = recents.length - 1
 
 		const unique = `${interaction.user.id}-${Math.floor(Math.random() * 10000000)}`
 		const row = create_row(unique, index, recents.length);
 
-		const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button });
+		const collector = reply.createMessageComponentCollector({ componentType: ComponentType.Button });
 		let collector_timeout: NodeJS.Timeout
 		const start_timeout = () => {
 			collector_timeout = setTimeout(() => {
@@ -130,21 +101,16 @@ export const command: Command = {
 
 				await miko.calculate(recents[index])
 				await i.editReply({
-					content: spanish ?
-						`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
-						: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Some penalties were found." : ""}`,
+					content: response.command.recent.score(user, index, recents[index].performance.penalty),
 					embeds: [await droid.embed.score(recents[index])],
 					components: [row]
 				})
 			}
 		})
-
 		await miko.calculate(recents[index])
 		const embed_score = await droid.embed.score(recents[index])
 		await interaction.editReply({
-			content: spanish ?
-				`<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
-				: `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${recents[index].performance.penalty ? "-# :warning: Some penalties were found." : ""}`,
+			content: response.command.recent.score(user, index, recents[index].performance.penalty),
 			embeds: [embed_score], components: [row]
 		})
 	},

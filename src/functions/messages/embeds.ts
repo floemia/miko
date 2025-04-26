@@ -1,5 +1,4 @@
 import { Interaction, EmbedBuilder } from "discord.js"
-import type { Command, GlobClient } from "../../types"
 import { client } from "../../"
 import { EmbedType, EmbedColors } from "./types"
 

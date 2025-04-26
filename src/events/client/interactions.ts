@@ -10,17 +10,11 @@ export const event: Event<"interactionCreate"> = {
 
 			if (command.developer && interaction.user.id != process.env.DEV)
 				return await interaction.reply({
-					content: "Este comando solo lo pueden ejecutar los desarrolladores del bot.",
+					content: "Este comando solo lo puede ejecutar floemia.",
 					ephemeral: true,
 				})
 
 				command.execute(client, interaction)
 		}
-		// else if (interaction.isButton()) {
-		//   const buttonInfo = interaction.customId.split("_")
-		//   const button = client.buttons.get(buttonInfo[0])
-		//   if (!button) return
-		//   button.execute(client, interaction, ...buttonInfo.slice(1))
-		// }
 	},
 }

@@ -1,12 +1,15 @@
-export type DroidTrackingUser = {
-    username: string,
-    uid: number,
-    discord_id: string,
-    guild: string,
-    country: string,
-    last_score: number,
-    timestamp: number
+export type GuildAndOwner = {
+	id: string,
+	owner_id: string
 }
+
+export type DroidTrackingUser = {
+	username: string,
+	uid: number,
+	guilds: GuildAndOwner[],
+	timestamp: Date,
+}
+
 
 export type OsuTrackingUser = {
 	username: string,

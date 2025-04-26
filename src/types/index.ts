@@ -29,3 +29,12 @@ interface Component {
 export interface Button extends Component {
 	execute: (client: GlobClient, interaction: ButtonInteraction, ...args: string[]) => void
 }
+
+export type Color = | 'Red' | 'Orange' | 'Yellow' | 'Green' | 'Blue' | 'Purple' | 'White'
+
+export interface LogCreatorParameters {
+	prefix: string;
+	message: string;
+	color: Color;
+	important?: boolean;
+}

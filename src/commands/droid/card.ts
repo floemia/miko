@@ -3,7 +3,7 @@ import type { Command } from "../../types"
 import { droid } from "../../functions/osu!droid/functions"
 import { embed } from "../../functions/messages/embeds"
 import { unlinkSync } from "fs"
-import DroidUserBindModel from "../../schemas/osudroid-userbind"
+import DroidUserBindModel from "../../schemas/DroidUserBindSchema"
 import { miko } from "miko-modules"
 import { droid as droidModule } from "osu-droid-scraping"
 import { DroidScore } from "../../functions/osu!droid/types"
@@ -35,57 +35,22 @@ export const command: Command = {
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		let response = spanish ? languages.es : languages.en
 		await interaction.deferReply()
-		let id = interaction.options.getInteger("uid")
-		let username = interaction.options.getString("username")
-		let discord_user = interaction.options.getUser("user")
-
-		if (!id && !username && !discord_user) {
-			let db_get = await DroidUserBindModel.findOne({ discord_id: interaction.user.id })
-			if (!db_get)
-				return await interaction.editReply({
-					embeds: [embed.response({
-						type: "error",
-						description: response.command.card.no_link,
-						interaction: interaction
-					})]
-				})
-			else id = db_get.uid
-		}
-		if (!id && !username && discord_user) {
-			let db_get = await DroidUserBindModel.findOne({ discord_id: discord_user.id })
-			if (!db_get) return await interaction.editReply({
-				embeds: [embed.response({
-					type: "error",
-					description: response.command.card.mention_no_link(discord_user.id),
-					interaction: interaction
-				})]
-			})
-			else id = db_get.uid
-
-		}
-		if (id || username) {
-			const request = await miko.request({ uid: id || undefined, username: username || undefined })
-			if ("error" in request) return await interaction.editReply({
-				embeds: [embed.response({ type: "error", description: response.command.card.error(request.error), interaction: interaction })]
-			})
-			id = request.UserId
-		}
-
-		const data: string | { error: string } = await droid.request(id!)
+		let new_data = await droid.get_response(interaction)
+		if ("error" in new_data) return await interaction.editReply({
+			embeds: [embed.response({ type: "error", description: response.command.card.error(new_data.error), interaction: interaction })]
+		})
+		const data: string | { error: string } = await droid.request(new_data.UserId)
 		if (typeof(data) != "string" && "error" in data) return await interaction.editReply({
 			embeds: [embed.response({ type: "error", description: response.command.card.error(data.error), interaction: interaction })]
 		})
 
-		const user = (await droid.user({ uid: id!, response: data }))!
+		const user = (await droid.user({ uid: new_data.UserId!, response: data }))!
 		if ("error" in user) return await interaction.editReply({
 			embeds: [embed.response({ type: "error", description: response.command.card.error(user.error), interaction: interaction })]
 		})
 
 		let scores: DroidScore[] = []
-		const scores_fetch = (await droidModule.scores({ uid: id!, type: "top", response: data }))!
-		if ("error" in scores_fetch) return await interaction.editReply({
-			embeds: [embed.response({ type: "error", description: response.command.card.error(scores_fetch.error), interaction: interaction })]
-		})
+		const scores_fetch = await droidModule.scores({ uid: new_data.UserId!, type: "top", response: data }) as DroidScore[]
 		for (const score of scores_fetch) {
 			scores.push({
 				...score,
@@ -93,12 +58,10 @@ export const command: Command = {
 				color: "#dedede"
 			})
 		}
+
 		const embed_wait = new EmbedBuilder()
 			.setColor(0xdedede)
-			.setDescription(spanish ?
-				`> <:graycheck:903741976061567027> <:droid_simple:1021473577951821824>  **osu!droid・**Creando tarjeta de perfil de  :flag_${user.country.toLowerCase()}:  **${user.username}...**`
-				: `> <:graycheck:903741976061567027> <:droid_simple:1021473577951821824>  **osu!droid・**Creating profile card of  :flag_${user.country.toLowerCase()}:  **${user.username}...**`)
-
+			.setDescription(response.command.card.generating(user))
 
 		await interaction.editReply({ embeds: [embed_wait] })
 

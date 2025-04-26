@@ -1,6 +1,6 @@
 import type { Event, GlobClient } from "../types"
 import { loadFiles } from "../functions/files"
-import { logger } from ".."
+import { utils } from "../utils"
 
 export async function handleEvents(client: GlobClient): Promise<void> {
 	client.events.clear()
@@ -19,12 +19,14 @@ export async function handleEvents(client: GlobClient): Promise<void> {
 				if (event.once) client.once(event.name, execute)
 				else client.on(event.name, execute)
 			}
-		} catch (error) {
-			error_events.push(`${event.name} - ${error}`)
+		} catch (error: any) {
+			utils.log.out({ prefix: "[BOT]", message: `An error has ocurred with the event ${event.name}. Details below.`, color: "Red", important: true })
+			utils.log.err({ prefix: "[BOT][EVENTS]", message: error.stack || "Unknown error" })
+			error_events.push(event.name)
 		}
 	})
-	logger.info(`${client.events.size} event(s) loaded successfully.`, "EVENTS")
+	utils.log.out({ prefix: "[BOT][EVENTS]", message: `${client.events.size} event(s) loaded successfully.`, color: "Green" })
 	if (error_events.length > 0){
-		logger.error(`${error_events.length} event(s) failed to load => ${error_events.join()}`, "EVENTS")
+		utils.log.out({ prefix: "[BOT][EVENTS][WARNING]", message: `${error_events.length} event(s) failed to load. Check the console for more details.`, color: "Yellow", important: true })
 	}
 }
