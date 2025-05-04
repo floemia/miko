@@ -49,3 +49,14 @@ export const create_row = (unique: string, index: number, length: number) => {
 export const format_double_dec = (int: number) => {
 	return int.toLocaleString("en", {minimumFractionDigits:2, maximumFractionDigits: 2})
 }
+
+export const time_formatted = (time: number) => {
+	let minutes = Math.floor(time / 60)
+	let seconds = Math.floor(time % 60)
+	return `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`
+}
+
+export const num_formatted = (num: number) => {
+	const rounded = Math.round(num * 100) / 100;
+	return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(2).replace(/\.?0+$/, '');
+}

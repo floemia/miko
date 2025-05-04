@@ -7,5 +7,5 @@ const DroidRXUserBindSchema = new Schema<DroidUserBind>({
     discord_id: { required: true, type: String }
 })
 
-const DroidUserBindModel = model("osu!droidrx-userbind", DroidRXUserBindSchema)
-export default DroidUserBindModel
+const DroidRXUserBindModel = model("osu!droidrx-userbind", DroidRXUserBindSchema)
+export default DroidRXUserBindModel

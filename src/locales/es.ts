@@ -1,63 +1,67 @@
-import { DroidRXUser, NewDroidUser } from "miko-modules";
-import { DroidUser } from "../functions/osu!droid/types";
+import { DroidRXUser, DroidBanchoUser, DroidUser } from "miko-modules";
 import { DroidTrackingUser } from "../schemas/types";
 
 export default {
 	command: {
 		calculate: {
-			no_cache: "No hay un beatmap en la cache.",
+			no_cache: "No hay ningún beatmap en la caché.",
 			no_beatmap: "El beatmap no existe.",
 		},
 		card: {
-			error: (error: string) => `Ocurrió un error.\n> ${error}`,
+			error: (error: string) => `\`\`\`diff\n- Ha ocurrido un error.\n\`\`\`\n> ${error}`,
+			no_params: `Debes proporcionar un usuario para generar una tarjeta de perfil.`,
 			no_link: "No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.",
-			no_params: `Debes especificar un usuario para generar una tarjeta de perfil.`,
-			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada por \`/userbind\`.`,
+			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada mediante \`/userbind\`.`,
 			no_user: "El usuario no existe.",
-			generating: (user: DroidUser) => `> <:graycheck:903741976061567027> <:droid_simple:1021473577951821824>  **osu!droid・**Creando tarjeta de perfil de  :flag_${user.country.toLowerCase()}:  **${user.username}...**`
+			generating: (user: DroidUser) => `> <:graycheck:903741976061567027> <:droid_simple:1021473577951821824>  **osu!droid・**Creando tarjeta de perfil de  **${user.toString()}...**`
 		},
 		recent: {
-			error: (error: string) => `Ocurrió un error.\n> ${error}`,
-			no_params: `Debes especificar un usuario para obtener scores recientes.`,
+			error: (error: string) => `\`\`\`diff\n- Ha ocurrido un error.\n\`\`\`\n> ${error}`,
+			no_params: `Debes proporcionar un usuario para obtener sus scores recientes.`,
 			no_link: `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.`,
-			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada por \`/userbind\`.`,
+			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada mediante \`/userbind\`.`,
 			no_user: "El usuario no existe.",
-			no_scores: (user: NewDroidUser) => `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  no ha subido ningún score.`,
-			score: (user: NewDroidUser, index: number, penalty: boolean = false) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  :flag_${user.region.toLowerCase()}:  **${user.username}**:\n${penalty ? "-# :warning: Algunas penalizaciones fueron encontradas." : ""}`
+			no_scores: (user: DroidUser) => `El usuario  **${user.toString()}** no tiene scores registrados.`,
+			score: (user: DroidUser, index: number, penalty?: boolean) =>{
+				if (user instanceof DroidRXUser) return `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  **${user.toString()}**:`
+				return `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  **${user.toString()}**:\n${penalty ? "-# :warning: Se detectaron penalizaciones." : ""}`		
+			}
 		},
 		top: {
-			error: (error: string) => `Ocurrió un error.\n> ${error}`,
-			no_params: `Debes especificar un usuario para obtener las top plays.`,
+			error: (error: string) => `Ha ocurrido un error.\n> ${error}`,
+			no_params: `Debes proporcionar un usuario para obtener sus mejores scores.`,
 			no_link: `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.`,
-			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada por \`/userbind\`.`,
+			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada mediante \`/userbind\`.`,
 			no_user: "El usuario no existe.",
-			no_scores: (user: NewDroidUser) => `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  no ha subido ningún score.`,
+			no_scores: (user: DroidUser) => `El usuario  **${user.toString()}** no tiene scores registrados.`,
 		},
 		userbind: {
-			error: (error: string) => `Ocurrió un error.\n> ${error}`,
-			no_params: "Debes proporcionar al menos uno de los siguientes parámetros: UID o nombre de usuario",
+			error: (error: string) => `Ha ocurrido un error.\n> ${error}`,
+			no_params: "Debes proporcionar al menos uno de los siguientes parámetros: UID o nombre de usuario.",
 			no_user: "El usuario no existe.",
-			linked: (user: NewDroidUser | DroidRXUser) => {
-				if ("online" in user) return `El usuario  **:flag_${user.country.toLowerCase()}: ${user.name}**  se vinculó correctamente a tu cuenta de Discord.`
-				return `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  se vinculó correctamente a tu cuenta de Discord.`
-			},
+			linked: (user: DroidUser) => `El usuario  **${user.toString()}**  fue vinculado exitosamente a tu cuenta de Discord.`,
 		},
 		tracking: {
-			error: (error: string) => `Ocurrió un error.\n> ${error}`,
+			error: (error: string) => `Ha ocurrido un error.\n> ${error}`,
 			no_user: "El usuario no existe.",
-			already_in: (user: NewDroidUser) => `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  ya está en el sistema de tracking de este servidor.`,
-			double_user: (user: NewDroidUser) => `Ya tienes un perfil en el sistema de tracking de este servidor:  **:flag_${user.region.toLowerCase()}: ${user.username}** \n> Utiliza el comando \`/tracking droid eliminar\` primero.`,
-			not_yours: (user: NewDroidUser) => `No puedes eliminar a  **:flag_${user.region.toLowerCase()}:  ${user.username}**  del sistema del servidor (No eres el dueño o no tienes permisos suficientes).`,
-			success: (user: NewDroidUser) => `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}** fue añadido al sistema de tracking de  <:droid_simple:1021473577951821824>  **osu!droid**  del servidor.`,
-			not_found: (user: NewDroidUser) => `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  no fue encontrado en el sistema de tracking de este servidor.`,
-			deleted: (user: NewDroidUser) => `El usuario  **:flag_${user.region.toLowerCase()}: ${user.username}**  fue eliminado del sistema de tracking de  <:droid_simple:1021473577951821824>  **osu!droid**  del servidor.`,
+			already_in: (user: DroidUser) => `El usuario  **${user.toString()}**  ya está siendo rastreado.`,
+			double_user: (user: DroidUser) => `Ya tienes un perfil en el sistema para este servidor:  **${user.toString()}** \n> Usa \`/tracking droid delete\` primero.`,
+			not_yours: (user: DroidUser) => `No puedes eliminar a  **${user.toString()}**  del sistema de seguimiento de puntuaciones de este servidor (no eres el propietario o no tienes suficientes permisos).`,
+			success: (user: DroidUser) => `El usuario  **${user.toString()}** fue añadido exitosamente al sistema de seguimiento de puntuaciones de  <:droid_simple:1021473577951821824>  **osu!droid**  en este servidor.`,
+			not_found: (user: DroidUser) => `El usuario  **${user.toString()}**  no fue encontrado en el sistema de seguimiento de puntuaciones de este servidor.`,
+			deleted: (user: DroidUser) => `El usuario  **${user.toString()}**  fue eliminado del sistema de seguimiento de puntuaciones de  <:droid_simple:1021473577951821824>  **osu!droid**  en este servidor.`,
 		},
+		server: {
+			error: (error: string) => `Ha ocurrido un error.\n> ${error}`,
+			success_bancho: () => `Tu servidor predeterminado ahora es iBancho.`,
+			success_rx: () => `Tu servidor predeterminado ahora es osudroid!relax.`,
+		}
 	},
 	error: {
-		general: "Ocurrió un error.",
 		no_user: "El usuario no existe.",
+		general: "Ha ocurrido un error.",
 		no_params: "Debes proporcionar al menos uno de los siguientes parámetros: UID, nombre de usuario o usuario de Discord.",
 		no_linked: "No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.",
-		mention_no_linked: (user: string) => `<@${user}> no tiene una cuenta vinculada por \`/userbind\`.`,
+		mention_no_linked: (user: string) => `<@${user}> no tiene una cuenta vinculada mediante \`/userbind\`.`,
 	}
 }

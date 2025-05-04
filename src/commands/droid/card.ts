@@ -2,12 +2,13 @@ import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js
 import type { Command } from "../../types"
 import { droid } from "../../functions/osu!droid/functions"
 import { unlinkSync } from "fs"
-import { droid as droidModule } from "osu-droid-scraping"
-import { DroidScore, DroidUser } from "../../functions/osu!droid/types"
+import { droid as droidModule  } from "osu-droid-scraping"
+import { DroidScore, DroidUser as OldDroidUser } from "../../functions/osu!droid/types"
 
 import en from "../../locales/en"
 import es from "../../locales/es"
 import { utils } from "../../utils"
+import { DroidBanchoUser } from "miko-modules"
 const languages = { en, es };
 
 export const command: Command = {
@@ -32,19 +33,23 @@ export const command: Command = {
 
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		let response = spanish ? languages.es : languages.en
-		await interaction.deferReply()
-		let new_data = await droid.get_response(interaction)
-		if ("error" in new_data) return await interaction.editReply({
-			embeds: [utils.embeds.error({ description: new_data.error, interaction: interaction, spanish: spanish })]
-		})
-		const data: string | { error: string } = await droid.request(new_data.UserId)
-		if (typeof(data) != "string" && "error" in data) return await interaction.editReply({
-			embeds: [utils.embeds.error({ description: data.error, interaction: interaction, spanish: spanish })]
-		})
+		const reply = await interaction.deferReply()
+		let user: DroidBanchoUser | undefined
+		try { 
+			user = await droid.get_droid_user(interaction, "ibancho") as DroidBanchoUser | undefined;
+		} catch(error: any) {
+			const embed = utils.embeds.error({ description: error.message, interaction, spanish });
+			return await reply.edit({
+				embeds: [embed]
+			});
+		}
 
-		const user = await droid.user({ uid: new_data.UserId!, response: data }) as DroidUser
+		if (!user) return await reply.edit({
+			embeds: [utils.embeds.error({ description: response.command.card.no_user, interaction, spanish })]
+		})
 		let scores: DroidScore[] = []
-		const scores_fetch = await droidModule.scores({ uid: new_data.UserId!, type: "top", response: data }) as DroidScore[]
+		const user_old = (await droid.user({ uid: user.id }))! as OldDroidUser
+		const scores_fetch = await droidModule.scores({ uid: user.id, type: "top" }) as DroidScore[]
 		for (const score of scores_fetch) {
 			scores.push({
 				...score,
@@ -57,12 +62,12 @@ export const command: Command = {
 			.setColor(0xdedede)
 			.setDescription(response.command.card.generating(user))
 
-		await interaction.editReply({ embeds: [embed_wait] })
+		await reply.edit({ embeds: [embed_wait] })
 
-		const embed_card = await droid.embed.card(user, scores)
+		const embed_card = await droid.embed.card(user_old, scores)
 		const attachment = new AttachmentBuilder(`./${user.id}-${user.username}.png`, { name: `${user.id}-${user.username}.png` });
 
-		await interaction.editReply({ embeds: [embed_card], files: [attachment] })
+		await reply.edit({ embeds: [embed_card], files: [attachment] })
 		unlinkSync(`./${user.id}-${user.username}.png`)
 	},
 }

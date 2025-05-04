@@ -2,7 +2,7 @@ import { InteractionContextType, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../types"
 import { droid } from "../functions/osu!droid/functions"
 import { embed } from "../functions/messages/embeds"
-import { DroidScoreExtended, miko, NewDroidUser } from "miko-modules"
+import { DroidBanchoUser } from "miko-modules"
 import en from "../locales/en"
 import es from "../locales/es"
 import { utils } from "../utils"
@@ -52,15 +52,21 @@ export const command: Command = {
 
 		if (!interaction.guild || !interaction.channel) return
 		if (subcommandgroup == "droid") {
-			let data = await droid.get_response(interaction)
-			if ("error" in data) return await interaction.editReply({
-				embeds: [utils.embeds.error({ description: data.error, interaction: interaction, spanish: spanish })]
+			let user: DroidBanchoUser | undefined;
+			try { 
+				user = await droid.get_droid_user(interaction, "ibancho") as DroidBanchoUser | undefined;
+			} catch(error: any) {
+				const embed = utils.embeds.error({ description: error.message, interaction, spanish });
+				return await interaction.editReply({
+					embeds: [embed]
+				});
+			}
+			if (!user) return await interaction.editReply({
+				embeds: [utils.embeds.error({ description: response.command.tracking.no_user, interaction, spanish })]
 			})
+			const scores = await user.scores.recent();
+			let score = scores[0];
 
-			const scores = await miko.scores({ type: "recent", response: data }) as DroidScoreExtended[]
-			let score = scores[0]
-
-			let user = await miko.user({ response: data }) as NewDroidUser
 			if (subcommand == "add") return droid.tracking.add(user, score, interaction)
 			else return droid.tracking.remove(user!, interaction)
 		}

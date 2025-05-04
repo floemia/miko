@@ -18,6 +18,7 @@ export interface Event<T extends keyof ClientEvents> {
 export interface Command {
 	cooldown?: number
 	data: SharedSlashCommand
+	disabled?: boolean
 	developer?: boolean
 	execute: (client: GlobClient, interaction: ChatInputCommandInteraction) => void
 }

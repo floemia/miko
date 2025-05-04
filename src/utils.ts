@@ -86,6 +86,7 @@ const getHexColor = (color: Color) => {
 const embeds = {
 	error: (params: { description: string, interaction: ChatInputCommandInteraction, spanish: boolean }) => {
 		return new EmbedBuilder()
+			.setTitle(params.spanish ? "Ocurrió un error." : "An error has ocurred.")
 			.setAuthor({ name: `${params.interaction.user.username}`, iconURL: params.interaction.user.displayAvatarURL() })
 			.setDescription(`> ${getCircleEmoji("Red")}   ${params.description}`)
 			.setFooter({ text: `${client.user.displayName}`, iconURL: client.user.displayAvatarURL() })
@@ -109,4 +110,11 @@ const embeds = {
 			.setTimestamp()
 	}
 }
-export const utils = { log, getCircleEmoji, getHexColor, embeds };
+
+const pagination = (params: { array: any[], page: number, elements_per_page: number }) => {
+	if (!params.array.length) return []
+	const start = params.elements_per_page * params.page;
+	const end = start + params.elements_per_page;
+	return params.array.slice(start, end)
+}
+export const utils = { log, getCircleEmoji, getHexColor, embeds, pagination };

@@ -29,6 +29,11 @@ export type DroidUserBind = {
     discord_id: string,
 }
 
+export type DroidDefaultServer = {
+	discord_id: string,
+	server: "ibancho" | "rx",
+}
+
 export type GuildConfig = {
     id: string,
 	tracking_enabled: boolean,

@@ -2,10 +2,11 @@ import { ButtonInteraction, ComponentType, SlashCommandBuilder } from "discord.j
 import type { Command } from "../../types"
 import { droid } from "../../functions/osu!droid/functions"
 import { create_row } from "../../functions/utils"
-import { DroidScoreExtended, miko, NewDroidUser } from "miko-modules"
+import { DroidBanchoScore, DroidBanchoUser, DroidRXScore, DroidRXUser } from "miko-modules"
 import en from "../../locales/en"
 import es from "../../locales/es"
 import { utils } from "../../utils"
+import DiscordUserDefaultServerModel from "../../schemas/DiscordUserDefaultServerSchema"
 const languages = { en, es };
 export const command: Command = {
 	data: new SlashCommandBuilder()
@@ -23,31 +24,58 @@ export const command: Command = {
 		.addUserOption(opt => opt
 			.setName("user")
 			.setDescription("Discord user bound to the osu!droid profile.").setDescriptionLocalization("es-ES", "Usuario de Discord vinculado al perfil de osu!droid.")
+		)
+		.addStringOption(opt => opt
+			.setName("server")
+			.setDescription("The server to fetch the information from. Defaults to iBancho.").setDescriptionLocalization("es-ES", "El servidor desde el cual conseguir la información. Por defecto, iBancho.")
+			.addChoices(
+				{ name: "iBancho", value: "ibancho" },
+				{ name: "osudroid!relax", value: "rx" },
+			)
 		),
 	async execute(client, interaction) {
 		const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 		let response = spanish ? languages.es : languages.en
-
-		const reply = await interaction.deferReply()
-		let data = await droid.get_response(interaction)
-		if ("error" in data) return await interaction.editReply({
-			embeds: [utils.embeds.error({ description: data.error, interaction: interaction, spanish: spanish })]
+		const reply = await interaction.deferReply()		
+		let server = interaction.options.getString("server") || undefined;
+		if (!server) {
+			let server_db = await DiscordUserDefaultServerModel.findOne({ discord_id: interaction.user.id })
+			if (server_db) {
+				server = server_db.server
+			} else server = "ibancho"
+		}
+		let user: DroidBanchoUser | DroidRXUser | undefined;
+		try { 
+			user = await droid.get_droid_user(interaction, server);
+		} catch(error: any) {
+			const embed = utils.embeds.error({ description: error.message, interaction, spanish });
+			return await reply.edit({
+				embeds: [embed]
+			});
+		}
+		if (!user) return await reply.edit({
+			embeds: [utils.embeds.error({ description: response.command.recent.no_user, interaction, spanish })]
 		})
-		let user = await miko.user({ response: data }) as NewDroidUser
-		let top = await miko.scores({ type: "top", response: data }) as DroidScoreExtended[]
-
-		if (!top.length) return await interaction.editReply({
-			embeds: [utils.embeds.error({ description: response.command.top.no_scores(user), interaction: interaction, spanish: spanish })]
+		let top_plays: DroidBanchoScore[] | DroidRXScore[];
+		try {
+			top_plays = await user.scores.top()
+		} catch(error: any) {
+			const embed = utils.embeds.error({ description: error.message, interaction, spanish });
+			return await reply.edit({
+				embeds: [embed]
+			});
+		}
+		if (!top_plays.length) return await reply.edit({
+			embeds: [utils.embeds.error({ description: response.command.recent.no_scores(user), interaction, spanish })]
 		})
-
 		const unique = `${interaction.user.id}-${Math.floor(Math.random() * 10000000)}`
 		let index = 0
-		let max_pages = Math.ceil(top.length / 5)
+		let max_pages = Math.ceil(top_plays.length / 5)
 		const row = create_row(unique, index, max_pages);
 
 		const collector = reply.createMessageComponentCollector({ componentType: ComponentType.Button });
 		let collector_timeout: NodeJS.Timeout
-		let scores = await miko.score_pagination({ scores: top, page: index, scores_per_page: 5 })
+		let scores = utils.pagination({ array: top_plays, page: index, elements_per_page: 5 })
 		let embed_top = await droid.embed.top(user, scores, index)
 		const start_timeout = () => {
 			collector_timeout = setTimeout(() => {
@@ -90,7 +118,7 @@ export const command: Command = {
 				row.components[2].setLabel(`${index + 1}/${max_pages}`)
 				row.components[4].setDisabled(index == max_pages - 1 ? true : false)
 
-				scores = await miko.score_pagination({ scores: top, page: index, scores_per_page: 5 })
+				scores = await utils.pagination({ array: top_plays, page: index, elements_per_page: 5 })
 				embed_top = await droid.embed.top(user, scores, index)
 
 				await i.editReply({

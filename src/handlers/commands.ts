@@ -1,12 +1,9 @@
 import type { RESTPostAPIApplicationCommandsJSONBody } from "discord.js"
-import { Table } from "tablifier"
 import type { Command, GlobClient } from "../types"
 import { loadFiles } from "../functions/files"
 import { utils } from "../utils"
 
 export async function handleCommands(client: GlobClient): Promise<void> {
-	const table = new Table(" Slash Command ", " Status ")
-
 	client.commands.clear()
 	const commands: RESTPostAPIApplicationCommandsJSONBody[] = []
 	const error_commands: string[] = []

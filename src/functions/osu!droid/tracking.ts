@@ -3,13 +3,13 @@ import { client } from "../..";
 import DroidAccountTrackModel from "../../schemas/DroidAccountTrackSchema";
 import GuildConfigModel from "../../schemas/GuildConfigSchema";
 import { embed } from "../messages/embeds";
-import { NewDroidUser, DroidScoreExtended } from "miko-modules";
+import { DroidBanchoScore, DroidUser, DroidScore } from "miko-modules";
 import en from "../../locales/en"
 import es from "../../locales/es"
 import { utils } from "../../utils";
 const languages = { en, es };
 
-const add = async (user: NewDroidUser, last_score: DroidScoreExtended | undefined, interaction: ChatInputCommandInteraction) => {
+const add = async (user: DroidUser, last_score: DroidScore, interaction: ChatInputCommandInteraction) => {
 	const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 	let response = spanish ? languages.es : languages.en
 	const guild_id = interaction.guild!.id;
@@ -59,14 +59,14 @@ const add = async (user: NewDroidUser, last_score: DroidScoreExtended | undefine
 			embeds: [embed.logs({
 				type: "success",
 				title: "Se añadió un usuario al sistema de tracking de osu!droid.",
-				description: `El usuario **:flag_${user.region.toLowerCase()}: ${user.username}** fue añadido por <@${user_id}>`,
+				description: `El usuario **${user.toString()}** fue añadido por <@${user_id}>`,
 				interaction
 			})]
 		});
 	}
 };
 
-const remove = async (user: NewDroidUser, interaction: ChatInputCommandInteraction) => {
+const remove = async (user: DroidUser, interaction: ChatInputCommandInteraction) => {
 	const spanish = ["es-ES", "es-419"].includes(interaction.locale)
 	let response = spanish ? languages.es : languages.en
 	const guild_id = interaction.guild!.id;
@@ -99,7 +99,7 @@ const remove = async (user: NewDroidUser, interaction: ChatInputCommandInteracti
 			embeds: [embed.logs({
 				type: "warn",
 				title: "Se eliminó a un usuario del sistema de tracking de osu!droid.",
-				description: `El usuario  **:flag_${user.region.toLowerCase()}:  ${user.username}**  fue eliminado por <@${interaction.user.id}>`,
+				description: `El usuario  **${user.toString()}**  fue eliminado por <@${interaction.user.id}>`,
 				interaction: interaction
 			})]
 		})
