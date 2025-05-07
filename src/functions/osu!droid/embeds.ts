@@ -9,6 +9,18 @@ import { DroidCalculatedData, DroidScoreExtended, DroidRXScore, miko, DroidScore
 import { v2 } from "osu-api-extended";
 import { MapInfo } from "@rian8337/osu-base";
 
+const countryCodeToEmoji = (code: string): string => {
+	const countryCode = code.toUpperCase();
+	if (!/^[A-Z]{2}$/.test(countryCode)) return '';
+
+	// Convert each character to its regional indicator symbol
+	const OFFSET = 0x1F1E6 - 'A'.charCodeAt(0);
+	return countryCode
+		.split('')
+		.map(char => String.fromCodePoint(char.charCodeAt(0) + OFFSET))
+		.join('');
+}
+
 const score = async (score: DroidScore, user: DroidUser) => {
 	let iBancho = (score instanceof DroidBanchoScore)
 	const rank = await osu.emoji.rank(score.rank)
@@ -23,45 +35,49 @@ const score = async (score: DroidScore, user: DroidUser) => {
 	if (score instanceof DroidRXScore) pp_string = `${score.pp!.toFixed(2)}pp`
 	let diff_string = ""
 	const embed = new EmbedBuilder()
-	let user_string = "" 
+	let status_emoji = osu.emoji.status(-2);
+	let user_string = ""
 	if (user instanceof DroidBanchoUser) {
 		let dpp = user.stats.dpp.toLocaleString("en-US", { maximumFractionDigits: 2 });
 		let global_rank = user.stats.rank.global.toLocaleString("en-US");
 		user_string = `${user.username}・${dpp}dpp (#${global_rank}`
 		if (user.country) {
-			user_string += ` ${user.country.toUpperCase()}${user.stats.rank.country})`
+			user_string += ` ${countryCodeToEmoji(user.country)} ${user.stats.rank.country})`
 		} else user_string += ")"
 	} else if (user instanceof DroidRXUser) {
-		user_string = `${user.username} ${format_double_dec(user.stats.pp)}pp (#${user.stats.rank})`
+		user_string = `${user.username} ${user.stats.pp}pp (#${user.stats.rank})`
 	}
 	if (score.beatmap) {
-		embed.setImage(`https://assets.ppy.sh/beatmaps/${score.beatmap.beatmapSetId}/covers/cover.jpg`)
+		embed.setURL(`https://assets.ppy.sh/beatmaps/${score.beatmap.beatmapSetId}/covers/cover.jpg`)
 		const diff = score.difficulty!
 		const stars_string = diff.stars.droid ? `${diff.stars.osu!.toFixed(2)}⭐` : ''
 		const bpm = num_formatted(diff.bpm!)
-		const total_length = time_formatted(score.beatmap.totalLength! / score.getFinalSpeed());
 		let ar = num_formatted(diff.ar!)
 		let od = num_formatted(diff.od!)
 		let cs = num_formatted(diff.cs!)
 		let hp = num_formatted(diff.hp!)
 		let mods = score.modsString()
+		status_emoji = osu.emoji.status(score.beatmap.approved);
 		if (score instanceof DroidRXScore) mods = mods.replace("+", "+RX");
 		title = `${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] [${stars_string}] ${mods}`
 		combo += `/${score.beatmap.maxCombo!.toLocaleString("en-US")}x`;
-		if (score instanceof DroidBanchoScore) pp_string += `${score.dpp!.toFixed(2)}dpp | ${score.pp!.toFixed(2)}pp`
+		if (score instanceof DroidBanchoScore) pp_string += `${score.dpp!.toFixed(2)}dpp — ${score.pp!.toFixed(2)}pp`
 		if (!score.isFC()) {
 			const score_fc = await DroidScore.ifFC(score)
-			pp_string += `** (${score_fc.pp!.toFixed(2)}pp ➜ FC ${format_double_dec(score_fc.accuracy * 100)}%)**`
-		}
-		diff_string = `\`BPM: ${bpm} (${total_length})\`・\`AR: ${ar}  OD: ${od}  CS: ${cs}  HP: ${hp}\``
+			pp_string += `** (${score instanceof DroidBanchoScore ? `${score_fc.dpp?.toFixed(2)}dpp — ` : ``}${score_fc.pp!.toFixed(2)}pp ➜ FC ${format_double_dec(score_fc.accuracy * 100)}%)`
+		} else pp_string += `**`
+		diff_string = `\`BPM: ${bpm} AR: ${ar} OD: ${od} CS: ${cs} HP: ${hp}\``
 		embed.setURL(`https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}`)
-	} 
-	let description = `> ${rank}**・**${total_score}**・${accuracy}%・**${combo}`
-	if (score.beatmap) description += `\n> **${pp_string}・**${statistics}\n> ${diff_string}`
-	else description += `**・**${statistics}`
-	embed.setTitle(title);
+		embed.setImage(`https://assets.ppy.sh/beatmaps/${score.beatmap.beatmapSetId}/covers/cover.jpg`)
+	}
+
+	let description = ""
+	if (!score.beatmap) description = `> ${rank}**・${total_score}・${accuracy}%・**${statistics}**・${combo}**`
+	else description = `> ${rank}**・${pp_string}\n> **${total_score}・**${statistics}**・${combo}**\n> ${diff_string}`
+
+	embed.setTitle(`**${status_emoji} ${title}**`);
 	embed.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.user_url })
-	embed.setDescription(description)
+	embed.setDescription(description);
 	embed.setFooter({ text: `Server: ${server_name}`, iconURL: server_icon })
 	embed.setTimestamp(score.played_date);
 	embed.setColor(Number(`0x${score.color.slice(1)}`))
@@ -180,7 +196,7 @@ const top = async (user: DroidUser, scores: DroidScore[], page: number) => {
 
 	for (const score of scores) {
 		if (score instanceof DroidRXScore) {
-			if (!score.beatmap){
+			if (!score.beatmap) {
 				const beatmapInfo = await MapInfo.getInformation(score.hash)
 				if (!beatmapInfo) continue;
 				score.beatmap = beatmapInfo;
@@ -191,7 +207,7 @@ const top = async (user: DroidUser, scores: DroidScore[], page: number) => {
 		const pp = iBancho ? `${score.dpp!.toFixed(2)}dpp` : `${score.pp!.toFixed(2)}pp`
 		const accuracy = `${format_double_dec(score.accuracy * 100)}%`
 		const combo = `${score.combo.toLocaleString("en-US")}x`
-		
+
 		let score_amount = Intl.NumberFormat('en-US', {
 			notation: "compact",
 			maximumFractionDigits: 1
@@ -212,12 +228,12 @@ const top = async (user: DroidUser, scores: DroidScore[], page: number) => {
 		if (user.country) {
 			user_string += ` ${user.country.toUpperCase()}${user.stats.rank.country.toLocaleString("en-US")})`
 		} else user_string += ")"
-		
+
 	} else if (user instanceof DroidRXUser) {
 		user_string += `${user.stats.pp.toLocaleString("en-US")}pp `;
 		user_string += `(#${user.stats.rank.toLocaleString("en-US")})`
 	}
-	embed.setAuthor({ name: user_string, iconURL: user.avatar_url , url: user.user_url })
+	embed.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.user_url })
 	embed.setColor(Number(`0x${user.color.slice(1)}`))
 	embed.setThumbnail(user.avatar_url)
 	embed.setTimestamp()

@@ -76,8 +76,21 @@ export const rank = async (rank: string) => {
 			return client.emojis.cache.get('966098768908914778')
 	}
 }
+export const status = (status: number) => {
+	switch (status) {
+		case 4:
+			return client.emojis.cache.get("1369494384613130320")
+		case 3:
+		case 2:
+			return client.emojis.cache.get("1369496051467288656")
+		case 1:
+			return client.emojis.cache.get("1369494433288032426")
+		default:
+			return client.emojis.cache.get("1369498405440589895")
+	}
+}
 
-const emoji = { rank, difficulty }
+const emoji = { rank, difficulty, status }
 const gamemode = { full }
 
 export const osu = { emoji, gamemode }

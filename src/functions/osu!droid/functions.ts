@@ -10,7 +10,6 @@ import { DroidBanchoUser, DroidRXUser, miko } from "miko-modules"
 import { ChatInputCommandInteraction } from "discord.js"
 import en from "../../locales/en"
 import es from "../../locales/es"
-import { BeatmapDifficulty, ModCustomSpeed, ModDifficultyAdjust, ModDoubleTime, ModHalfTime, ModMap, ModNightCore } from "@rian8337/osu-base"
 import DiscordUserDefaultServerModel from "../../schemas/DiscordUserDefaultServerSchema"
 const languages = { en, es };
 
@@ -23,7 +22,7 @@ const user = async (params: DroidUserParameters): Promise<DroidUser | { error: s
 }
 
 const get_droid_user = async (interaction: ChatInputCommandInteraction, server?: string) => {
-	let ibancho = ( server == "ibancho")
+	let ibancho = server == undefined ? "ibancho" : ( server == "ibancho")
 	let spanish = ["es-ES", "es-419"].includes(interaction.locale)
 	let response = spanish ? languages.es : languages.en
 	let uid = interaction.options.getInteger("uid") || undefined

@@ -16,4 +16,3 @@ client.cooldowns = new Collection();
 handleEvents(client)
 client.login(process.env.TOKEN)
 
-
