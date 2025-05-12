@@ -84,6 +84,7 @@ export const command: Command = {
 					button.setDisabled(true)
 				}
 				interaction.editReply({ components: [row] })
+				setTimeout(() => { interaction.editReply({ components: [] }) }, 5000)
 			}, 120000)
 		}
 

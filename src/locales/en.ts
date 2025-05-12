@@ -23,8 +23,8 @@ export default {
 			no_user: "The user does not exist.",
 			no_scores: (user: DroidUser) => `The user  **${user.toString()}** has no submitted scores.`,
 			score: (user: DroidUser, index: number, penalty?: boolean) =>{
-				if (user instanceof DroidRXUser) return `<:droid_simple:1021473577951821824>  **osu!droid・**Score #${index + 1} from  **${user.toString()}**:`
-				return `<:droid_simple:1021473577951821824>  **osu!droid・**Score #${index + 1} from  **${user.toString()}**:\n${penalty ? "-# :warning: Some penalties were found." : ""}`		
+				if (user instanceof DroidRXUser) return `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}**:`
+				return `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}**:\n${penalty ? "-# :warning: Some penalties were found." : ""}`		
 			}
 		},
 		top: {

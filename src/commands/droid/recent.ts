@@ -87,6 +87,7 @@ export const command: Command = {
 					button.setDisabled(true)
 				}
 				interaction.editReply({ components: [row] })
+				setTimeout(() => { interaction.editReply({ components: [] }) }, 5000)
 			}, 120000)
 		}
 
@@ -122,7 +123,7 @@ export const command: Command = {
 				row.components[4].setDisabled(index == recents.length - 1 ? true : false)
 				if (!recents[index].calculated) await recents[index].calculate();
 				await i.editReply({
-					//content: response.command.recent.score(user, index, recents[index].performance.penalty),
+					content: response.command.recent.score(user, index),
 					embeds: [await droid.embed.score(recents[index], user)],
 					components: [row]
 				})
@@ -131,7 +132,7 @@ export const command: Command = {
 		if (!recents[index].calculated) await recents[index].calculate();
 		const embed_score = await droid.embed.score(recents[index], user)
 		await interaction.editReply({
-			//content: response.command.recent.score(user, index, recents[index].performance.penalty),
+			content: response.command.recent.score(user, index),
 			embeds: [embed_score], components: [row]
 		})
 	},

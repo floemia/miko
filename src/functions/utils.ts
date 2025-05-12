@@ -60,3 +60,5 @@ export const num_formatted = (num: number) => {
 	const rounded = Math.round(num * 100) / 100;
 	return rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(2).replace(/\.?0+$/, '');
 }
+
+
