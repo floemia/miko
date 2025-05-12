@@ -3,9 +3,9 @@ import { droid } from "./functions";
 import { osu } from "../osu/functions";
 import { client } from "../..";
 import * as fs from "fs"
-import { average_color, format_double_dec, num_formatted, time_formatted } from "../utils";
+import { format_double_dec, num_formatted, time_formatted } from "../utils";
 import { DroidUser as OldDroidUser, DroidScore as OldDroidScore } from "./types";
-import { DroidCalculatedData, DroidScoreExtended, DroidRXScore, miko, DroidScore, DroidUser, DroidBanchoScore, DroidBanchoUser, DroidRXUser } from "miko-modules";
+import { DroidCalculatedData, DroidRXScore, DroidScore, DroidUser, DroidBanchoScore, DroidBanchoUser, DroidRXUser } from "miko-modules";
 import { v2 } from "osu-api-extended";
 import { MapInfo } from "@rian8337/osu-base";
 
@@ -65,7 +65,7 @@ const score = async (score: DroidScore, user: DroidUser) => {
 		if (score instanceof DroidBanchoScore) pp_string += `${score.dpp!.toFixed(2)}dpp | ${score.pp!.toFixed(2)}pp`
 		if (!score.isFC()) {
 			const score_fc = await DroidScore.ifFC(score);
-			if_fc_string = ` **(${score instanceof DroidBanchoScore ? `${score_fc.dpp?.toFixed(2)}dpp | ` : ``}${score_fc.pp!.toFixed(2)}pp ➜ FC ${format_double_dec(score_fc.accuracy * 100)}%)`
+			if_fc_string = ` (${score instanceof DroidBanchoScore ? `${score_fc.dpp?.toFixed(2)}dpp | ` : ``}${score_fc.pp!.toFixed(2)}pp ➜ FC ${format_double_dec(score_fc.accuracy * 100)}%)`
 		}
 		diff_string = `\`BPM: ${bpm} AR: ${ar} OD: ${od} CS: ${cs} HP: ${hp}\``
 		embed.setURL(`https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}`)
@@ -74,7 +74,7 @@ const score = async (score: DroidScore, user: DroidUser) => {
 
 	let description = ""
 	if (!score.beatmap) description = `> ${rank}**・${total_score}・${accuracy}%・**${statistics}**・${combo}**`
-	else description = `> ${rank}**・${pp_string}・${accuracy}%${if_fc_string}\n> **${total_score}・**${statistics}**・${combo}**\n> ${diff_string}`
+	else description = `> ${rank}**・${pp_string}・${accuracy}%**${if_fc_string}\n> **${total_score}・**${statistics}**・${combo}**\n> ${diff_string}`
 
 	embed.setTitle(`**${status_emoji} ${title}**`);
 	embed.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.user_url })
