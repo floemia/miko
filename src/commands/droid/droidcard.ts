@@ -13,7 +13,7 @@ const languages = { en, es };
 
 export const command: Command = {
 	data: new SlashCommandBuilder()
-		.setName("card")
+		.setName("droidcard")
 		.setDescription("osu!droid - (BETA) Generates a card with an osu!droid profile details.")
 		.setDescriptionLocalization("es-ES", "osu!droid - (BETA) Genera una tarjeta con los datos de un perfil de osu!droid.")
 		.addIntegerOption(opt => opt

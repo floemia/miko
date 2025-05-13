@@ -6,7 +6,12 @@ import { utils } from "../utils"
 export const osu_api_connect = async () => {
 	if (process.env.OSU_CLIENT_ID && process.env.OSU_CLIENT_SECRET) {
 		try{
-		await auth.login(Number(process.env.OSU_CLIENT_ID), process.env.OSU_CLIENT_SECRET, ['public'])
+		await auth.login({
+			type: "v2",
+			client_id: process.env.OSU_CLIENT_ID,
+			client_secret: process.env.OSU_CLIENT_SECRET,
+			scopes: ["public"]
+		})
 		utils.log.out({ prefix: "[API]", message: "osu! api v2 connection has been established.", color: "Blue" })
 		} catch(error: any) {
 			utils.log.out({ prefix: "[API][ERROR]", message: `An error has ocurred while establishing connection with osu! api v2. Details below.`, color: "Red", important: true })

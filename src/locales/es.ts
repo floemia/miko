@@ -1,5 +1,8 @@
 import { DroidRXUser, DroidBanchoUser, DroidUser } from "miko-modules";
 import { DroidTrackingUser } from "../schemas/types";
+import { osu } from "../functions/osu/functions";
+import { UsersDetailsResponse } from "osu-api-extended/dist/types/v2/users_details";
+import { Modes_names } from "osu-api-extended";
 
 export default {
 	command: {
@@ -13,7 +16,11 @@ export default {
 			no_link: "No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.",
 			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada mediante \`/userbind\`.`,
 			no_user: "El usuario no existe.",
-			generating: (user: DroidUser) => `> <:graycheck:903741976061567027> <:droid_simple:1021473577951821824>  **osu!droid・**Creando tarjeta de perfil de  **${user.toString()}...**`
+			generating: (user: DroidUser) => `> <:droid_simple:1021473577951821824>  **osu!droid・**Creando tarjeta de perfil de  **${user.toString()}...**`
+		},
+		osucard: {
+			error: (error: string) => `\`\`\`diff\n- Ha ocurrido un error.\n\`\`\`\n> ${error}`,
+			generating: (user: UsersDetailsResponse, mode: Modes_names) => `> **${osu.gamemode.full(mode)} ・**Creando tarjeta de perfil de  **${user.username}**...`
 		},
 		recent: {
 			error: (error: string) => `\`\`\`diff\n- Ha ocurrido un error.\n\`\`\`\n> ${error}`,

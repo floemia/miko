@@ -10,6 +10,7 @@
   "author": "floemia",
   "license": "ISC",
   "dependencies": {
+    "@floemia/osu-profile-card": "^1.0.3",
     "@napi-rs/canvas": "^0.1.56",
     "@rian8337/osu-base": "^4.0.0-beta.63",
     "@rian8337/osu-difficulty-calculator": "^4.0.0-beta.63",
@@ -22,7 +23,7 @@
     "glob": "^11.0.0",
     "miko-modules": "^1.5.0",
     "mongoose": "^8.5.2",
-    "osu-api-extended": "^2.8.52",
+    "osu-api-extended": "^3.1.4",
     "osu-droid-card": "^0.0.7-beta",
     "osu-droid-scraping": "^0.0.2",
     "rosu-pp-js": "^2.0.0",

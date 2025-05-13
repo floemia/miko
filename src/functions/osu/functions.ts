@@ -1,5 +1,6 @@
+import { GuildEmoji } from "discord.js";
 import { client } from "../..";
-
+import { card } from "./embeds";
 
 export const full = (int_or_code: number | string) => {
 	if (typeof (int_or_code) == "number") {
@@ -21,6 +22,23 @@ export const full = (int_or_code: number | string) => {
 	}
 }
 
+const mode = (int_or_code: number | string): GuildEmoji => {
+	if (typeof (int_or_code) == "number") {
+		switch (int_or_code) {
+			case 1: return client.emojis.cache.get("955183369912721428")!;
+			case 2: return client.emojis.cache.get("955183369740775504")!;
+			case 3: return client.emojis.cache.get("955183369816256523")!;
+			default: return client.emojis.cache.get("955183369954680922")!;
+		}
+	} else {
+		switch (int_or_code) {
+			case "taiko": return client.emojis.cache.get("955183369912721428")!;
+			case "fruits": return client.emojis.cache.get("955183369740775504")!;
+			case "mania": return client.emojis.cache.get("955183369816256523")!;
+			default: return client.emojis.cache.get("955183369954680922")!;
+		}
+	}
+}
 export const difficulty = (mode: "osu" | "taiko" | "fruits" | "mania", SR: number) => {
 	var rank = 1
 	if (SR < 1.70) {
@@ -90,7 +108,7 @@ export const status = (status: number) => {
 	}
 }
 
-const emoji = { rank, difficulty, status }
+const emoji = { rank, difficulty, status, mode }
 const gamemode = { full }
-
-export const osu = { emoji, gamemode }
+const embed = { card }
+export const osu = { emoji, gamemode, embed }
