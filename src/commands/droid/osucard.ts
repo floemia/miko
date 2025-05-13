@@ -15,6 +15,7 @@ export const command: Command = {
 		.setDescriptionLocalization("es-ES", "osu! - (BETA, DISEÑO NO FINAL) Genera una tarjeta con los datos de un perfil de osu!")
 		.addStringOption(opt => opt
 			.setName("username")
+			.setRequired(true)
 			.setDescription("Username of the osu! profile.").setDescriptionLocalization("es-ES", "UID del perfil de osu!.")
 		)
 		.addStringOption(opt => opt
