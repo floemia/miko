@@ -57,6 +57,7 @@ export const command: Command = {
 			embeds: [utils.embeds.error({ description: response.command.userbind.no_user, interaction, spanish })]
 		})
 		let db = iBancho ? DroidUserBindModel : DroidRXUserBindModel
+		uid = user.id;
 		const user_in_db = await db.findOne({ discord_id: interaction.user.id })
 		if (!user_in_db) {
 			await new db({
