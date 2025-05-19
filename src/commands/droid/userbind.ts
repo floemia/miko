@@ -59,14 +59,13 @@ export const command: Command = {
 		let db = iBancho ? DroidUserBindModel : DroidRXUserBindModel
 		const user_in_db = await db.findOne({ discord_id: interaction.user.id })
 		if (!user_in_db) {
-			new db({
+			await new db({
 				username: username,
 				uid: uid,
 				discord_id: interaction.user.id
 			}).save()
 		} else {
-			await db.updateOne(
-				{ discord_id: interaction.user.id },
+			await db.updateOne({ discord_id: interaction.user.id },
 				{
 					"$set": {
 						username: username,
