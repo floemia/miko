@@ -5,6 +5,9 @@ import { Modes_names } from "osu-api-extended";
 import { osu } from "../functions/osu/functions";
 
 export default {
+	general: {
+		temp_broken: "Due to issues with `new.osudroid.moe/api/`, the `username` parameter is currently not supported. Please use `uid` instead.",
+	},
 	command: {
 		calculate: {
 			no_cache: "There is no beatmap in the cache.",
@@ -30,8 +33,11 @@ export default {
 			no_user: "The user does not exist.",
 			no_scores: (user: DroidUser) => `The user  **${user.toString()}** has no submitted scores.`,
 			score: (user: DroidUser, index: number, penalty?: boolean) =>{
-				if (user instanceof DroidRXUser) return `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}**:`
-				return `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}**:\n${penalty ? "-# :warning: Some penalties were found." : ""}`		
+				let text;
+				if (user instanceof DroidRXUser) text =  `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}**:`
+				text = `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}**:${penalty ? "\n-# :warning: Some penalties were found." : ""}`		
+				if (process.env.NEW_DROID_HOTFIX) text += `\n-# :warning: Fallback to old API due to issues with the new one! Expect issues.`
+				return text;
 			}
 		},
 		top: {

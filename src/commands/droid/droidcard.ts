@@ -43,6 +43,7 @@ export const command: Command = {
 				embeds: [embed]
 			});
 		}
+		console.log(user);
 
 		if (!user) return await reply.edit({
 			embeds: [utils.embeds.error({ description: response.command.card.no_user, interaction, spanish })]

@@ -6,7 +6,7 @@ import { droid as droidModule, DroidUserParameters } from "osu-droid-scraping"
 import { card } from "osu-droid-card"
 import DroidUserBindModel from "../../schemas/DroidUserBindSchema"
 import DroidRXUserBindModel from "../../schemas/DroidRXUserBindSchema"
-import { DroidBanchoUser, DroidRXUser, miko } from "miko-modules"
+import { DroidAPI, DroidBanchoUser, DroidRXUser, miko } from "miko-modules"
 import { ChatInputCommandInteraction } from "discord.js"
 import en from "../../locales/en"
 import es from "../../locales/es"
@@ -22,13 +22,13 @@ const user = async (params: DroidUserParameters): Promise<DroidUser | { error: s
 }
 
 const get_droid_user = async (interaction: ChatInputCommandInteraction, server?: string) => {
-	let ibancho = server == undefined ? "ibancho" : ( server == "ibancho")
+	let ibancho = server == undefined ? "ibancho" : (server == "ibancho")
 	let spanish = ["es-ES", "es-419"].includes(interaction.locale)
 	let response = spanish ? languages.es : languages.en
 	let uid = interaction.options.getInteger("uid") || undefined
 	let username = interaction.options.getString("username") || undefined
 	let discord_user = interaction.options.getUser("user") || undefined
-	
+
 	if (!uid && !username && !discord_user) {
 		if (!server) {
 			let server_db = await DiscordUserDefaultServerModel.findOne({ discord_id: interaction.user.id })
@@ -52,7 +52,16 @@ const get_droid_user = async (interaction: ChatInputCommandInteraction, server?:
 	}
 
 	if (uid || username) {
-		if (ibancho) return await DroidBanchoUser.get({ uid: uid, username: username })
+		if (ibancho) {
+			if (process.env.NEW_DROID_HOTFIX) {
+				if (!uid) throw new Error(response.general.temp_broken)
+				const old_user = await DroidAPI.getUser(uid);
+				if (!old_user) return undefined;
+				return new DroidBanchoUser(DroidAPI.temp_toNew(old_user), old_user);
+			}
+			
+			return await DroidBanchoUser.get({ uid: uid, username: username })
+		}
 		else return await DroidRXUser.get({ uid: uid, username: username })
 	}
 	else throw new Error(response.error.no_params)

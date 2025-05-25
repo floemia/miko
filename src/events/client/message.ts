@@ -15,7 +15,6 @@ export const event: Event<"messageCreate"> = {
 			setTimeout(async () => {
 				await channel.send(text);
 			}, Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000);
-
 		}
 		const regex = /https:\/\/osu\.ppy\.sh\/beatmapsets\/\d+#osu\/\d+/g;
 		let url;

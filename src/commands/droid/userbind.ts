@@ -7,6 +7,7 @@ import { DroidBanchoUser, DroidRXUser } from "miko-modules"
 import en from "../../locales/en"
 import es from "../../locales/es"
 import { utils } from "../../utils"
+import { droid } from "../../functions/osu!droid/functions"
 const languages = { en, es };
 
 export const command: Command = {
@@ -46,6 +47,9 @@ export const command: Command = {
 		}
 		const DroidServer = iBancho ? DroidBanchoUser : DroidRXUser
 		try {
+			if (iBancho && process.env.NEW_DROID_HOTFIX) {
+				user = await droid.get_droid_user(interaction, "ibancho")
+			} else
 			user = await DroidServer.get({ uid: uid, username: username })
 		} catch(error: any) {
 			const embed = utils.embeds.error({ description: error.message, interaction, spanish });

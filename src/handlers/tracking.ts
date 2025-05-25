@@ -3,7 +3,7 @@ import { droid } from "../functions/osu!droid/functions"
 import DroidAccountTrackModel from "../schemas/DroidAccountTrackSchema"
 import { ChannelType } from "discord.js"
 import GuildConfigModel from "../schemas/GuildConfigSchema"
-import { DroidBanchoUser, DroidScoreExtended } from "miko-modules"
+import { DroidAPI, DroidBanchoUser, DroidScoreExtended } from "miko-modules"
 import { utils } from "../utils"
 
 export const droid_tracking = async () => {
@@ -14,13 +14,22 @@ export const droid_tracking = async () => {
 			tracking_users = await DroidAccountTrackModel.find()
 			for await (const user_data of tracking_users) {
 				await new Promise(resolve => setTimeout(resolve, 15000))
-				const user = await DroidBanchoUser.get({ uid: user_data.uid })
+				let user: DroidBanchoUser | undefined;
+				try {	
+					if (process.env.NEW_DROID_HOTFIX) {
+						const user_old = DroidAPI.temp_toNew((await DroidAPI.getUser(user_data.uid))!)
+						user = new DroidBanchoUser(user_old)
+					} else user = await DroidBanchoUser.get({ uid: user_data.uid })
+				} catch (error: any) {
+					utils.log.out({ prefix: "\n[TRACKING][ERROR]", message: `An error has ocurred while fetching the user ${user_data.username} - ${user_data.uid}. Details below.`, color: "Red", important: true })
+					utils.log.err({ prefix: "[TRACKING]", message: error.stack || "Unknown error" })
+					continue
+				}
 				if (!user) continue
 				const scores = await user.scores.recent()
 				if (!scores.length || scores[0].played_date <= user_data.timestamp) continue
 				const score = scores[0];
-				console.log()
-				utils.log.out({ prefix: "[TRACKING]", message: `osu!droid | Creating score embed for ${user.username}...`, color: "Purple", important: true })
+				utils.log.out({ prefix: "\n[TRACKING]", message: `osu!droid | Creating score embed for ${user.username}...`, color: "Purple", important: true })
 				utils.log.out({ prefix: "[TRACKING]", message: `Sending in guilds: [${user_data.guilds.map(guild => guild.id).join(", ")}]\nBeatmap: ${score.filename}`, color: "Purple" })
 				await score.calculate();
 				const embed = await droid.embed.score(score, user)
@@ -35,8 +44,7 @@ export const droid_tracking = async () => {
 					try {
 						await track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid**・Score reciente de  **${user.toString()}**:`, embeds: [embed] })
 					} catch (error: any) {
-						console.log()
-						utils.log.out({ prefix: "[TRACKING][ERROR]", message: `An error has ocurred while sending the score embed to ${guild.name}, in the channel: #${track_channel.name}. Details below.`, color: "Red", important: true })
+						utils.log.out({ prefix: "\n[TRACKING][ERROR]", message: `An error has ocurred while sending the score embed to ${guild.name}, in the channel: #${track_channel.name}. Details below.`, color: "Red", important: true })
 						utils.log.err({ prefix: "[TRACKING]", message: error.stack || "Unknown error" })
 					}
 				}

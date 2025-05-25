@@ -67,7 +67,6 @@ export const command: Command = {
 				embeds: [embed]
 			});
 		}
-
 		if (!recents.length) return await reply.edit({
 			embeds: [utils.embeds.error({ description: response.command.recent.no_scores(user), interaction, spanish })]
 		})

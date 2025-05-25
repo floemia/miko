@@ -26,7 +26,7 @@ const score = async (score: DroidScore, user: DroidUser) => {
 	const rank = await osu.emoji.rank(score.rank)
 	let server_name = iBancho ? "iBancho" : "osudroid!relax"
 	let server_icon = iBancho ? `https://cdn.discordapp.com/icons/316545691545501706/a_2e882927641c2b4bb15e514d4e2829c7.webp` : `https://cdn.discordapp.com/icons/1095653998389907468/a_82bf78e259e9cb4ba4d4ca355e28e0df.webp`
-	const statistics = `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]`
+	const statistics = !process.env.NEW_DROID_HOTFIX ? `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]` : `${score.count.nMiss}❌`
 	let title = `${score.filename} ${score.modsString()}`
 	let combo = `${score.combo.toLocaleString("en-US")}x`
 	const total_score = score.total_score.toLocaleString("en-US")
@@ -231,7 +231,9 @@ const top = async (user: DroidUser, scores: DroidScore[], page: number) => {
 		user_string += `${user.stats.dpp.toLocaleString("en-US", { maximumFractionDigits: 2 })}dpp `
 		user_string += `(#${user.stats.rank.global.toLocaleString("en-US")}`
 		if (user.country) {
-			user_string += ` ${user.country.toUpperCase()}${user.stats.rank.country.toLocaleString("en-US")})`
+			user_string += ` ${user.country.toUpperCase()}`
+			if (process.env.NEW_DROID_HOTFIX) user_string += `)`
+			else user_string += `${user.stats.rank.country!.toLocaleString("en-US")}`
 		} else user_string += ")"
 
 	} else if (user instanceof DroidRXUser) {
