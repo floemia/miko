@@ -42,7 +42,9 @@ export const droid_tracking = async () => {
 					const track_channel = client.channels.cache.get(`${guild_config?.channel.track}`)
 					if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 					try {
-						await track_channel.send({ content: `<:droid_simple:1021473577951821824>  **osu!droid**・Score reciente de  **${user.toString()}**:`, embeds: [embed] })
+						let text = `<:droid_simple:1021473577951821824>  **osu!droid**・Recent score from  **${user.toString()}**:`
+						if (process.env.NEW_DROID_HOTFIX) text += `\n-# :warning: Fallback to old API due to issues with the new one! Expect issues.`
+						await track_channel.send({ content: text, embeds: [embed] })
 					} catch (error: any) {
 						utils.log.out({ prefix: "\n[TRACKING][ERROR]", message: `An error has ocurred while sending the score embed to ${guild.name}, in the channel: #${track_channel.name}. Details below.`, color: "Red", important: true })
 						utils.log.err({ prefix: "[TRACKING]", message: error.stack || "Unknown error" })
