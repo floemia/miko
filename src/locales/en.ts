@@ -36,7 +36,7 @@ export default {
 				let text;
 				if (user instanceof DroidRXUser) text =  `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}**:`
 				text = `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}**:${penalty ? "\n-# :warning: Some penalties were found." : ""}`		
-				if (process.env.NEW_DROID_HOTFIX) text += `\n-# :warning: Fallback to old API due to issues with the new one! Expect issues.`
+				if (process.env.NEW_DROID_HOTFIX) text += `\n-# :warning: Fallback to old API due to maintenance! Expect issues.`
 				return text;
 			}
 		},
