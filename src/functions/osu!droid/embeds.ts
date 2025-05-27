@@ -79,13 +79,13 @@ const score = async (score: DroidScore, user: DroidUser) => {
 	let description = ""
 	if (!score.beatmap) description = `> ${rank}**・${total_score}・${accuracy}%・**${statistics}**・${combo}**`
 	else description = `> ${rank}**・${pp_string}・${accuracy}%**${if_fc_string}\n> **${total_score}・**${statistics}**・${combo}**\n> ${diff_string}`
-
-	if (process.env.NEW_DROID_HOTFIX && score instanceof DroidBanchoScore) score.played_date.setHours(score.played_date.getHours() - 2)
+	let timestamp = score.played_date
+	if (process.env.NEW_DROID_HOTFIX && score instanceof DroidBanchoScore) timestamp.setHours(timestamp.getHours() - 2)
 	embed.setTitle(`**${status_emoji} ${title}**`);
 	embed.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.user_url })
 	embed.setDescription(description);
 	embed.setFooter({ text: `Server: ${server_name}`, iconURL: server_icon })
-	embed.setTimestamp(score.played_date);
+	embed.setTimestamp(timestamp);
 	embed.setColor(Number(`0x${score.color.slice(1)}`))
 	return embed;
 }
