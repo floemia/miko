@@ -17,8 +17,9 @@ export const droid_tracking = async () => {
 				let user: DroidBanchoUser | undefined;
 				try {	
 					if (process.env.NEW_DROID_HOTFIX) {
-						const user_old = DroidAPI.temp_toNew((await DroidAPI.getUser(user_data.uid))!)
-						user = new DroidBanchoUser(user_old)
+						const user_old = await DroidAPI.getUser(user_data.uid)
+						const userToNew = DroidAPI.temp_toNew(user_old!)
+						user = new DroidBanchoUser(userToNew, user_old)
 					} else user = await DroidBanchoUser.get({ uid: user_data.uid })
 				} catch (error: any) {
 					utils.log.out({ prefix: "\n[TRACKING][ERROR]", message: `An error has ocurred while fetching the user ${user_data.username} - ${user_data.uid}. Details below.`, color: "Red", important: true })
