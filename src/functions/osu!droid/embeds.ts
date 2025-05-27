@@ -80,7 +80,7 @@ const score = async (score: DroidScore, user: DroidUser) => {
 	if (!score.beatmap) description = `> ${rank}**・${total_score}・${accuracy}%・**${statistics}**・${combo}**`
 	else description = `> ${rank}**・${pp_string}・${accuracy}%**${if_fc_string}\n> **${total_score}・**${statistics}**・${combo}**\n> ${diff_string}`
 
-	if (process.env.NEW_DROID_HOTFIX) score.played_date.setHours(score.played_date.getHours() - 2)
+	if (process.env.NEW_DROID_HOTFIX && score instanceof DroidBanchoScore) score.played_date.setHours(score.played_date.getHours() - 2)
 	embed.setTitle(`**${status_emoji} ${title}**`);
 	embed.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.user_url })
 	embed.setDescription(description);
