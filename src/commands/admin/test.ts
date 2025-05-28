@@ -18,10 +18,10 @@ export const command: Command = {
 		const tracking_users = await DroidAccountTrackModel.find()
 		let i = 0
 		for await (const user_data of tracking_users) {
-			await new Promise(resolve => setTimeout(resolve, 3000))
+			await new Promise(resolve => setTimeout(resolve, 2000))
 			const user = (await DroidBanchoUser.get({ uid: user_data.uid }))!
 			const recent = (await user.scores.recent())[0];
-			if (recent.played_date <= user_data.timestamp) continue
+			// if (recent.played_date <= user_data.timestamp) continue
 			utils.log.out({ prefix: "[TRACKING]", message: `(USER ${i + 1} of ${tracking_users.length}) Updating database entry for ${user.username}...`, color: "Purple", important: true })
 			await DroidAccountTrackModel.findOneAndUpdate({ uid: user_data.uid }, { timestamp: recent.played_date })
 			utils.log.out({ prefix: "[TRACKING]", message: `Done.`, color: "Purple", important: true })

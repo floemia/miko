@@ -32,7 +32,7 @@ export const connect_mongoose = async () => {
 	await mongoose.connect(`${MONGO_URI}`)
 		.then(async () => {
 			utils.log.out({ prefix: "[DATABASE]", message: "Database connection has been established.", color: "Blue" })
-			if (Boolean((process.env.DROID_TRACKING_ENABLED))) {
+			if (process.env.DROID_TRACKING_ENABLED == "true") {
 				droid_tracking()
 			}
 		})
