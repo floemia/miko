@@ -1,12 +1,10 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
-import { embed } from "../../functions/messages/embeds"
-import { urlStorage } from "../../events/client/message"
-import { miko } from "miko-modules"
+import { DroidBanchoUser, miko } from "miko-modules"
 import { droid } from "../../functions/osu!droid/functions"
 import { utils } from "../../utils"
-import { MapInfo } from "@rian8337/osu-base"
 import { DroidDifficultyCalculator, DroidPerformanceCalculator } from "@rian8337/osu-difficulty-calculator"
+import DroidAccountTrackModel from "../../schemas/DroidAccountTrackSchema"
 export const command: Command = {
 	data: new SlashCommandBuilder()
 		.setName("test")
@@ -16,11 +14,20 @@ export const command: Command = {
 	developer: true,
 	async execute(client, interaction) {
 		await interaction.deferReply()
-		const map = await MapInfo.getInformation(4303461);
-		if(!map) return
-		const rating = new DroidDifficultyCalculator().calculate(map.beatmap);
-		const perf = new DroidPerformanceCalculator(rating).calculate();
-		console.log(rating)
-		console.log(perf)
+		if (interaction.user.id != "596481414426525696") return await interaction.deleteReply()
+		const tracking_users = await DroidAccountTrackModel.find()
+		let i = 0
+		for await (const user_data of tracking_users) {
+			await new Promise(resolve => setTimeout(resolve, 3000))
+			const user = (await DroidBanchoUser.get({ uid: user_data.uid }))!
+			const recent = (await user.scores.recent())[0];
+			if (recent.played_date <= user_data.timestamp) continue
+			utils.log.out({ prefix: "[TRACKING]", message: `(USER ${i + 1} of ${tracking_users.length}) Updating database entry for ${user.username}...`, color: "Purple", important: true })
+			await DroidAccountTrackModel.findOneAndUpdate({ uid: user_data.uid }, { timestamp: recent.played_date })
+			utils.log.out({ prefix: "[TRACKING]", message: `Done.`, color: "Purple", important: true })
+			i++;
+		}
+		utils.log.out({ prefix: "[TRACKING]", message: `All tracked users have been updated.`, color: "Purple", important: true })
+
 	}
 }

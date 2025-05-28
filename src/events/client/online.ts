@@ -12,6 +12,10 @@ export const event: Event<"ready"> = {
 		await osu_api_connect()
 		await connect_mongoose()
 		await presence_loop(client)
+		new Boolean()
 		utils.log.out({ prefix: "[BOT]", message: `${client.user.displayName} is online!`, color: "Green", important: true })
+		if (process.env.NEW_DROID_HOTFIX == "true") utils.log.out({ prefix: "[DROID][WARNING]", message: `osu!droid commands are using the scraping method. Expect issues.`, color: "Yellow", important: true })
+
+
 	}
 }

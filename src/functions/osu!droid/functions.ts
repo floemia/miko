@@ -1,12 +1,12 @@
 import { embed } from "./embeds"
 import { DroidUser } from "./types"
-import { average_color, num_formatted } from "../utils"
+import { average_color } from "../utils"
 import { tracking } from "./tracking"
 import { droid as droidModule, DroidUserParameters } from "osu-droid-scraping"
 import { card } from "osu-droid-card"
 import DroidUserBindModel from "../../schemas/DroidUserBindSchema"
 import DroidRXUserBindModel from "../../schemas/DroidRXUserBindSchema"
-import { DroidAPI, DroidBanchoUser, DroidRXUser, miko } from "miko-modules"
+import { DroidScrape, DroidBanchoUser, DroidRXUser } from "miko-modules"
 import { ChatInputCommandInteraction } from "discord.js"
 import en from "../../locales/en"
 import es from "../../locales/es"
@@ -53,11 +53,11 @@ const get_droid_user = async (interaction: ChatInputCommandInteraction, server?:
 
 	if (uid || username) {
 		if (ibancho) {
-			if (process.env.NEW_DROID_HOTFIX) {
+			if (process.env.NEW_DROID_HOTFIX == "true") {
 				if (!uid) throw new Error(response.general.temp_broken)
-				const old_user = await DroidAPI.getUser(uid);
+				const old_user = await DroidScrape.getUser(uid);
 				if (!old_user) return undefined;
-				return new DroidBanchoUser(DroidAPI.temp_toNew(old_user), old_user);
+				return new DroidBanchoUser(DroidScrape.temp_toNew(old_user), old_user);
 			}
 			
 			return await DroidBanchoUser.get({ uid: uid, username: username })

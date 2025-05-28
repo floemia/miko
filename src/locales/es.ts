@@ -31,12 +31,13 @@ export default {
 			no_link: `No tienes una cuenta de osu!droid vinculada. Usa \`/userbind\`.`,
 			mention_no_link: (user: string) => `<@${user}> no tiene una cuenta vinculada mediante \`/userbind\`.`,
 			no_user: "El usuario no existe.",
+			getting: (user: DroidUser) => `> <:droid_simple:1021473577951821824>  **osu!droid・**Consiguiendo scores recientes de  **${user.toString()}...**`,
 			no_scores: (user: DroidUser) => `El usuario  **${user.toString()}** no tiene scores registrados.`,
 			score: (user: DroidUser, index: number, penalty?: boolean) => {
 				let text;
 				if (user instanceof DroidRXUser) return `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  **${user.toString()}**:`
 				text = `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  **${user.toString()}**:${penalty ? "\n-# :warning: Se detectaron penalizaciones." : ""}`		
-				if (process.env.NEW_DROID_HOTFIX) text += `\n-# :warning: Usando API antigua debido a mantenimiento! Pueden haber errores.`
+				if (process.env.NEW_DROID_HOTFIX == "true") text += `\n-# :warning: Usando API antigua debido a mantenimiento! Pueden haber errores.`
 				return text
 			}
 		},

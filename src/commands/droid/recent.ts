@@ -1,4 +1,4 @@
-import { ButtonInteraction, ComponentType, SlashCommandBuilder } from "discord.js"
+import { ButtonInteraction, ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js"
 import type { Command } from "../../types"
 import { droid } from "../../functions/osu!droid/functions"
 import { create_row } from "../../functions/utils"
@@ -58,6 +58,12 @@ export const command: Command = {
 		if (!user) return await reply.edit({
 			embeds: [utils.embeds.error({ description: response.command.recent.no_user, interaction, spanish })]
 		})
+
+		const embed_wait = new EmbedBuilder()
+			.setColor(0xdedede)
+			.setDescription(response.command.recent.getting(user))
+		await reply.edit({ embeds: [embed_wait] })
+		
 		let recents: DroidBanchoScore[] | DroidRXScore[];
 		try {
 			recents = await user.scores.recent()

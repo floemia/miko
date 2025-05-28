@@ -26,13 +26,14 @@ const score = async (score: DroidScore, user: DroidUser) => {
 	const rank = await osu.emoji.rank(score.rank)
 	let server_name = iBancho ? "iBancho" : "osudroid!relax"
 	let server_icon = iBancho ? `https://cdn.discordapp.com/icons/316545691545501706/a_2e882927641c2b4bb15e514d4e2829c7.webp` : `https://cdn.discordapp.com/icons/1095653998389907468/a_82bf78e259e9cb4ba4d4ca355e28e0df.webp`
-	const statistics = !process.env.NEW_DROID_HOTFIX ? `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]` : `${score.count.nMiss}❌`
+	const statistics = !(process.env.NEW_DROID_HOTFIX == "true") ? `[${score.count?.n300}/${score.count?.n100}/${score.count?.n50}/${score.count?.nMiss}]` : `${score.count.nMiss}❌`
 	let title = `${score.filename} ${score.modsString()}`
 	let combo = `${score.combo.toLocaleString("en-US")}x`
 	const total_score = score.total_score.toLocaleString("en-US")
 	const accuracy = format_double_dec(score.accuracy * 100)
 	let pp_string = ""
 	if (score instanceof DroidRXScore) pp_string = `${score.pp!.toFixed(2)}pp`
+	let UR = ""
 	let diff_string = ""
 	const embed = new EmbedBuilder()
 	let status_emoji = osu.emoji.status(-2);
@@ -76,11 +77,16 @@ const score = async (score: DroidScore, user: DroidUser) => {
 		embed.setImage(`https://assets.ppy.sh/beatmaps/${score.beatmap.beatmapSetId}/covers/cover.jpg`)
 	}
 
+	if (score instanceof DroidBanchoScore && score.replay) {
+		const hit_error = score.replay.calculateHitError();
+		UR = `・**\`${hit_error?.unstableRate.toFixed(2)}UR\``
+	}
+
 	let description = ""
 	if (!score.beatmap) description = `> ${rank}**・${total_score}・${accuracy}%・**${statistics}**・${combo}**`
-	else description = `> ${rank}**・${pp_string}・${accuracy}%**${if_fc_string}\n> **${total_score}・**${statistics}**・${combo}**\n> ${diff_string}`
+	else description = `> ${rank}**・${pp_string}・${accuracy}%**${if_fc_string}\n> **${total_score}・**${statistics}**・${combo}${UR}\n> ${diff_string}`
 	let timestamp = new Date(score.played_date)
-	if (process.env.NEW_DROID_HOTFIX && score instanceof DroidBanchoScore) timestamp.setHours(timestamp.getHours() - 2)
+	if ((process.env.NEW_DROID_HOTFIX == "true") && score instanceof DroidBanchoScore) timestamp.setHours(timestamp.getHours() - 2)
 	embed.setTitle(`**${status_emoji} ${title}**`);
 	embed.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.user_url })
 	embed.setDescription(description);
@@ -233,7 +239,7 @@ const top = async (user: DroidUser, scores: DroidScore[], page: number) => {
 		user_string += `(#${user.stats.rank.global.toLocaleString("en-US")}`
 		if (user.country) {
 			user_string += ` ${user.country.toUpperCase()}`
-			if (process.env.NEW_DROID_HOTFIX) user_string += `)`
+			if (process.env.NEW_DROID_HOTFIX == "true") user_string += `)`
 			else user_string += `${user.stats.rank.country!.toLocaleString("en-US")}`
 		} else user_string += ")"
 

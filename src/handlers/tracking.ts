@@ -3,7 +3,7 @@ import { droid } from "../functions/osu!droid/functions"
 import DroidAccountTrackModel from "../schemas/DroidAccountTrackSchema"
 import { ChannelType } from "discord.js"
 import GuildConfigModel from "../schemas/GuildConfigSchema"
-import { DroidAPI, DroidBanchoUser, DroidScoreExtended } from "miko-modules"
+import { DroidBanchoUser, DroidScrape } from "miko-modules"
 import { utils } from "../utils"
 
 export const droid_tracking = async () => {
@@ -15,10 +15,10 @@ export const droid_tracking = async () => {
 			for await (const user_data of tracking_users) {
 				await new Promise(resolve => setTimeout(resolve, 15000))
 				let user: DroidBanchoUser | undefined;
-				try {	
-					if (process.env.NEW_DROID_HOTFIX) {
-						const user_old = await DroidAPI.getUser(user_data.uid)
-						const userToNew = DroidAPI.temp_toNew(user_old!)
+				try {
+					if (process.env.NEW_DROID_HOTFIX == "true") {
+						const user_old = await DroidScrape.getUser(user_data.uid)
+						const userToNew = DroidScrape.temp_toNew(user_old!)
 						user = new DroidBanchoUser(userToNew, user_old)
 					} else user = await DroidBanchoUser.get({ uid: user_data.uid })
 				} catch (error: any) {
@@ -44,7 +44,7 @@ export const droid_tracking = async () => {
 					if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 					try {
 						let text = `<:droid_simple:1021473577951821824>  **osu!droid**・Recent score from  **${user.toString()}**:`
-						if (process.env.NEW_DROID_HOTFIX) text += `\n-# :warning: Fallback to old API due to maintenance! Expect issues.`
+						if (process.env.NEW_DROID_HOTFIX == "true") text += `\n-# :warning: Fallback to old API due to maintenance! Expect issues.`
 						await track_channel.send({ content: text, embeds: [embed] })
 					} catch (error: any) {
 						utils.log.out({ prefix: "\n[TRACKING][ERROR]", message: `An error has ocurred while sending the score embed to ${guild.name}, in the channel: #${track_channel.name}. Details below.`, color: "Red", important: true })
