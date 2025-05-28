@@ -15,7 +15,7 @@ export const event: Event<"interactionCreate"> = {
 			}
 			if (command.developer && interaction.user.id != process.env.DEV)
 				return await interaction.reply({
-					content: "Este comando solo lo puede ejecutar floemia.",
+					content: "This is a developer-only command.",
 					ephemeral: true,
 				})
 				command.execute(client, interaction)

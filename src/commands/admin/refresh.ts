@@ -7,10 +7,9 @@ import { DroidDifficultyCalculator, DroidPerformanceCalculator } from "@rian8337
 import DroidAccountTrackModel from "../../schemas/DroidAccountTrackSchema"
 export const command: Command = {
 	data: new SlashCommandBuilder()
-		.setName("test")
-		.setDescription("Test command.")
-		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-		.setDescriptionLocalization("es-ES", "Test command."),
+		.setName("refresh")
+		.setDescription("Refresh the tracking database.")
+		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 	developer: true,
 	async execute(client, interaction) {
 		await interaction.deferReply()
