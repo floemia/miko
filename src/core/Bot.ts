@@ -28,10 +28,9 @@ export class Bot extends Client {
 		if (!mongoURI) {
 			return Logger.err({ prefix: "[DATABASE]", message: "No MongoDB URI provided" });
 		}
-		const timer = Misc.createTimer();
 		Logger.out({ prefix: "[DATABASE]", message: "Connecting to MongoDB...", color: "Blue", important: true });
 		await mongoose.connect(mongoURI);
-		Logger.out({ prefix: "[DATABASE]", message: `Success. (${timer()}s)`, color: "Blue" });
+		Logger.out({ prefix: "[DATABASE]", message: `Success.`, color: "Blue" });
 	}
 
 	public async start() {

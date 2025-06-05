@@ -9,7 +9,7 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 export const data: SlashCommand["data"] =
 	new SlashCommandBuilder()
 		.setName("crash")
-		.setDescription("💣 Nuke the bot for testing purposes.")
-		.setDescriptionLocalization("es-ES", "Nukear el bot para pruebas.")
+		.setDescription("💣 (DEV!) Nuke the bot for testing purposes.")
+		.setDescriptionLocalization("es-ES", "💣 (DEV!) Nukear el bot para pruebas.")
 
 export const developer: SlashCommand["developer"] = true;

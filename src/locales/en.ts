@@ -7,6 +7,7 @@ export const en = {
 		cooldown: (time: number) => `You're being too fast! Please wait \`${time.toFixed(1)}s\`.`,
 		user_dne: "That user does not exist.",
 		no_scores: (user: DroidUser) => `No scores found for ${user.toString()}.`,
+		dev_only: "This command is only available for developers.",
 	},
 	commands: {
 		ping: {

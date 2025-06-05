@@ -7,6 +7,7 @@ export const es = {
 		cooldown: (time: number) => `¡Estás yendo muy rápido! Espera \`${time.toFixed(2)}s\`.`,
 		user_dne: "Ese usuario no existe.",
 		no_scores: (user: DroidUser) => `El usuario ${user.toString()} no tiene scores.`,
+		dev_only: "Este comando solo está disponible para <@596481414426525696>.",
 	},
 	commands: {
 		ping: {
