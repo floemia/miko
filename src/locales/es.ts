@@ -26,6 +26,14 @@ export const es = {
 		},
 		uptime: {
 			response: (uptime: number) => `El tiempo de actividad de Miko es de \`${Misc.msToTime(uptime)}\`.`,
+		},
+		config: {
+			track_channel: {
+				set: (channel: string, permission: boolean) => `El canal de tracking de scores de osu!droid ha sido establecido a ${channel}.${permission ? "" : "... **pero no tengo permisos para enviar mensajes en ese canal!**"}`,
+			},
+			track: {
+				enabled: (status: boolean) => `El sistema de tracking de scores de osu!droid ha sido ${status ? "habilitado" : "deshabilitado"}.`,
+			}
 		}
 	},
 	tracking: {

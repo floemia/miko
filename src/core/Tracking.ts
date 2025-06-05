@@ -3,7 +3,7 @@ import GuildConfigModel from "@structures/mongoose/GuildConfigSchema";
 import { DroidBanchoUser } from "miko-modules";
 import { client } from "@root";
 import { Embeds, Logger } from "@utils";
-import { ChannelType } from "discord.js";
+import { ChannelType, PermissionFlagsBits } from "discord.js";
 import { en, es } from "@locales";
 export class Tracking {
 	private cooldown: number = 10;
@@ -40,14 +40,19 @@ export class Tracking {
 					if (!dbguild || !dbguild.tracking_enabled) continue;
 					const track_channel = client.channels.cache.get(dbguild.channel.track);
 					if (!track_channel || track_channel.type != ChannelType.GuildText) continue
-					const guild_locale = client.guilds.cache.get(guild.id)!.preferredLocale;
+					const cache_guild = client.guilds.cache.get(guild.id);
+					if (!cache_guild) continue;
+					const bot_member = cache_guild.members.me!;
+					if (!bot_member.permissionsIn(track_channel).has(PermissionFlagsBits.SendMessages)) continue;
+
+					const guild_locale = cache_guild.preferredLocale;
 					const spanish = guild_locale.includes("es");
 					const str = spanish ? es : en;
 
 					const embed = await Embeds.score({ user: user, score: score });
 					await track_channel.send({ content: str.tracking.message(user), embeds: [embed] });
 				}
-				Logger.out({ prefix: "[TRACKING]", message: `Embed sent and updated entry in database.`, color: "Orange" });
+				Logger.out({ prefix: "[TRACKING]", message: `The embed was sent and the entry was updated.`, color: "Orange" });
 			}
 		}
 	}

@@ -20,6 +20,13 @@ export abstract class Embeds {
 		return embed;
 	}
 
+	public static process(description: string, emoji: boolean = false) {
+		if (emoji) description = `${Misc.getCircleEmoji("White")}  ${description}`;
+		return new EmbedBuilder()
+			.setDescription(`> ${description}`)
+			.setColor("LightGrey");
+	}
+
 	public static error(params: EmbedResponseParameters): EmbedBuilder {
 		params.color = "Red";
 		const embed = this.response(params);

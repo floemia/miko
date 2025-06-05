@@ -7,7 +7,7 @@ export const en = {
 		cooldown: (time: number) => `You're being too fast! Please wait \`${time.toFixed(1)}s\`.`,
 		user_dne: "That user does not exist.",
 		no_scores: (user: DroidUser) => `No scores found for ${user.toString()}.`,
-		dev_only: "This command is only available for developers.",
+		dev_only: "This command is only available for <@596481414426525696>.",
 	},
 	commands: {
 		ping: {
@@ -25,6 +25,14 @@ export const en = {
 		},
 		uptime: {
 			response: (uptime: number) => `Miko's uptime is \`${Misc.msToTime(uptime)}\`.`,
+		},
+		config: {
+			track_channel: {
+				set: (channel: string, permission: boolean) => `The osu!droid scores tracking channel has been set to ${channel}.${permission ? "" : ".. **but I don't have permissions to send messages in that channel!**"}`,
+			},
+			track: {
+				enabled: (status: boolean) => `The osu!droid scores tracking system has been ${status ? "enabled" : "disabled"}.`,
+			}
 		}
 	},
 	tracking: {
