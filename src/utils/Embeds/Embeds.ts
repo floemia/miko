@@ -45,9 +45,10 @@ export abstract class Embeds {
 		}
 		const user_string = Droid.getFullUserString(user);
 		if (status < 0) status = 0;
-		const status_emoji = client.emojis.cache.get(client.config.emojis.status[status.toString() as keyof typeof client.config.emojis.status])
+		const mods_string = score.modsString();
+		const status_emoji = client.emojis.cache.get(client.config.emojis.status[status.toString() as keyof typeof client.config.emojis.status]);
 		embed.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.user_url })
-		embed.setTitle(`**${status_emoji?.toString()}  ${title}**`)
+		embed.setTitle(`**${status_emoji?.toString()}  ${title} ${mods_string}**`)
 		embed.setColor(Number(`0x${score.color.slice(1)}`))
 		embed.setDescription(desc)
 		embed.setFooter({ text: `Server: ${server.name}`, iconURL: server.iconURL })
@@ -70,7 +71,7 @@ export abstract class Embeds {
 			.setThumbnail(user.avatar_url);
 		for (const score of scores) {
 			const rank_code = score.rank as keyof typeof client.config.emojis.ranks;
-			const rank = await client.application!.emojis.fetch(client.config.emojis.ranks[rank_code]);
+			const rank = await client.application!.emojis.fetch(client.config.emojis.ranks[rank_code]).catch(() => rank_code);
 			const total_score = Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(score.total_score);
 			const accuracy = Misc.formatFloat(score.accuracy * 100);
 			const c = score.count;
@@ -82,7 +83,7 @@ export abstract class Embeds {
 			const mods_string = score.modsString();
 			embed.addFields({
 				name: `**#${i++}・${score.filename} \`${mods_string}\`**`,
-				value: `${rank}**・${pp}・${accuracy}%・${combo}・**\`${total_score}\`**・**${statistics}**・**<t:${(score.played_date.valueOf() / 1000).toFixed(0)}:R>`
+				value: `${rank.toString()}**・${pp}・${accuracy}%・${combo}・**\`${total_score}\`**・**${statistics}**・**<t:${(score.played_date.valueOf() / 1000).toFixed(0)}:R>`
 			});
 		}
 		return embed;

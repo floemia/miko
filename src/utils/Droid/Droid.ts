@@ -58,7 +58,7 @@ export abstract class Droid {
 		const iBancho = score instanceof DroidBanchoScore;
 		if (!score.calculated) await score.calculate();
 		let rank_code = score.rank as keyof typeof client.config.emojis.ranks;
-		const rank = await client.application!.emojis.fetch(client.config.emojis.ranks[rank_code]);
+		const rank = await client.application!.emojis.fetch(client.config.emojis.ranks[rank_code]).catch(() => rank_code);
 		const total_score = Misc.formatInteger(score.total_score);
 		let combo = `${Misc.formatInteger(score.combo)}x`;
 		const accuracy = `${(score.accuracy * 100).toFixed(2)}%`;
