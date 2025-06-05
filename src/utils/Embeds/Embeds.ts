@@ -70,7 +70,7 @@ export abstract class Embeds {
 			.setThumbnail(user.avatar_url);
 		for (const score of scores) {
 			const rank_code = score.rank as keyof typeof client.config.emojis.ranks;
-			const rank = client.application!.emojis.cache.get(client.config.emojis.ranks[rank_code]);
+			const rank = client.application!.emojis.fetch(client.config.emojis.ranks[rank_code]);
 			const total_score = Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(score.total_score);
 			const accuracy = Misc.formatFloat(score.accuracy * 100);
 			const c = score.count;
