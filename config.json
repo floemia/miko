@@ -1,5 +1,5 @@
 {
-	"debug": true,
+	"debug": false,
 	"developers": ["596481414426525696"],
 	"droid_scraping": false,
 	"tracking": {

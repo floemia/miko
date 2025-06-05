@@ -17,6 +17,7 @@ export class Bot extends Client {
 	public commands = new Collection<string, SlashCommand>();
 	public events = new Collection<keyof ClientEvents, (client: Bot, ...args: any) => Promise<any>>();
 	public cooldowns = new Collection<string, Cooldown[]>();
+	public current_pfp: string = "";
 	public tracking = new Tracking(this.config.tracking.interval);
 	constructor() {
 		super({
