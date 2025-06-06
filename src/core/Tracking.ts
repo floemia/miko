@@ -40,6 +40,7 @@ export class Tracking {
 					if (!dbguild || !dbguild.tracking_enabled) continue;
 					const track_channel = client.channels.cache.get(dbguild.channel.track);
 					if (!track_channel || track_channel.type != ChannelType.GuildText) continue
+					
 					const cache_guild = client.guilds.cache.get(guild.id);
 					if (!cache_guild) continue;
 					const bot_member = cache_guild.members.me!;

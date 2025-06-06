@@ -70,7 +70,7 @@ export abstract class Droid {
 			await DroidScore.calculateFC(score);
 			combo += `/${Misc.formatInteger(score.beatmap.maxCombo!)}x`;
 			let { ar, od, hp, cs } = score.difficulty!;
-			const bpm = score.beatmap.bpm * score.getFinalSpeed();
+			const bpm = (score.beatmap.bpm * score.getFinalSpeed()).toLocaleString("en-US", { maximumFractionDigits: 2 });
 			diff_string = `\n> \`BPM: ${bpm} AR: ${Misc.to2Dec(ar!)} OD: ${Misc.to2Dec(od!)} HP: ${Misc.to2Dec(hp!)} CS: ${Misc.to2Dec(cs!)}\``;
 			const dpp = Misc.formatFloat(score.dpp);
 			const pp = Misc.formatFloat(score.pp);
