@@ -23,7 +23,6 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 
 	const unique = Misc.getUniqueID();
 	const row = Misc.createRow(index, unique, scores.length);
-
 	const embed = await Embeds.score({ user: user, score: scores[0] });
 	await response.edit({ content: str.commands.recent.message(user, index), embeds: [embed], components: [row] });
 

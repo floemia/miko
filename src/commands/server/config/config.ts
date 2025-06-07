@@ -1,6 +1,6 @@
 import { SlashCommand } from "@structures/core";
 import { ChannelType, InteractionContextType, PermissionsBitField, SlashCommandBuilder } from "discord.js";
-import { channel, status } from "./subComands/";
+import { channel, status } from "./subCommands";
 export const run: SlashCommand["run"] = async (client, interaction) => {
 	await interaction.deferReply();
 	const subcommand = interaction.options.getSubcommand();

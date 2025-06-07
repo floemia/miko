@@ -1,5 +1,6 @@
 import { SlashCommand } from "@structures/core";
 import { SlashCommandBuilder } from "discord.js";
+export const developer: SlashCommand["developer"] = true;
 
 export const run: SlashCommand["run"] = async (client, interaction) => {
 	await interaction.deferReply();
@@ -11,5 +12,3 @@ export const data: SlashCommand["data"] =
 		.setName("crash")
 		.setDescription("💣 (DEV!) Nuke the bot for testing purposes.")
 		.setDescriptionLocalization("es-ES", "💣 (DEV!) Nukear el bot para pruebas.")
-
-export const developer: SlashCommand["developer"] = true;

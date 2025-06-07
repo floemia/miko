@@ -82,7 +82,7 @@ export abstract class Embeds {
 			const total_score = Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(score.total_score);
 			const accuracy = Misc.formatFloat(score.accuracy * 100);
 			const c = score.count;
-			const statistics = client.config.droid_scraping && iBancho ?
+			const statistics = client.config.scraping && iBancho ?
 				`${c.nMiss}❌` :
 				`[${c.n300}/${c.n100}/${c.n50}/${c.nMiss}]`;
 			const pp = Misc.formatFloat(score.dpp || score.pp) + (iBancho ? "dpp" : "pp");

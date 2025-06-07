@@ -1,6 +1,6 @@
 import { Misc } from "@utils";
 import { DroidUser } from "miko-modules";
-
+import { client } from "@root";
 export const es = {
 	general: {
 		error: "Ocurrió un error.",
@@ -8,6 +8,7 @@ export const es = {
 		user_dne: "Ese usuario no existe.",
 		no_scores: (user: DroidUser) => `El usuario ${user.toString()} no tiene scores.`,
 		dev_only: "Este comando solo está disponible para <@596481414426525696>.",
+		scraping: "⚠️ Usando el método de web scraping! Pueden haber errores.",
 	},
 	commands: {
 		ping: {
@@ -16,7 +17,7 @@ export const es = {
 		recent: {
 			generating: (user: DroidUser) => `Obteniendo scores recientes de ${user.toString()}...`,
 			no_scores: (user: DroidUser) => `El usuario ${user.toString()} no tiene scores.`,
-			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  **${user.toString()}:**`,
+			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  **${user.toString()}:**${client.config.scraping ? `\n-# ${es.general.scraping}` : ``}`,
 		},
 		userbind: {
 			success: (user: DroidUser) => `Tu cuenta de Discord ha sido vinculada a ${user.toString()}.`,
@@ -33,10 +34,13 @@ export const es = {
 			},
 			track: {
 				enabled: (status: boolean) => `El sistema de tracking de scores de osu!droid ha sido ${status ? "habilitado" : "deshabilitado"}.`,
-			}
+			},
+		},
+		defaultserver: {
+			response: (server: string) => `Tu servidor predeterminado de osu!droid ahora es ${server}.`,
 		}
 	},
 	tracking: {
-		message: (user: DroidUser) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente de  **${user.toString()}:**`
+		message: (user: DroidUser) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente de  **${user.toString()}:**${client.config.scraping ? `\n-# ${es.general.scraping}` : ``}`,
 	}
 }

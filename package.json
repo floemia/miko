@@ -1,6 +1,6 @@
 {
   "name": "miko",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "Bot for osu!droid.",
   "main": "./dist/index.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "chalk": "^4.1.2",
     "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
-    "miko-modules": "^1.8.1",
+    "miko-modules": "^1.8.2",
     "module-alias": "^2.2.3",
     "mongoose": "^8.15.1",
     "tsconfig-paths": "^4.2.0"

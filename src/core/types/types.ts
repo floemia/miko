@@ -1,6 +1,6 @@
 export interface ConfigFile {
 	debug: boolean;
-	droid_scraping: boolean;
+	scraping: boolean;
 	developers: string[];
 	tracking: {
 		droid: {

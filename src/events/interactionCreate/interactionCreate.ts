@@ -58,7 +58,7 @@ export const run: Event<"interactionCreate">["run"] = async (client, interaction
 				user: interaction.user
 			});
 			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ embeds: [embed] });
+				await interaction.editReply({ embeds: [embed] });
 			} else {
 				await interaction.reply({ embeds: [embed] });
 			}

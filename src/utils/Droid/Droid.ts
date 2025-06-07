@@ -36,7 +36,7 @@ export abstract class Droid {
 
 		if (uid || username) {
 			if (ibancho) {
-				if (process.env.NEW_DROID_HOTFIX == "true") {
+				if (client.config.scraping == true) {
 					if (!uid) throw new Error("broken")
 					const old_user = await DroidScrape.getUser(uid);
 					if (!old_user) return undefined;
@@ -63,7 +63,7 @@ export abstract class Droid {
 		let combo = `${Misc.formatInteger(score.combo)}x`;
 		const accuracy = `${(score.accuracy * 100).toFixed(2)}%`;
 		const c = score.count;
-		const statistics = client.config.droid_scraping ?
+		const statistics = client.config.scraping ?
 			`${c.nMiss}❌` :
 			`[${c.n300}/${c.n100}/${c.n50}/${c.nMiss}]`;
 		if (score.beatmap) {
@@ -87,15 +87,13 @@ export abstract class Droid {
 				const hit_error = score.replay.calculateHitError();
 				ur_penalties += `・**${hit_error?.unstableRate.toFixed(2)} UR`;
 				const _3F = score.is3Finger();
-				const _2H = score.is2Hand();
 				const SC = score.isSliderCheesed();
-				const penalties = (_3F || _2H || SC)
+				const penalties = (_3F || SC)
 				if (penalties) {
 					ur_penalties += `\n> **Penalties:** `;
 					const list_penalties = [];
 					if (_3F) list_penalties.push("3F");
 					if (SC) list_penalties.push("SC");
-					if (_2H) list_penalties.push("2H");
 					ur_penalties += list_penalties.join(", ");
 				}
 			}
