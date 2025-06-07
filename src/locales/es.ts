@@ -20,10 +20,10 @@ export const es = {
 			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  **${user.toString()}:**${client.config.scraping ? `\n-# ${es.general.scraping}` : ``}`,
 		},
 		userbind: {
-			success: (user: DroidUser) => `Tu cuenta de Discord ha sido vinculada a ${user.toString()}.`,
+			success: (user: DroidUser) => `Tu cuenta de Discord ha sido vinculada a  ${user.toString()}.`,
 		},
 		top: {
-			generating: (user: DroidUser) => `Obteniendo top scores de ${user.toString()}...`,
+			generating: (user: DroidUser) => `Obteniendo top scores de  ${user.toString()}...`,
 		},
 		uptime: {
 			response: (uptime: number) => `El tiempo de actividad de Miko es de \`${Misc.msToTime(uptime)}\`.`,
@@ -38,6 +38,9 @@ export const es = {
 		},
 		defaultserver: {
 			response: (server: string) => `Tu servidor predeterminado de osu!droid ahora es ${server}.`,
+		},
+		card: {
+			generating: (user: DroidUser) => `Generando tarjeta de perfil de  ${user.toString()}...`,
 		}
 	},
 	tracking: {

@@ -1,60 +1,39 @@
 import { SlashCommand } from "@structures/core";
-import { Embeds, Droid, Misc } from "@utils";
-import { ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { DroidBanchoUser, DroidRXUser } from "miko-modules";
+import { Embeds, Droid } from "@utils";
+import { SlashCommandBuilder } from "discord.js";
 import { en, es } from "@locales";
+import { PaginationRowBuilder } from "@utils";
 export const run: SlashCommand["run"] = async (client, interaction) => {
 	const spanish = interaction.locale.includes("es");
 	const str = spanish ? es : en;
 	await interaction.deferReply();
-	let index = interaction.options.getInteger("index") || 0;
+	let index = (interaction.options.getInteger("index") || 1) - 1;
 	const user = await Droid.getUserFromInteraction(interaction);
 	if (!user)
 		return interaction.editReply({ embeds: [Embeds.error({ description: str.general.user_dne, user: interaction.user })] });
 
-	const embed_wait = new EmbedBuilder()
-		.setColor("LightGrey")
-		.setDescription(`> <:droid_simple:1021473577951821824>  **osu!droid・**${str.commands.recent.generating(user)}`);
+	const embed_wait = Embeds.process(str.commands.recent.generating(user));
 	const response = await interaction.editReply({ embeds: [embed_wait] });
 
 	const scores = await user.scores.recent();
 	if (scores.length == 0)
 		return response.edit({ embeds: [Embeds.error({ description: str.general.no_scores(user), user: interaction.user })] });
 
-	const unique = Misc.getUniqueID();
-	const row = Misc.createRow(index, unique, scores.length);
+	const row = new PaginationRowBuilder(response)
+		.setIndex(index)
+		.setLength(scores.length)
+		.startTimeout();
+
 	const embed = await Embeds.score({ user: user, score: scores[0] });
 	await response.edit({ content: str.commands.recent.message(user, index), embeds: [embed], components: [row] });
-
-	const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button });
-	let collector_timeout = Misc.rowTimeout(row, collector, response);
-
-	collector.on("collect", async (i) => {
+	row.collector.on("collect", async (i) => {
 		await i.deferUpdate();
-		if (i.user.id != interaction.user.id) return;
-		switch (i.customId) {
-			case `backAll-${unique}`:
-				index = 0;
-				break;
-			case `back-${unique}`:
-				index--;
-				break;
-			case `go-${unique}`:
-				index++;
-				break;
-			case `goAll-${unique}`:
-				index = scores.length - 1;
-				break;
-		}
-		clearTimeout(collector_timeout);
-		collector_timeout = Misc.rowTimeout(row, collector, response);
-		if (index < 0) index = scores.length - 1;
-		if (index > scores.length - 1) index = 0;
-		row.components[0].setDisabled(index == 0 ? true : false)
-		row.components[2].setLabel(`${index + 1}/${scores.length}`)
-		row.components[4].setDisabled(index == scores.length - 1 ? true : false)
-		const embed = await Embeds.score({ user: user, score: scores[index] });
-		await response.edit({ content: str.commands.recent.message(user, index), embeds: [embed], components: [row] });
+		if (i.user.id != interaction.user.id || !i.customId.includes(row.ID)) return
+		const action = i.customId.split("-")[0] as "first" | "back" | "next" | "last";
+		row.handleAction(action);
+
+		const embed = await Embeds.score({ user: user, score: scores[row.index] });
+		await response.edit({ content: str.commands.recent.message(user, row.index), embeds: [embed], components: [row] });
 	})
 }
 export const data: SlashCommand["data"] =

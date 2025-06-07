@@ -1,6 +1,6 @@
 import { SlashCommand } from "@structures/core";
-import { Droid, Embeds, Misc } from "@utils";
-import { ComponentType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { Droid, Embeds, PaginationRowBuilder } from "@utils";
+import { SlashCommandBuilder } from "discord.js";
 import { en, es } from "@locales";
 export const run: SlashCommand["run"] = async (client, interaction) => {
 	await interaction.deferReply();
@@ -11,47 +11,26 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 	if (!user)
 		return interaction.editReply({ embeds: [Embeds.error({ description: str.general.user_dne, user: interaction.user })] });
 
-	const embed_wait = new EmbedBuilder()
-		.setColor("LightGrey")
-		.setDescription(`> <:droid_simple:1021473577951821824>  **osu!droid・**${str.commands.top.generating(user)}`);
+	const embed_wait = Embeds.process(str.commands.top.generating(user));
 	const response = await interaction.editReply({ embeds: [embed_wait] });
 
 	const scores = await user.scores.top();
 	if (scores.length == 0)
 		return interaction.editReply({ embeds: [Embeds.error({ description: str.general.no_scores(user), user: interaction.user })] });
 
-	const unique = Misc.getUniqueID();
 	const max_pages = Math.ceil(scores.length / 5);
-	const row = Misc.createRow(page, unique, max_pages);
-	const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button });
-	let collector_timeout = Misc.rowTimeout(row, collector, response);
+	const row = new PaginationRowBuilder(response)
+		.setIndex(page)
+		.setLength(max_pages)
+		.startTimeout();
 	const embed = await Embeds.top(user, scores, page);
 	await response.edit({ embeds: [embed], components: [row] });
-	collector.on("collect", async (i) => {
+	row.collector.on("collect", async (i) => {
 		await i.deferUpdate();
-		if (i.user.id != interaction.user.id) return;
-		switch (i.customId) {
-			case `backAll-${unique}`:
-				page = 0;
-				break;
-			case `back-${unique}`:
-				page--;
-				break;
-			case `go-${unique}`:
-				page++;
-				break;
-			case `goAll-${unique}`:
-				page = max_pages - 1;
-				break;
-		}
-		clearTimeout(collector_timeout);
-		collector_timeout = Misc.rowTimeout(row, collector, response);
-		if (page < 0) page = max_pages - 1;
-		if (page == max_pages) page = 0;
-		row.components[0].setDisabled(page == 0 ? true : false);
-		row.components[2].setLabel(`${page + 1}/${max_pages}`);
-		row.components[4].setDisabled(page == max_pages - 1? true : false);
-		const embed = await Embeds.top(user, scores, page);
+		if (i.user.id != interaction.user.id || !i.customId.includes(row.ID)) return
+		const action = i.customId.split("-")[0] as "first" | "back" | "next" | "last";
+		row.handleAction(action);
+		const embed = await Embeds.top(user, scores, row.index);
 		await response.edit({ embeds: [embed], components: [row] });
 	})
 }

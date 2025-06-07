@@ -1,6 +1,7 @@
 import { Misc } from "@utils";
 import { client } from "@root";
 import { DroidUser } from "miko-modules";
+import { card } from "osu-droid-card";
 export const en = {
 	general: {
 		error: "An error has occurred.",
@@ -19,10 +20,10 @@ export const en = {
 			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`,
 		},
 		userbind: {
-			success: (user: DroidUser) => `Your Discord account has been linked to ${user.toString()}.`,
+			success: (user: DroidUser) => `Your Discord account has been linked to  ${user.toString()}.`,
 		},
 		top: {
-			generating: (user: DroidUser) => `Getting top scores of ${user.toString()}...`,
+			generating: (user: DroidUser) => `Getting top scores of  ${user.toString()}...`,
 		},
 		uptime: {
 			response: (uptime: number) => `Miko's uptime is \`${Misc.msToTime(uptime)}\`.`,
@@ -37,6 +38,9 @@ export const en = {
 		},
 		defaultserver: {
 			response: (server: string) => `Your default osu!droid server has been set to ${server}.`,
+		},
+		card: {
+			generating: (user: DroidUser) => `Generating profile card of  ${user.toString()}...`,
 		}
 	},
 	tracking: {
