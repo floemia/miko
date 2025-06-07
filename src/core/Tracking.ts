@@ -61,6 +61,7 @@ export class Tracking {
 	public stop() {
 		Logger.out({ prefix: "[TRACKING]", message: "Stopping osu!droid tracking system.", color: "Orange", important: true });
 		this.running = false;
+		client.config.tracking.droid.enabled = false;
 	}
 
 	public async refresh(): Promise<boolean> {
