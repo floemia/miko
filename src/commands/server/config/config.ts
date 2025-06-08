@@ -1,17 +1,12 @@
 import { SlashCommand } from "@structures/core";
 import { ChannelType, InteractionContextType, PermissionsBitField, SlashCommandBuilder } from "discord.js";
-import { channel, status } from "./subCommands";
+import { tracking } from "./subCommandsGroups/";
 export const run: SlashCommand["run"] = async (client, interaction) => {
 	await interaction.deferReply();
-	const subcommand = interaction.options.getSubcommand();
-	switch (subcommand) {
-		case "status":
-			await status(client, interaction);
-			break;
-		case "channel":
-			await channel(client, interaction);
-			break;
-	}
+
+	// const subcommandGroup = interaction.options.getSubcommandGroup();
+	// no more subcommandroups for now
+	tracking(client, interaction);
 }
 
 export const data: SlashCommand["data"] =
@@ -20,9 +15,9 @@ export const data: SlashCommand["data"] =
 		.setContexts(InteractionContextType.Guild)
 		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
 		.setDescription("unreachable")
-		.addSubcommandGroup(sub => sub
+		.addSubcommandGroup(g => g
 			.setName("tracking")
-			.setDescription("unreachable 2: Electric Boogaloo")
+			.setDescription("really, this is unreachable")
 			.addSubcommand(sub => sub
 				.setName("status")
 				.setDescription("⚙️ Set the osu!droid scores tracking status.")
@@ -44,4 +39,5 @@ export const data: SlashCommand["data"] =
 						.addChannelTypes(ChannelType.GuildText)
 						.setDescription("The desired channel for the tracking system.")
 						.setDescriptionLocalization("es-ES", "El canal deseado para el sistema de tracking.")
-						.setRequired(true))));
+						.setRequired(true))))
+

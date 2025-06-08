@@ -9,6 +9,9 @@ export const es = {
 		no_scores: (user: DroidUser) => `El usuario ${user.toString()} no tiene scores.`,
 		dev_only: "Este comando solo está disponible para <@596481414426525696>.",
 		scraping: "⚠️ Usando el método de web scraping! Pueden haber errores.",
+		you_no_link: "No tienes una cuenta de osu!droid vinculada. Usa /link o especifica un usuario.",
+		mention_no_link: "El usuario mencionado no tiene una cuenta de osu!droid vinculada.",
+		api_broken: `El API está actualmente rota y el método de emergencia no soporta usernames. Por favor usa UIDs.`
 	},
 	commands: {
 		ping: {
@@ -19,7 +22,7 @@ export const es = {
 			no_scores: (user: DroidUser) => `El usuario ${user.toString()} no tiene scores.`,
 			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  **${user.toString()}:**${client.config.scraping ? `\n-# ${es.general.scraping}` : ``}`,
 		},
-		userbind: {
+		link: {
 			success: (user: DroidUser) => `Tu cuenta de Discord ha sido vinculada a  ${user.toString()}.`,
 		},
 		top: {
@@ -35,6 +38,9 @@ export const es = {
 			track: {
 				enabled: (status: boolean) => `El sistema de tracking de scores de osu!droid ha sido ${status ? "habilitado" : "deshabilitado"}.`,
 			},
+			prefix: {
+				set: (prefix: string) => `El prefijo ha sido establecido a \`${prefix}\` para este servidor.`,
+			}
 		},
 		defaultserver: {
 			response: (server: string) => `Tu servidor predeterminado de osu!droid ahora es ${server}.`,

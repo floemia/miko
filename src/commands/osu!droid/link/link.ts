@@ -1,6 +1,4 @@
 import { SlashCommand } from "@structures/core";
-import DroidRXUserBindModel from "@structures/mongoose/DroidRXUserBindSchema";
-import DroidUserBindModel from "@structures/mongoose/DroidUserBindSchema";
 import { Embeds } from "@utils";
 import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { DroidBanchoUser, DroidRXUser } from "miko-modules";
@@ -17,17 +15,13 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 	const Request = iBancho ? DroidBanchoUser : DroidRXUser;
 	const user = await Request.get({ uid: uid, username: username });
 	if (!user) return interaction.editReply({ embeds: [Embeds.error({ description: str.general.user_dne, user: interaction.user })] });
-	const db = iBancho ? DroidUserBindModel : DroidRXUserBindModel;
-	await db.findOneAndUpdate(
-		{ discord_id: interaction.user.id },
-		{ uid: user.id, username: user.username, discord_id: interaction.user.id },
-		{ upsert: true, new: true }
-	);
+	await client.db.user.link(user, interaction.user.id);
+
 	const sv = iBancho ? client.config.servers.ibancho : client.config.servers.rx;
 	const embed = new EmbedBuilder()
 		.setColor(Number(`0x${user.color.slice(1)}`))
 		.setAuthor({ name: interaction.user.displayName, iconURL: interaction.user.displayAvatarURL() })
-		.setDescription(`> ${str.commands.userbind.success(user)}`)
+		.setDescription(`> ${str.commands.link.success(user)}`)
 		.setFooter({ text: `Server: ${sv.name}`, iconURL: sv.iconURL })
 		.setThumbnail(user.avatar_url)
 		.setTimestamp();
@@ -36,8 +30,8 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 
 export const data: SlashCommand["data"] =
 	new SlashCommandBuilder()
-		.setName("userbind")
-		.setDescription("🔘 Bind your Discord account to an osu!droid user.")
+		.setName("link")
+		.setDescription("🔘 Link your Discord account to an osu!droid user.")
 		.setDescriptionLocalization("es-ES", "🔘 Vincula tu cuenta de Discord a un usuario de osu!droid.")
 		.addIntegerOption(option => option.setName("uid")
 			.setDescription("The UID of the player.")

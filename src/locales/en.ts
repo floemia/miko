@@ -10,6 +10,9 @@ export const en = {
 		no_scores: (user: DroidUser) => `No scores found for ${user.toString()}.`,
 		dev_only: "This command is only available for <@596481414426525696>.",
 		scraping: "⚠️ Using web scraping method! Expect some errors.",
+		you_no_link: "You don't have a linked osu!droid account. Use /link or specify a user.",
+		mention_no_link: "The mentioned user doesn't have a linked osu!droid account.",
+		api_broken: `The API is currently broken and the fallback method doesn't support usernames. Please use UIDs.`
 	},
 	commands: {
 		ping: {
@@ -19,7 +22,7 @@ export const en = {
 			generating: (user: DroidUser) => `Getting recent scores of ${user.toString()}...`,
 			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`,
 		},
-		userbind: {
+		link: {
 			success: (user: DroidUser) => `Your Discord account has been linked to  ${user.toString()}.`,
 		},
 		top: {
@@ -34,6 +37,9 @@ export const en = {
 			},
 			track: {
 				enabled: (status: boolean) => `The osu!droid scores tracking system has been ${status ? "enabled" : "disabled"}.`,
+			},
+			prefix: {
+				set: (prefix: string) => `The prefix has been set to \`${prefix}\` for this server.`,
 			}
 		},
 		defaultserver: {

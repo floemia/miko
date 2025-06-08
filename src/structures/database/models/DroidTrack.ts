@@ -1,7 +1,6 @@
 import { Schema, model } from "mongoose";
-import { DroidTrackingUser } from "./types";
 
-const DroidAccountTrackSchema = new Schema<DroidTrackingUser>({
+const DroidTrackSchema = new Schema ({
 	username: { required: true, type: String },
 	uid: { required: true, type: Number },
 	guilds: [{
@@ -11,5 +10,5 @@ const DroidAccountTrackSchema = new Schema<DroidTrackingUser>({
 	timestamp: { type: Date, required: true },
 })
 
-const DroidAccountTrackModel = model("DroidTrackingList", DroidAccountTrackSchema)
-export default DroidAccountTrackModel
+
+export const DroidTrack = model("droidtrackinglist", DroidTrackSchema)

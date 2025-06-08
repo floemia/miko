@@ -1,53 +1,38 @@
-import DroidUserBindModel from "@structures/mongoose/DroidUserBindSchema";
-import DroidRXUserBindModel from "@structures/mongoose/DroidRXUserBindSchema";
-import DiscordUserDefaultServerModel from "@structures/mongoose/DiscordUserDefaultServerSchema";
 import { client } from "@root";
 import { Misc } from "@utils";
 import { ChatInputCommandInteraction } from "discord.js";
 import { DroidBanchoScore, DroidBanchoUser, DroidRXUser, DroidScore, DroidScrape, DroidUser } from "miko-modules";
+import { en, es } from "@locales";
+
 export abstract class Droid {
 	public static async getUserFromInteraction(interaction: ChatInputCommandInteraction): Promise<DroidBanchoUser | DroidRXUser | undefined> {
-		let server = interaction.options.getString("server") || undefined;
+		const spanish = interaction.locale.includes("es");
+		const str = spanish ? es : en;
+
+		let server = interaction.options.getString("server") as "ibancho" | "rx" | undefined;
 		let ibancho = !server ? "ibancho" : (server == "ibancho")
 		let uid = interaction.options.getInteger("uid") || undefined
 		let username = interaction.options.getString("username") || undefined
 		let discord_user = interaction.options.getUser("user") || undefined
-		if (!uid && !username && !discord_user) {
-			if (!server) {
-				let server_db = await DiscordUserDefaultServerModel.findOne({ discord_id: interaction.user.id })
-				if (server_db) ibancho = (server_db.server == "ibancho")
-				else ibancho = true
+		if (!uid && !username) {
+			const db = await client.db.user.getDroidUser(discord_user ? discord_user.id : interaction.user.id, server);
+			if (!db) {
+				if (!discord_user) throw new Error(str.general.you_no_link);
+				else throw new Error(str.general.mention_no_link);
 			}
-			let db = ibancho ? DroidUserBindModel : DroidRXUserBindModel
-			let user_db = await db.findOne({ discord_id: interaction.user.id })
-			if (!user_db) throw new Error("no user")
-			uid = user_db.uid
-		} else if (!uid && !username && discord_user) {
-			if (!server) {
-				let server_db = await DiscordUserDefaultServerModel.findOne({ discord_id: discord_user.id })
-				if (server_db) ibancho = (server_db.server == "ibancho")
-				else ibancho = true
-			}
-			let db = ibancho ? DroidUserBindModel : DroidRXUserBindModel
-			let user_db = await db.findOne({ discord_id: discord_user.id })
-			if (!user_db) throw new Error("no linked user")
-			uid = user_db.uid
+			uid = db.uid;
 		}
 
-		if (uid || username) {
-			if (ibancho) {
-				if (client.config.scraping == true) {
-					if (!uid) throw new Error("broken")
-					const old_user = await DroidScrape.getUser(uid);
-					if (!old_user) return undefined;
-					return new DroidBanchoUser(DroidScrape.temp_toNew(old_user), old_user);
-				}
-
-				return await DroidBanchoUser.get({ uid: uid, username: username })
+		if (ibancho) {
+			if (client.config.scraping == true) {
+				if (!uid) throw new Error(str.general.api_broken);
+				const old_user = await DroidScrape.getUser(uid);
+				if (!old_user) return undefined;
+				return new DroidBanchoUser(DroidScrape.temp_toNew(old_user), old_user);
 			}
-			else return await DroidRXUser.get({ uid: uid, username: username })
+			return await DroidBanchoUser.get({ uid: uid, username: username })
 		}
-		else throw new Error("no params")
+		else return await DroidRXUser.get({ uid: uid, username: username })
 	}
 
 	public static async createDescription(score: DroidScore): Promise<string> {
@@ -109,11 +94,11 @@ export abstract class Droid {
 
 	public static getFullUserString(user: DroidUser) {
 		let user_string = `${user.username}・`;
-		if (user instanceof DroidBanchoUser) user_string += `${Misc.formatFloat(user.stats.dpp)}dpp (#${Misc.formatInteger(user.stats.rank.global)}`;
-		if (user instanceof DroidRXUser) user_string += `${Misc.formatFloat(user.stats.pp)}pp (#${Misc.formatInteger(user.stats.rank)}`;
+		if (user instanceof DroidBanchoUser) user_string += `${Misc.formatFloat(user.stats.dpp || 0)}dpp (#${Misc.formatInteger(user.stats.rank.global)}`;
+		if (user instanceof DroidRXUser) user_string += `${Misc.formatFloat(user.stats.pp || 0)}pp (#${Misc.formatInteger(user.stats.rank)}`;
 		if (user.country && user instanceof DroidBanchoUser) {
 			let rank = Misc.formatInteger((<DroidBanchoUser>user).stats.rank.country);
-			user_string +=  ` ${user.country.toUpperCase()}#${rank})`
+			user_string += ` ${user.country.toUpperCase()}#${rank})`
 		} else user_string += `)`
 		return user_string;
 	}

@@ -34,7 +34,7 @@ export type DroidDefaultServer = {
 	server: "ibancho" | "rx",
 }
 
-export type GuildConfig = {
+export type GuildConfigModel = {
     id: string,
 	tracking_enabled: boolean,
     channel: {

@@ -1,11 +1,12 @@
 import config from "../../config.json";
 import mongoose from "mongoose";
 import { Client, ClientEvents, Collection } from "discord.js";
-import { Logger, Misc } from "@utils";
+import { Logger } from "@utils";
 import { CommandHandler, EventHandler } from "@handlers";
 import { SlashCommand, Cooldown } from "@structures/core";
 import { OsuAPIRequestBuilder } from "@rian8337/osu-base";
 import { Tracking } from "./Tracking";
+import { DBManager } from "./DBManager";
 
 const env = process.env
 const token = env.TOKEN;
@@ -17,6 +18,7 @@ export class Bot extends Client {
 	public commands = new Collection<string, SlashCommand>();
 	public events = new Collection<keyof ClientEvents, (client: Bot, ...args: any) => Promise<any>>();
 	public cooldowns = new Collection<string, Cooldown[]>();
+	public db = new DBManager();
 	public current_pfp: string = "";
 	public tracking = new Tracking(this.config.tracking.interval);
 	constructor() {
@@ -25,20 +27,14 @@ export class Bot extends Client {
 		});
 	}
 
-	private async connectDB(): Promise<void> {
-		if (!mongoURI) {
-			return Logger.err({ prefix: "[DATABASE]", message: "No MongoDB URI provided" });
-		}
-		Logger.out({ prefix: "[DATABASE]", message: "Connecting to MongoDB...", color: "Blue", important: true });
-		await mongoose.connect(mongoURI);
-		Logger.out({ prefix: "[DATABASE]", message: `Success.`, color: "Blue" });
-	}
-
 	public async start() {
 		if (!token) throw new Error("No token provided (process.env.TOKEN).");
 		if (!osuAPIKey) throw new Error("No osu! API key provided (process.env.OSU_API_KEY).");
 		OsuAPIRequestBuilder.setAPIKey(osuAPIKey);
-		await this.connectDB();
+		Logger.out({ prefix: "[DATABASE]", message: "Connecting to MongoDB...", color: "Blue", important: true });
+		await this.db.connect();
+		Logger.out({ prefix: "[DATABASE]", message: `Success.`, color: "Blue" });
+
 		await this.login(token);
 
 		Logger.out({ prefix: "[CLIENT]", message: `Registering events...`, color: "Purple", important: true });
@@ -50,7 +46,7 @@ export class Bot extends Client {
 		Logger.out({ prefix: "[CLIENT]", message: `Successfully registered ${this.commands.size} slash command(s).`, color: "Purple" });
 
 		if (this.config.tracking.droid.enabled) {
-			this.tracking.start();
+			await this.tracking.start();
 		}
 	}
 }

@@ -1,6 +1,6 @@
 {
   "name": "miko",
-  "version": "3.0.9",
+  "version": "3.1.1",
   "description": "Bot for osu!droid.",
   "main": "./dist/index.js",
   "scripts": {

@@ -3,14 +3,20 @@ import { Embeds, Droid } from "@utils";
 import { SlashCommandBuilder } from "discord.js";
 import { en, es } from "@locales";
 import { PaginationRowBuilder } from "@utils";
+import { DroidBanchoUser, DroidRXUser } from "miko-modules";
 export const run: SlashCommand["run"] = async (client, interaction) => {
 	const spanish = interaction.locale.includes("es");
 	const str = spanish ? es : en;
 	await interaction.deferReply();
 	let index = (interaction.options.getInteger("index") || 1) - 1;
-	const user = await Droid.getUserFromInteraction(interaction);
+	let user: DroidBanchoUser | DroidRXUser | undefined;
+	try {
+		user = await Droid.getUserFromInteraction(interaction);
+	} catch (error: any) {
+		return await interaction.editReply({ embeds: [Embeds.error({ description: `${error.message}`, user: interaction.user, title: str.general.error })] });
+	}
 	if (!user)
-		return interaction.editReply({ embeds: [Embeds.error({ description: str.general.user_dne, user: interaction.user })] });
+		return interaction.editReply({ embeds: [Embeds.error({ description: str.general.user_dne, user: interaction.user, title: str.general.error })] });
 
 	const embed_wait = Embeds.process(str.commands.recent.generating(user));
 	const response = await interaction.editReply({ embeds: [embed_wait] });
