@@ -18,3 +18,5 @@ export const data: SlashCommand["data"] =
 		.setName("uptime")
 		.setDescription("🕒 Get Miko's uptime.")
 		.setDescriptionLocalization("es-ES", "🕒 Obtener el tiempo de actividad de Miko.")
+
+export const dirname = __dirname;

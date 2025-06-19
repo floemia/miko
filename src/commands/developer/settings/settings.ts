@@ -68,3 +68,4 @@ export const data: SlashCommand["data"] =
 							{ name: "scraping", value: "scraping" },
 							{ name: "api", value: "api" })))
 		);
+export const dirname = __dirname;

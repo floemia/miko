@@ -65,3 +65,5 @@ export const data: SlashCommand["data"] =
 			.setDescription("The server to fetch scores from.")
 			.setDescriptionLocalization("es-ES", "El servidor desde el cual obtener los scores.")
 			.addChoices({ name: "iBancho", value: "ibancho" }, { name: "osudroid!relax", value: "rx" }))
+
+export const dirname = __dirname;

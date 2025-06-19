@@ -21,3 +21,4 @@ export const data: SlashCommand["data"] =
 		.setDescription("📶 Get Miko's ping.")
 		.setDescriptionLocalization("es-ES", "📶 Obtener el ping de Miko.")
 
+export const dirname = __dirname;

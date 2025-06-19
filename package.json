@@ -1,11 +1,10 @@
 {
   "name": "miko",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Bot for osu!droid.",
   "main": "./dist/index.js",
   "scripts": {
-    "start": "tsc && node ./dist/index.js",
-    "start-dev": "tsc && nodemon ./dist/index.js"
+    "start": "tsc && node ./dist/index.js"
   },
   "author": "floemia",
   "license": "ISC",
@@ -14,7 +13,7 @@
     "chalk": "^4.1.2",
     "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
-    "miko-modules": "^1.8.2",
+    "miko-modules": "^1.8.3",
     "module-alias": "^2.2.3",
     "mongoose": "^8.15.1",
     "osu-droid-card": "^0.0.7-beta",

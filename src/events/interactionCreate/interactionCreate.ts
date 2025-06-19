@@ -10,6 +10,14 @@ export const run: Event<"interactionCreate">["run"] = async (client, interaction
 		const now = new Date();
 		const command = client.commands.get(interaction.commandName);
 		if (!command) return;
+		if (command.disabled) {
+			const embed = Embeds.error({
+				title: str.general.error,
+				description: str.general.disabled,
+				user: interaction.user
+			});
+			return interaction.reply({ embeds: [embed] });
+		}
 		if (command.developer && !client.config.developers.includes(interaction.user.id)) {
 			const embed = Embeds.error({
 				title: str.general.error,

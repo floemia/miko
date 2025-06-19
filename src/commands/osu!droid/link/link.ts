@@ -43,3 +43,5 @@ export const data: SlashCommand["data"] =
 			.setDescription("The server of the player.")
 			.setDescriptionLocalization("es-ES", "El servidor del jugador.")
 			.addChoices({ name: "iBancho", value: "ibancho" }, { name: "osudroid!relax", value: "rx" }))
+
+export const dirname = __dirname;

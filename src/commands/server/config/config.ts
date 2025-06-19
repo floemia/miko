@@ -41,3 +41,4 @@ export const data: SlashCommand["data"] =
 						.setDescriptionLocalization("es-ES", "El canal deseado para el sistema de tracking.")
 						.setRequired(true))))
 
+export const dirname = __dirname;

@@ -10,7 +10,7 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 	const server = interaction.options.getString("server", true) as "ibancho" | "rx";
 	const fancy_name = server == "ibancho" ? "iBancho" : "osudroid!relax";
 	await client.db.user.setDefaultServer(interaction.user.id, server);
-	
+
 	const embed = Embeds.response({ description: str.commands.defaultserver.response(fancy_name), user: interaction.user, color: "Green" })
 	.setThumbnail(client.config.servers[server].iconURL)
 	await interaction.editReply({ embeds: [embed] });
@@ -29,3 +29,5 @@ export const data: SlashCommand["data"] =
 				.addChoices(
 					{ name: "iBancho", value: "ibancho" },
 					{ name: "osudroid!relax", value: "rx" }));
+
+export const dirname = __dirname;

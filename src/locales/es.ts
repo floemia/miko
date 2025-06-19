@@ -3,6 +3,7 @@ import { DroidUser } from "miko-modules";
 import { client } from "@root";
 export const es = {
 	general: {
+		disabled: "Este comando está temporalmente deshabilitado.",
 		error: "Ocurrió un error.",
 		cooldown: (time: number) => `¡Estás yendo muy rápido! Espera \`${time.toFixed(2)}s\`.`,
 		user_dne: "Ese usuario no existe.",

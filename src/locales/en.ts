@@ -4,6 +4,7 @@ import { DroidUser } from "miko-modules";
 import { card } from "osu-droid-card";
 export const en = {
 	general: {
+		disabled: "This command is temporarily disabled.",
 		error: "An error has occurred.",
 		cooldown: (time: number) => `You're being too fast! Please wait \`${time.toFixed(1)}s\`.`,
 		user_dne: "That user does not exist.",

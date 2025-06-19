@@ -12,3 +12,5 @@ export const data: SlashCommand["data"] =
 		.setName("crash")
 		.setDescription("💣 (DEV!) Nuke the bot for testing purposes.")
 		.setDescriptionLocalization("es-ES", "💣 (DEV!) Nukear el bot para pruebas.")
+
+export const dirname = __dirname;
