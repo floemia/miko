@@ -1,6 +1,6 @@
 {
   "name": "miko",
-  "version": "3.1.2",
+  "version": "3.1.3",
   "description": "Bot for osu!droid.",
   "main": "./dist/index.js",
   "scripts": {
@@ -11,13 +11,14 @@
   "dependencies": {
     "@rian8337/osu-base": "4.0.0-beta.63",
     "chalk": "^4.1.2",
-    "discord.js": "^14.19.3",
+    "discord.js": "^14.21.0",
     "dotenv": "^16.5.0",
-    "miko-modules": "^1.8.3",
+    "miko-modules": "^1.9.2",
     "module-alias": "^2.2.3",
     "mongoose": "^8.15.1",
     "osu-droid-card": "^0.0.7-beta",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.8.3"
   },
   "_moduleAliases": {
     "@core": "dist/core",

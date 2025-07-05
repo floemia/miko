@@ -54,7 +54,7 @@ export abstract class Embeds {
 		if (status < 0) status = 0;
 		const mods_string = score.modsString();
 		const status_emoji = client.emojis.cache.get(client.config.emojis.status[status.toString() as keyof typeof client.config.emojis.status]);
-		embed.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.user_url })
+		embed.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.url })
 		embed.setTitle(`**${status_emoji?.toString()}  ${title} ${mods_string}**`)
 		embed.setColor(Number(`0x${score.color.slice(1)}`))
 		embed.setDescription(desc)
@@ -71,7 +71,7 @@ export abstract class Embeds {
 		const user_string = Droid.getFullUserString(user);
 		const embed = new EmbedBuilder()
 			.setColor(Number(`0x${user.color.slice(1)}`))
-			.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.user_url })
+			.setAuthor({ name: user_string, iconURL: user.avatar_url, url: user.url })
 			.setTitle(`**Top 50 Scores**`)
 			.setFooter({ text: `Server: ${server.name}`, iconURL: server.iconURL })
 			.setTimestamp()
