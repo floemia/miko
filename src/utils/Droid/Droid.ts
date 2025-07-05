@@ -94,7 +94,7 @@ export abstract class Droid {
 
 	public static getFullUserString(user: DroidUser) {
 		const rx = user instanceof DroidRXUser;
-		let user_string = `${user.username}・${Misc.formatFloat(user.stats.pp || 0)}${rx ? "pp" : "dpp"}`;
+		let user_string = `${user.username}・${Misc.formatFloat(user.stats.pp || 0)}${rx ? "pp" : "dpp"} (#${user.stats.rank.global}`;
 		if (user.stats.rank.country && user.country) {
 			let rank = Misc.formatInteger(user.stats.rank.country);
 			user_string += ` ${user.country.toUpperCase()}#${rank})`
