@@ -28,8 +28,7 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 		.setImage(`attachment://${filename}`)
 		.setColor(Number(`0x${user.color.slice(1)}`))
 		.setAuthor({ name: interaction.user.displayName, iconURL: interaction.user.displayAvatarURL() })
-		.setTimestamp()
-		.setFooter({ text: client.user?.displayName! + " - Beta"});
+		.setFooter({ text: client.user?.displayName! + " - Beta", iconURL: client.user?.displayAvatarURL() });
 	await response.edit({ embeds: [embed], files: [attachment] });
 }
 export const data: SlashCommand["data"] =
@@ -46,5 +45,9 @@ export const data: SlashCommand["data"] =
 		.addStringOption(option => option.setName("username")
 			.setDescription("The username of the player.")
 			.setDescriptionLocalization("es-ES", "El nombre de usuario del jugador."))
+		.addStringOption(option => option.setName("server")
+			.setDescription("The desired server.")
+			.setDescriptionLocalization("es-ES", "El servidor deseado.")
+			.addChoices({ name: "iBancho", value: "ibancho" }, { name: "osudroid!relax", value: "rx" }))
 
 export const dirname = __dirname;
