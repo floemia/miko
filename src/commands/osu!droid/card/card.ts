@@ -1,35 +1,33 @@
 import { SlashCommand } from "@structures/core";
-import { Droid, Embeds } from "@utils";
-import { AttachmentBuilder, EmbedBuilder, SlashCommandBuilder } from "discord.js";
-import { en, es } from "@locales";
-import { DroidBanchoUser, DroidRXUser } from "miko-modules";
+import { ResponseEmbedBuilder, ResponseType } from "@utils/builders";
+import { AttachmentBuilder, SlashCommandBuilder } from "discord.js";
 import { DroidCard } from "@floemia/osu-droid-card";
+import { ColorHelper, DroidHelper } from "@utils/helpers";
+import { CacheManager } from "@utils/managers";
+import { DroidUserNotFound } from "@structures/errors";
 
-export const run: SlashCommand["run"] = async (client, interaction) => {
-	await interaction.deferReply();
-	const spanish = interaction.locale.includes("es");
-	const str = spanish ? es : en;
+export const run: SlashCommand["run"] = async (client, interaction, str) => {
+	const user = await DroidHelper.getUser(interaction);
+	if (!user) throw new DroidUserNotFound(str.general.user_dne);
+	
+	const embed = new ResponseEmbedBuilder()
+		.setUser(interaction.user)
+		.setType(ResponseType.PROCESS)
+		.setDescription(str.commands.card.generating(user));
+	const response = await interaction.editReply({ embeds: [embed] });
 
-	let user: DroidBanchoUser | DroidRXUser | undefined;
-	try {
-		user = await Droid.getUserFromInteraction(interaction);
-	} catch (error: any) {
-		return await interaction.editReply({ embeds: [Embeds.error({ description: `${error.message}`, user: interaction.user, title: str.general.error })] });
-	}
-	if (!user)
-		return interaction.editReply({ embeds: [Embeds.error({ description: str.general.user_dne, user: interaction.user, title: str.general.error })] });
+	const inCache = CacheManager.getDroidCard(user);
+	let cardBuffer = inCache ?? await DroidCard.create(user);
 
-	const embed_wait = Embeds.process(str.commands.card.generating(user));
-	const response = await interaction.editReply({ embeds: [embed_wait] });
-	const card_data = await DroidCard.create(user);
 	const filename = `${user.username}-${user.id}.png`;
-	const attachment = new AttachmentBuilder(card_data!, { name: filename });
-	const embed = new EmbedBuilder()
+	const attachment = new AttachmentBuilder(cardBuffer, { name: filename });
+	const color = await ColorHelper.getAverageColor(user.avatar_url);
+	embed.setType(ResponseType.SUCCESS)
 		.setImage(`attachment://${filename}`)
-		.setColor(Number(`0x${user.color.slice(1)}`))
-		.setAuthor({ name: interaction.user.displayName, iconURL: interaction.user.displayAvatarURL() })
-		.setFooter({ text: client.user?.displayName! + " - Beta", iconURL: client.user?.displayAvatarURL() });
+		.setColor(Number(`0x${color.hex.slice(1)}`))
+
 	await response.edit({ embeds: [embed], files: [attachment] });
+	CacheManager.setDroidCard(user, cardBuffer);
 }
 export const data: SlashCommand["data"] =
 	new SlashCommandBuilder()

@@ -1,14 +1,15 @@
-import { Misc } from "@utils";
 import { client } from "@root";
-import { DroidUser } from "miko-modules";
-import { card } from "osu-droid-card";
-export const en = {
+import { DroidUser } from "@floemia/osu-droid-utils";
+import { TimeHelper } from "@utils/helpers/TimeHelper";
+import { Localization } from "./Localization";
+import { DroidHelper } from "@utils/helpers";
+export const en: Localization = {
 	general: {
 		disabled: "This command is temporarily disabled.",
 		error: "An error has occurred.",
 		cooldown: (time: number) => `You're being too fast! Please wait \`${time.toFixed(1)}s\`.`,
 		user_dne: "That user does not exist.",
-		no_scores: (user: DroidUser) => `No scores found for ${user.toString()}.`,
+		no_scores: (user: DroidUser) => `No scores found for ${DroidHelper.userToString(user, false)}.`,
 		dev_only: "This command is only available for <@596481414426525696>.",
 		scraping: "⚠️ Using web scraping method! Expect some errors.",
 		you_no_link: "You don't have a linked osu!droid account. Use /link or specify a user.",
@@ -20,17 +21,17 @@ export const en = {
 			response: (ping: number) => `The ping is \`${ping.toFixed(2)}ms\`.`,
 		},
 		recent: {
-			generating: (user: DroidUser) => `Getting recent scores of ${user.toString()}...`,
-			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${user.toString()}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`,
+			generating: (user: DroidUser) => `Getting recent scores of ${DroidHelper.userToString(user, false)}...`,
+			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`,
 		},
 		link: {
-			success: (user: DroidUser) => `Your Discord account has been linked to  ${user.toString()}.`,
+			success: (user: DroidUser) => `Your Discord account has been linked to  ${DroidHelper.userToString(user, false)}.`,
 		},
 		top: {
-			generating: (user: DroidUser) => `Getting top scores of  ${user.toString()}...`,
+			generating: (user: DroidUser) => `Getting top scores of  ${DroidHelper.userToString(user, false)}...`,
 		},
 		uptime: {
-			response: (uptime: number) => `Miko's uptime is \`${Misc.msToTime(uptime)}\`.`,
+			response: (uptime: number) => `Miko's uptime is \`${TimeHelper.msToTime(uptime)}\`.`,
 		},
 		config: {
 			track_channel: {
@@ -47,11 +48,11 @@ export const en = {
 			response: (server: string) => `Your default osu!droid server has been set to ${server}.`,
 		},
 		card: {
-			generating: (user: DroidUser) => `Generating profile card of  ${user.toString()}...`,
+			generating: (user: DroidUser) => `Generating profile card of  ${DroidHelper.userToString(user, false)}...`,
 		}
 	},
 	tracking: {
-		message: (user: DroidUser) => `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score from  **${user.toString()}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`
+		message: (user: DroidUser) => `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score from  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`
 
 	}
 }

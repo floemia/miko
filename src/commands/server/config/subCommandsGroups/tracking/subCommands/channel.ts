@@ -1,22 +1,16 @@
 import { SlashCommand } from "@structures/core";
-import { Embeds } from "@utils";
-import { en, es } from "@locales";
 import { PermissionFlagsBits, TextChannel } from "discord.js";
+import { DBManager } from "@utils/managers";
+import { ResponseEmbedBuilder } from "@utils/builders";
 
-export const channel: SlashCommand["run"] = async (client, interaction) => {
-	const spanish = interaction.locale.includes("es");
-	const str = spanish ? es : en;
-
+export const channel: SlashCommand["run"] = async (client, interaction, str) => {
 	const channel = interaction.options.getChannel("channel", true) as TextChannel;
-	await client.db.guilds.setTrackChannel(interaction.guild!.id, channel.id);
-
 	const botMember = interaction.guild?.members.me!;
-	const embed = Embeds.response({
-		description: str.commands.config.track_channel.set(channel.toString(), botMember.permissionsIn(channel).has(PermissionFlagsBits.SendMessages)), 
-		color: "Green",
-		user: interaction.user
-	});
+	const embed = new ResponseEmbedBuilder()
+		.setUser(interaction.user)
+		.setDescription(str.commands.config.track_channel.set(channel.name, channel.permissionsFor(botMember).has(PermissionFlagsBits.SendMessages)))
 	await interaction.editReply({ embeds: [embed] });
 
+	await DBManager.setTrackChannel(interaction.guild!, channel);
 
 }

@@ -1,29 +1,27 @@
 import { Event } from "@structures/core";
-import { Embeds, Logger } from "@utils";
-import { en, es } from "@locales";
+import { InteractionHelper } from "@utils/helpers";
+import { ResponseEmbedBuilder, ResponseType } from "@utils/builders";
+import { Logger } from "@utils/logger";
+import { MikoError } from "@structures/errors";
 export const name = "interactionCreate";
 export const run: Event<"interactionCreate">["run"] = async (client, interaction) => {
 	if (interaction.isChatInputCommand()) {
-		const spanish = interaction.locale.includes("es");
-		const str = spanish ? es : en;
+		const str = InteractionHelper.getLocaleResponses(interaction);
+		const embed = new ResponseEmbedBuilder()
+			.setUser(interaction.user);
+
 		const cooldowns = client.cooldowns;
 		const now = new Date();
-		const command = client.commands.get(interaction.commandName);
+		const command = client.commands.get(interaction.commandName) || client.dev_commands.get(interaction.commandName);
 		if (!command) return;
 		if (command.disabled) {
-			const embed = Embeds.error({
-				title: str.general.error,
-				description: str.general.disabled,
-				user: interaction.user
-			});
+			embed.setType(ResponseType.ERROR)
+				.setDescription(str.general.disabled);
 			return interaction.reply({ embeds: [embed] });
 		}
 		if (command.developer && !client.config.developers.includes(interaction.user.id)) {
-			const embed = Embeds.error({
-				title: str.general.error,
-				description: str.general.dev_only,
-				user: interaction.user
-			});
+			embed.setType(ResponseType.ERROR)
+				.setDescription(str.general.dev_only);
 			return interaction.reply({ embeds: [embed] });
 		}
 		const cd = command.cooldown ?? 5;
@@ -37,10 +35,7 @@ export const run: Event<"interactionCreate">["run"] = async (client, interaction
 			const expiresAt = new Date(userCD.executed_at.getTime() + cd * 1000);
 			if (expiresAt > now) {
 				const timeLeft = (expiresAt.getTime() - now.getTime()) / 1000;
-				const embed = Embeds.error({
-					description: str.general.cooldown(timeLeft),
-					user: interaction.user
-				});
+				embed.setType(ResponseType.ERROR).setDescription(str.general.cooldown(timeLeft));
 				return interaction.reply({
 					embeds: [embed],
 					flags: "Ephemeral",
@@ -55,16 +50,17 @@ export const run: Event<"interactionCreate">["run"] = async (client, interaction
 			});
 		}
 		try {
-			await command.run(client, interaction);
+			await interaction.deferReply();
+			await command.run(client, interaction, str);
 		} catch (error: any) {
-			Logger.err({ prefix: "[SC]", message: `An error has occurred while running the command /${command.data.name}.`, color: "Red", important: true });
-			Logger.err({ prefix: "[SC]", message: `${error.stack}`, color: "Red" });
-
-			const embed = Embeds.error({
-				title: str.general.error,
-				description: `\`${error}\``,
-				user: interaction.user
-			});
+			if (error instanceof MikoError) {
+				embed.setType(ResponseType.ERROR).setDescription(`\`${error.message}\``);
+			}
+			else {
+				Logger.err({ prefix: "[SC]", message: `An error has occurred while running the command /${command.data.name}.`, color: "Red", important: true });
+				Logger.err({ prefix: "[SC]", message: `${error.stack}`, color: "Red" });
+				embed.setType(ResponseType.ERROR).setDescription(str.general.error);
+			}
 			if (interaction.replied || interaction.deferred) {
 				await interaction.editReply({ embeds: [embed] });
 			} else {

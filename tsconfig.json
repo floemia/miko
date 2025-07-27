@@ -15,7 +15,8 @@
 	"esModuleInterop": true,
 	"paths": {
 		"@core*": ["core/"],
-		"@utils*": ["utils/"],
+    "@utils*": ["utils/"],
+		"@utils/*": ["utils/*"],
 		"@handlers*": ["handlers/"],
 		"@locales*": ["locales/"],
 		"@root": ["."],

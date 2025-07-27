@@ -2,7 +2,7 @@ import "dotenv/config";
 import 'module-alias/register';
 
 import { Bot } from "@core/Bot";
-import { Logger } from "@utils/Logger";
+import { Logger } from "@utils/logger";
 
 const client = new Bot();
 

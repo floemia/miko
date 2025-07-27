@@ -1,0 +1,1 @@
+export type DroidServer = "ibancho" | "rx";

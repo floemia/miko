@@ -1,15 +1,12 @@
 import { SlashCommand } from "@structures/core";
-import { Embeds, Misc } from "@utils";
+import { ResponseEmbedBuilder } from "@utils/builders";
 import { SlashCommandBuilder } from "discord.js";
-import { en, es } from "@locales";
-export const run: SlashCommand["run"] = async (client, interaction) => {
-	await interaction.deferReply();
-	const spanish = interaction.locale.includes("es");
-	const str = spanish ? es : en;
-	const embed = Embeds.response({
-		description: str.commands.uptime.response(client.uptime!),
-		user: interaction.user
-	});
+
+export const run: SlashCommand["run"] = async (client, interaction, str) => {	
+	const embed = new ResponseEmbedBuilder()
+		.setUser(interaction.user)
+		.setDescription(str.commands.uptime.response(client.uptime!));
+
 	await interaction.editReply({ embeds: [embed] });
 }
 

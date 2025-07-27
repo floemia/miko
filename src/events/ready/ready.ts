@@ -1,12 +1,13 @@
 import { Event } from "@structures/core/Event";
-import { Logger } from "@utils/Logger";
+import { Logger } from "@utils/logger";
+import { FileManager } from "@utils/managers";
 import { ActivityOptions, ActivityType } from "discord.js";
+
 export const name = "ready";
-import fs from "fs";
 
 export const run: Event<"ready">["run"] = async (client) => {
 	Logger.out({ prefix: "[CLIENT]", message: `Logged in as ${client.user?.displayName}!`, color: "Purple" })
-	const avatars = fs.readdirSync("./assets/avatars/").map(file => `./assets/avatars/${file}`);
+	const avatars = FileManager.getAvatarList();
 	setInterval(async () => {
 		const candidates = avatars.filter(pfp => pfp != client.current_pfp);
 		const random = candidates.length > 0

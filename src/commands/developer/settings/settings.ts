@@ -1,17 +1,17 @@
 import { SlashCommand } from "@structures/core";
 import { SlashCommandBuilder } from "discord.js";
-import { debug, tracking, droid } from "./subCommandGroups/";
+import { debug, tracking } from "./subCommandGroups/";
 import fs from "fs";
 import path from "path";
+
 export const developer: SlashCommand["developer"] = true;
 
-export const run: SlashCommand["run"] = async (client, interaction) => {
-	await interaction.deferReply();
+export const run: SlashCommand["run"] = async (client, interaction, str) => {
 	const subcommandGroup = interaction.options.getSubcommandGroup();
-	if (subcommandGroup == "debug") debug(client, interaction);
-	else if (subcommandGroup == "tracking") tracking(client, interaction);
-	else droid(client, interaction);
+	if (subcommandGroup == "debug") debug(client, interaction, str);
+	else tracking(client, interaction, str);
 
+	// lazy
 	const config_path = path.join(__dirname, "../../../../config.json");
 	fs.writeFileSync(config_path, JSON.stringify(client.config, null, 4));
 }

@@ -1,19 +1,20 @@
 import { SlashCommand } from "@structures/core";
-import { Embeds } from "@utils";
-import { en, es } from "@locales";
 import { SlashCommandBuilder } from "discord.js";
+import { DBManager } from "@utils/managers";
+import { ResponseEmbedBuilder } from "@utils/builders";
+import { DroidServer } from "@structures/servers";
 
-export const run: SlashCommand["run"] = async (client, interaction) => {
-	await interaction.deferReply();
-	const spanish = interaction.locale.includes("es");
-	const str = spanish ? es : en;
-	const server = interaction.options.getString("server", true) as "ibancho" | "rx";
+export const run: SlashCommand["run"] = async (client, interaction, str) => {
+	const server = interaction.options.getString("server", true) as DroidServer;
 	const fancy_name = server == "ibancho" ? "iBancho" : "osudroid!relax";
-	await client.db.user.setDefaultServer(interaction.user.id, server);
-
-	const embed = Embeds.response({ description: str.commands.defaultserver.response(fancy_name), user: interaction.user, color: "Green" })
-	.setThumbnail(client.config.servers[server].iconURL)
+	
+	const embed = new ResponseEmbedBuilder()
+	.setUser(interaction.user)
+	.setDescription(str.commands.defaultserver.response(fancy_name))
+	.setThumbnail(client.config.servers[server].iconURL);
+	
 	await interaction.editReply({ embeds: [embed] });
+	await DBManager.setDefaultServer(interaction.user, server);
 }
 
 export const data: SlashCommand["data"] =

@@ -1,47 +1,45 @@
 import { SlashCommand } from "@structures/core";
-import { Embeds, Droid } from "@utils";
 import { SlashCommandBuilder } from "discord.js";
-import { en, es } from "@locales";
-import { PaginationRowBuilder } from "@utils";
-import { DroidBanchoUser, DroidRXUser } from "miko-modules";
-export const run: SlashCommand["run"] = async (client, interaction) => {
-	const spanish = interaction.locale.includes("es");
-	const str = spanish ? es : en;
-	await interaction.deferReply();
+import { DroidHelper } from "@utils/helpers";
+import { ScoreEmbedBuilder, PaginationRowBuilder, ResponseEmbedBuilder, ResponseType, RowActions } from "@utils/builders";
+import { DroidUserNotFound } from "@structures/errors";
+import { NoDroidScores } from "@structures/errors/NoDroidScores";
+import { DroidRXUser } from "@floemia/osu-droid-utils";
+
+export const run: SlashCommand["run"] = async (client, interaction, str) => {
 	let index = (interaction.options.getInteger("index") || 1) - 1;
-	let user: DroidBanchoUser | DroidRXUser | undefined;
-	try {
-		user = await Droid.getUserFromInteraction(interaction);
-	} catch (error: any) {
-		return await interaction.editReply({ embeds: [Embeds.error({ description: `${error.message}`, user: interaction.user, title: str.general.error })] });
-	}
-	if (!user)
-		return interaction.editReply({ embeds: [Embeds.error({ description: str.general.user_dne, user: interaction.user, title: str.general.error })] });
+	const user = await DroidHelper.getUser(interaction);
+	if (!user) throw new DroidUserNotFound(str.general.user_dne);
+	const embed = new ResponseEmbedBuilder()
+		.setType(ResponseType.PROCESS)
+		.setDescription(str.commands.recent.generating(user));
+	const response = await interaction.editReply({ embeds: [embed] });
 
-	const embed_wait = Embeds.process(str.commands.recent.generating(user));
-	const response = await interaction.editReply({ embeds: [embed_wait] });
-
-	const scores = await user.scores.recent();
-	if (scores.length == 0)
-		return response.edit({ embeds: [Embeds.error({ description: str.general.no_scores(user), user: interaction.user })] });
+	if (user instanceof DroidRXUser) await user.getRecentScores();
+	const scores = user.scores.recent;
+	if (scores.length == 0) throw new NoDroidScores(str.general.no_scores(user));
 
 	const row = new PaginationRowBuilder(response)
 		.setIndex(index)
 		.setLength(scores.length)
 		.startTimeout();
 
-	const embed = await Embeds.score({ user: user, score: scores[0] });
-	await response.edit({ content: str.commands.recent.message(user, index), embeds: [embed], components: [row] });
+	const score_embed = await new ScoreEmbedBuilder()
+		.setPlayer(user)
+		.setScore(scores[row.index])
+
+	await response.edit({ content: str.commands.recent.message(user, index), embeds: [score_embed], components: [row] });
 	row.collector.on("collect", async (i) => {
 		await i.deferUpdate();
 		if (i.user.id != interaction.user.id || !i.customId.includes(row.ID)) return
-		const action = i.customId.split("-")[0] as "first" | "back" | "next" | "last";
-		row.handleAction(action);
 
-		const embed = await Embeds.score({ user: user, score: scores[row.index] });
-		await response.edit({ content: str.commands.recent.message(user, row.index), embeds: [embed], components: [row] });
+		const action = i.customId.split("-")[0] as RowActions;
+		row.handleAction(action);
+		await score_embed.setScore(scores[row.index])
+		await response.edit({ content: str.commands.recent.message(user, row.index), embeds: [score_embed], components: [row] });
 	})
 }
+
 export const data: SlashCommand["data"] =
 	new SlashCommandBuilder()
 		.setName("recent")
