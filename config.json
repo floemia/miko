@@ -1,12 +1,12 @@
 {
-    "debug": false,
+    "debug": true,
     "scraping": false,
     "developers": [
         "596481414426525696"
     ],
     "test_guild": "976981749848473610",
     "tracking": {
-        "enabled": true,
+        "enabled": false,
         "interval": 15
     },
     "servers": {

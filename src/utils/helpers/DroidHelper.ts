@@ -85,7 +85,7 @@ export abstract class DroidHelper {
         const c = score.accuracy;
         const statistics = `[${c.n300}/${c.n100}/${c.n50}/${c.nmiss}]`;
         if (score.beatmap) {
-            const data = (await DroidScore.toFC(score).calculate())!;
+            const data = (await score.calculate())!;
             combo += `/${NumberHelper.toInt(score.beatmap.maxCombo!)}x`;
             let { ar, od, hp, cs } = data;
             const bpm = (score.beatmap.bpm * score.getFinalSpeed()).toLocaleString("en-US", { maximumFractionDigits: 2 });

@@ -23,8 +23,11 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 	const attachment = new AttachmentBuilder(cardBuffer, { name: filename });
 	const color = await ColorHelper.getAverageColor(user.avatar_url);
 	embed.setType(ResponseType.SUCCESS)
+		.setDescription(null)
 		.setImage(`attachment://${filename}`)
 		.setColor(Number(`0x${color.hex.slice(1)}`))
+		.setTimestamp()
+		.setFooter({ text: `${client.user?.displayName} (beta)`});
 
 	await response.edit({ embeds: [embed], files: [attachment] });
 	CacheManager.setDroidCard(user, cardBuffer);

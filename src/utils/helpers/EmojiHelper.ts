@@ -1,3 +1,4 @@
+import { RankEmojis } from "@core";
 import { client } from "@root";
 import { ApplicationEmoji, Snowflake, Collection, Guild, Emoji } from "discord.js";
 
@@ -12,7 +13,7 @@ export abstract class EmojiHelper {
 
     static getRankEmoji(rank: string): Emoji | undefined {
         const isDebug = client.config.debug;    
-        const emoji = isDebug ? this.guild.emojis.cache.find(e => e.name == rank) : this.app_emojis.find(e => e.name == rank);
+        const emoji = isDebug ? this.guild.emojis.cache.find(e => e.name == rank) : this.app_emojis.find(e => e.id == `${client.config.emojis.ranks[(rank as keyof RankEmojis)]}`);
         return emoji;
     }
 

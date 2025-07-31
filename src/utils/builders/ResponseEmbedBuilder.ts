@@ -43,8 +43,8 @@ export class ResponseEmbedBuilder extends EmbedBuilder {
         return this;
     }
 
-    setDescription(description: string) {
+    setDescription(description: string | null) {
+        if (description === null) return super.setDescription(null);
         return super.setDescription(`> ${description}`);
     }
-
 }
