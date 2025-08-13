@@ -1,4 +1,4 @@
-import { DroidRXScore, DroidScore, DroidUser } from "@floemia/osu-droid-utils";
+import { DroidBanchoScore, DroidRXScore, DroidScore, DroidUser } from "@floemia/osu-droid-utils";
 import { DroidHelper, EmojiHelper, NumberHelper } from "@utils/helpers";
 import { EmbedBuilder } from "discord.js";
 import { client } from "@root";
@@ -34,7 +34,9 @@ export class ScoreListEmbedBuilder extends EmbedBuilder {
             const total_score = NumberHelper.toShort(score.total_score);
             const pp = NumberHelper.to2Decimal(score.pp || 0) + (this.server.name == "ibancho" ? "dpp" : "pp")
             const mods = score.mods.toString();
-            const timestamp = `<t:${score.played_at.valueOf() / 1000}:R>`;
+            let time_value = score.played_at.valueOf();
+            if (score instanceof DroidBanchoScore) time_value /= 1000;
+            const timestamp = `<t:${time_value}:R>`;
             const combo = `${NumberHelper.toInt(score.max_combo)}x`;
             const accuracy = `${(score.accuracy.value() * 100).toFixed(2)}%`;
             const rank = EmojiHelper.getRankEmoji(score.rank);

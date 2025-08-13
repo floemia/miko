@@ -21,7 +21,7 @@ export abstract class DBManager {
         if (inCache) return await DroidServerUser.get({ uid: inCache });
         const user_id = (await ServerDocuments.findOne({ discord_id: discord_user.id }))?.uid;
         if (!user_id) return;
-        const user_droid = await DroidBanchoUser.get({ uid: user_id });
+        const user_droid = await DroidServerUser.get({ uid: user_id });
         if (!user_droid) return;
 
         CacheManager.setLinkedUser(discord_user, user_droid);

@@ -6,6 +6,8 @@ import { ColorHelper, DroidHelper } from "@utils/helpers";
 import { CacheManager } from "@utils/managers";
 import { DroidUserNotFound } from "@structures/errors";
 
+export const disabled: SlashCommand["disabled"] = true;
+
 export const run: SlashCommand["run"] = async (client, interaction, str) => {
 	const user = await DroidHelper.getUser(interaction);
 	if (!user) throw new DroidUserNotFound(str.general.user_dne);

@@ -5,6 +5,7 @@ import { CacheManager, DBManager } from "@utils/managers";
 import { client } from "@root";
 import { RankEmojis } from "@core";
 import { DroidServer } from "@structures/servers";
+import { DroidUserNotFound } from "@structures/errors";
 
 export abstract class DroidHelper {
     static async getUser(input: User | ChatInputCommandInteraction | string | number, server: "ibancho" | "rx" = "ibancho"): Promise<DroidBanchoUser | DroidRXUser | undefined> {
@@ -19,19 +20,19 @@ export abstract class DroidHelper {
             if (mentionUser) {
                 if (!inputServer) inputServer = await DroidHelper.getDefaultServer(mentionUser);
                 const user = await DroidHelper.getUser(mentionUser, inputServer);
-                if (!user) throw new Error(str.general.mention_no_link);
+                if (!user) throw new DroidUserNotFound(str.general.mention_no_link);
             }
 
             // check by passed uid or username
             if (!inputServer) inputServer = await DroidHelper.getDefaultServer(input.user);
             const uid = input.options.getInteger("uid") || undefined;
             const username = input.options.getString("username") || undefined;
-            if (uid || username) return await DroidHelper.getUser((uid ?? username)!);
+            if (uid || username) return await DroidHelper.getUser((uid ?? username)!, inputServer);
 
             // check by interaction author
             if (!inputServer) inputServer = await DroidHelper.getDefaultServer(input.user);
             const db_user = await DroidHelper.getUser(input.user, inputServer);
-            if (!db_user) throw new Error(str.general.you_no_link);
+            if (!db_user) throw new DroidUserNotFound(str.general.you_no_link);
             return db_user;
         }
         // input is string or number

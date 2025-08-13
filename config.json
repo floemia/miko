@@ -1,5 +1,5 @@
 {
-    "debug": true,
+    "debug": false,
     "scraping": false,
     "developers": [
         "596481414426525696"

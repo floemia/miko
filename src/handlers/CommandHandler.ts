@@ -17,6 +17,7 @@ export abstract class CommandHandler {
 		for (const file of commandFiles) {
 			const command = await import(file) as SlashCommand;
 			if ("run" in command && "data" in command) {
+				if (command.disabled) continue;
 				if (command.developer) {
 					devCommands.push(command.data.toJSON());
 					client.dev_commands.set(command.data.name, command);
