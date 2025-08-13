@@ -20,7 +20,7 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 
 export const data: SlashCommand["data"] =
     new SlashCommandBuilder()
-        .setName("cache")
+        .setName("updatetrack")
         .setDescription("🔘 (DEV!) Update the osu!droid scores tracking list.")
 
 export const dirname = __dirname;
