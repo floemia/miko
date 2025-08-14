@@ -46,7 +46,7 @@ export class Tracking {
 				// continue
 				if (!user) continue;
 				this.page_down = false;
-				
+
 				const score = user.scores.recent[0];
 				if (!score || score.played_at <= dbuser.timestamp) continue;
 				Logger.out({ prefix: "[TRACKING]", message: `Creating score embed for ${user.username}...`, color: "Orange", important: true });
@@ -54,14 +54,19 @@ export class Tracking {
 				Logger.out({ prefix: "[TRACKING]", message: `Guilds: ${dbuser.guilds.map(g => g.id)}`, color: "Orange" });
 				await DBManager.updateTrackingEntry(dbuser.uid, score.played_at);
 				for (const guild of dbuser.guilds) {
-					if (client.config.debug && guild.id != "976981749848473610") continue;
-					let dbguild = await DBManager.getGuildConfig(guild.id);
+					if (client.config.debug && guild.id != client.config.test_guild) continue;
+					const actual_guild = client.guilds.cache.get(guild.id);
+					if (!actual_guild) continue;
+
+					let dbguild = await DBManager.getGuildConfig(actual_guild);
 					if (!dbguild || !dbguild.tracking_enabled) continue;
+					
 					const track_channel = client.channels.cache.get(dbguild.channel.track);
 					if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 
 					const cache_guild = client.guilds.cache.get(guild.id);
 					if (!cache_guild) continue;
+
 					const bot_member = cache_guild.members.me!;
 					if (!bot_member.permissionsIn(track_channel).has(PermissionFlagsBits.SendMessages)) continue;
 
