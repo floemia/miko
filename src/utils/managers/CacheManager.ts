@@ -9,8 +9,8 @@ type DroidCardCache = {
 
 
 export abstract class CacheManager {
-    static bancho_score_embeds: Map<number, APIEmbed> = new Map()
-    static rx_score_embeds: Map<number, APIEmbed> = new Map()
+    static bancho_score_embeds: Map<string, APIEmbed> = new Map()
+    static rx_score_embeds: Map<string, APIEmbed> = new Map()
     static bancho_card_buffers: Map<number, DroidCardCache> = new Map()
     static rx_card_buffers: Map<number, DroidCardCache> = new Map()
     static bancho_users: Map<string, number> = new Map()
@@ -22,13 +22,13 @@ export abstract class CacheManager {
     static setScoreEmbed(score: DroidScore, embed: EmbedBuilder): void {
         if (!score.id) return
         const map = score instanceof DroidBanchoScore ? this.bancho_score_embeds : this.rx_score_embeds;
-        map.set(score.id, embed.toJSON());
+        map.set(`${score.id}-${score.total_score}-${score.played_at}`, embed.toJSON());
     }
 
     static getScoreEmbed(score: DroidScore) {
         if (!score.id) return;
         const map = score instanceof DroidBanchoScore ? this.bancho_score_embeds : this.rx_score_embeds;
-        return map.get(score.id);
+        return map.get(`${score.id}-${score.total_score}-${score.played_at}`);
     }
 
     static setDroidCard(user: DroidUser, cardBuffer: Buffer<ArrayBufferLike>): void {
