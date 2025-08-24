@@ -6,7 +6,7 @@ import { ColorHelper, DroidHelper } from "@utils/helpers";
 import { CacheManager } from "@utils/managers";
 import { DroidUserNotFound } from "@structures/errors";
 
-export const disabled: SlashCommand["disabled"] = true;
+// export const disabled: SlashCommand["disabled"] = true;
 
 export const run: SlashCommand["run"] = async (client, interaction, str) => {
 	const user = await DroidHelper.getUser(interaction);
@@ -23,14 +23,14 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 
 	const filename = `${user.username}-${user.id}.png`;
 	const attachment = new AttachmentBuilder(cardBuffer, { name: filename });
-	const color = await ColorHelper.getAverageColor(user.avatar_url);
+	const color = await ColorHelper.getAverageColor(cardBuffer);
 	embed.setType(ResponseType.SUCCESS)
 		.setDescription(null)
 		.setImage(`attachment://${filename}`)
 		.setColor(Number(`0x${color.hex.slice(1)}`))
 		.setTimestamp()
-		.setFooter({ text: `${client.user?.displayName} (beta)`});
-
+		.setFooter({ text: `${client.user?.displayName} - beta! May contain errors.`});
+		
 	await response.edit({ embeds: [embed], files: [attachment] });
 	CacheManager.setDroidCard(user, cardBuffer);
 }

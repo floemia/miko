@@ -16,8 +16,8 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 		.setDescription(str.commands.top.generating(user))
 		.setType(ResponseType.PROCESS);
 	const response = await interaction.editReply({ embeds: [embed] });
-	if (user instanceof DroidRXUser) await user.getTopScores();
-	const scores = user.scores.top;
+	const scores = await user.getTopScores();
+
 	if (scores.length == 0) throw new NoDroidScores(str.general.no_scores(user));
 
 	const max_pages = Math.ceil(scores.length / 5);
@@ -28,11 +28,11 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 		.startTimeout();
 
 	const color = await ColorHelper.getAverageColor(user.avatar_url);
-	const embed_top = new ScoreListEmbedBuilder()
-		.setPlayer(user)
+	const embed_top = await new ScoreListEmbedBuilder()
 		.setScores(scores)
 		.setColor(Number(`0x${color.hex.slice(1)}`))
 		.setPage(page)
+		.setPlayer(user);
 
 	await response.edit({ embeds: [embed_top], components: [row] });
 	row.collector.on("collect", async (i) => {

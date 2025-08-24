@@ -47,40 +47,42 @@ export class Tracking {
 				if (!user) continue;
 				this.page_down = false;
 
-				const score = user.scores.recent[0];
-				if (!score || score.played_at <= dbuser.timestamp) continue;
-				Logger.out({ prefix: "[TRACKING]", message: `Creating score embed for ${user.username}...`, color: "Orange", important: true });
-				Logger.out({ prefix: "[TRACKING]", message: `Beatmap: ${score.filename}`, color: "Orange" });
-				Logger.out({ prefix: "[TRACKING]", message: `Guilds: ${dbuser.guilds.map(g => g.id)}`, color: "Orange" });
-				await DBManager.updateTrackingEntry(dbuser.uid, score.played_at);
-				for (const guild of dbuser.guilds) {
-					if (client.config.debug && guild.id != client.config.test_guild) continue;
-					const actual_guild = client.guilds.cache.get(guild.id);
-					if (!actual_guild) continue;
+				const scores = user.getRecentScores();
+				for (const score of scores) {
+					if (!score || score.played_at <= dbuser.timestamp) continue;
+					Logger.out({ prefix: "[TRACKING]", message: `Creating score embed for ${user.username}...`, color: "Orange", important: true });
+					Logger.out({ prefix: "[TRACKING]", message: `Beatmap: ${score.filename}`, color: "Orange" });
+					Logger.out({ prefix: "[TRACKING]", message: `Guilds: ${dbuser.guilds.map(g => g.id)}`, color: "Orange" });
+					await DBManager.updateTrackingEntry(dbuser.uid, score.played_at);
+					for (const guild of dbuser.guilds) {
+						if (client.config.debug && guild.id != client.config.test_guild) continue;
+						const actual_guild = client.guilds.cache.get(guild.id);
+						if (!actual_guild) continue;
 
-					let dbguild = await DBManager.getGuildConfig(actual_guild);
-					if (!dbguild || !dbguild.tracking_enabled) continue;
-					
-					const track_channel = client.channels.cache.get(dbguild.channel.track);
-					if (!track_channel || track_channel.type != ChannelType.GuildText) continue
+						let dbguild = await DBManager.getGuildConfig(actual_guild);
+						if (!dbguild || !dbguild.tracking_enabled) continue;
 
-					const cache_guild = client.guilds.cache.get(guild.id);
-					if (!cache_guild) continue;
+						const track_channel = client.channels.cache.get(dbguild.channel.track);
+						if (!track_channel || track_channel.type != ChannelType.GuildText) continue
 
-					const bot_member = cache_guild.members.me!;
-					if (!bot_member.permissionsIn(track_channel).has(PermissionFlagsBits.SendMessages)) continue;
+						const cache_guild = client.guilds.cache.get(guild.id);
+						if (!cache_guild) continue;
 
-					const guild_locale = cache_guild.preferredLocale;
-					const spanish = guild_locale.includes("es");
-					const str = spanish ? es : en;
+						const bot_member = cache_guild.members.me!;
+						if (!bot_member.permissionsIn(track_channel).has(PermissionFlagsBits.SendMessages)) continue;
 
-					const embed = await new ScoreEmbedBuilder()
-						.setPlayer(user)
-						.setScore(score);
+						const guild_locale = cache_guild.preferredLocale;
+						const spanish = guild_locale.includes("es");
+						const str = spanish ? es : en;
 
-					await track_channel.send({ content: str.tracking.message(user), embeds: [embed] });
+						const embed = await new ScoreEmbedBuilder()
+							.setPlayer(user)
+							.setScore(score);
+
+						await track_channel.send({ content: str.tracking.message(user), embeds: [embed] });
+					}
+					Logger.out({ prefix: "[TRACKING]", message: `The embed was sent and the entry was updated.`, color: "Orange" });
 				}
-				Logger.out({ prefix: "[TRACKING]", message: `The embed was sent and the entry was updated.`, color: "Orange" });
 			}
 		}
 	}
@@ -101,7 +103,7 @@ export class Tracking {
 			await new Promise(resolve => setTimeout(resolve, 3000));
 			const user = await DroidBanchoUser.get({ uid: dbuser.uid });
 			if (!user) continue;
-			const score = user.scores.recent[0];
+			const score = user.getRecentScores()[0];
 			Logger.out({ prefix: "[TRACKING]", message: `(${i++} of ${tracking_users.length}) Updating tracking entry for ${user.username}...`, color: "Orange", important: true });
 			Logger.out({ prefix: "[TRACKING]", message: `Timestamp: ${score.played_at}`, color: "Orange" });
 			await DBManager.updateTrackingEntry(dbuser.uid, score.played_at);

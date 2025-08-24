@@ -21,7 +21,8 @@ export class ScoreListEmbedBuilder extends EmbedBuilder {
         return this.scores.slice(this.index, this.index + this.elements_per_page);
     }
 
-    setPlayer(player: DroidUser) {
+    async setPlayer(player: DroidUser) {
+        await DroidHelper.getAvatarURL(player);
         this.setThumbnail(player.avatar_url);
         return this.setAuthor({ name: DroidHelper.userToString(player), iconURL: player.avatar_url, url: player.url })
     }
@@ -34,8 +35,7 @@ export class ScoreListEmbedBuilder extends EmbedBuilder {
             const total_score = NumberHelper.toShort(score.total_score);
             const pp = NumberHelper.to2Decimal(score.pp || 0) + (this.server.name == "ibancho" ? "dpp" : "pp")
             const mods = score.mods.toString();
-            let time_value = score.played_at.valueOf();
-            if (score instanceof DroidBanchoScore) time_value /= 1000;
+            let time_value = Math.floor(score.played_at.valueOf() / 1000);
             const timestamp = `<t:${time_value}:R>`;
             const combo = `${NumberHelper.toInt(score.max_combo)}x`;
             const accuracy = `${(score.accuracy.value() * 100).toFixed(2)}%`;

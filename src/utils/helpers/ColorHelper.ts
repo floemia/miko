@@ -43,7 +43,7 @@ export abstract class ColorHelper {
 		}
 	};
 
-	public static async getAverageColor(imageURL: string) {
+	public static async getAverageColor(imageURL: string | Buffer) {
 		const averageColor = await getAverageColor(imageURL, { defaultColor: [255, 255, 255, 255] });
 		return averageColor
 	}

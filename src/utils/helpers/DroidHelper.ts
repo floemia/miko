@@ -143,4 +143,10 @@ export abstract class DroidHelper {
         title += ` +${score.mods.toString()}**`;
         return title;
     }
+
+    public static async getAvatarURL(user: DroidUser): Promise<string> {
+        const response = await fetch(user.avatar_url);
+        if (response.status != 200) user.avatar_url = "https://osu.ppy.sh/images/layout/avatar-guest@2x.png";
+        return user.avatar_url;
+    }
 }

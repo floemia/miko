@@ -15,8 +15,8 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 		.setDescription(str.commands.recent.generating(user));
 	const response = await interaction.editReply({ embeds: [embed] });
 
-	if (user instanceof DroidRXUser) await user.getRecentScores();
-	const scores = user.scores.recent;
+	const scores = await user.getRecentScores();
+	
 	if (scores.length == 0) throw new NoDroidScores(str.general.no_scores(user));
 
 	const row = new PaginationRowBuilder(response)

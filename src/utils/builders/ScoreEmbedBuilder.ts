@@ -7,7 +7,7 @@ import { DroidBanchoScore, DroidScore, DroidUser } from "@floemia/osu-droid-util
 export class ScoreEmbedBuilder extends EmbedBuilder {
     private player: DroidUser | undefined;
 
-    public setPlayer(player: DroidUser) {
+    setPlayer(player: DroidUser) {
         this.player = player;
         return this.setAuthor({ name: DroidHelper.userToString(player), iconURL: player.avatar_url, url: player.url })
     }
@@ -15,6 +15,10 @@ export class ScoreEmbedBuilder extends EmbedBuilder {
     async setScore(score: DroidScore) {
         const inCache = CacheManager.getScoreEmbed(score);
         if (inCache) return this.replaceEmbed(inCache);
+        if (this.player) {
+            const avatar_url = await DroidHelper.getAvatarURL(this.player);
+            this.setAuthor({ name: DroidHelper.userToString(this.player), iconURL: avatar_url, url: this.player.url })
+        }
         const description = await DroidHelper.createDescription(score);
         const iBancho = score instanceof DroidBanchoScore;
         const server = iBancho ? client.config.servers.ibancho : client.config.servers.rx;
