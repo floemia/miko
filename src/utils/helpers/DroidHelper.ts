@@ -141,7 +141,7 @@ export abstract class DroidHelper {
             title = `**${score.filename}`;
         }
         const mods = score.mods.toString();
-        title += mods ? ` +${mods}` : "";
+        title += mods ? ` +${mods}**` : "**";
         return title;
     }
 

@@ -29,8 +29,8 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 		.setImage(`attachment://${filename}`)
 		.setColor(Number(`0x${color.hex.slice(1)}`))
 		.setTimestamp()
-		.setFooter({ text: `${client.user?.displayName} - beta! May contain errors.`});
-		
+		.setFooter({ iconURL: client.user?.displayAvatarURL(), text: `${client.user?.displayName} - beta! May contain errors.`});
+
 	await response.edit({ embeds: [embed], files: [attachment] });
 	CacheManager.setDroidCard(user, cardBuffer);
 }
