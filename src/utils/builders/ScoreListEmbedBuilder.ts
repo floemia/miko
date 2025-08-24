@@ -43,7 +43,7 @@ export class ScoreListEmbedBuilder extends EmbedBuilder {
             const c = score.accuracy;
             const statistics = `[${c.n300}/${c.n100}/${c.n50}/${c.nmiss}]`;
             return {
-                name: `**#${i + 1}・${title} +${mods ||"NM"}**`,
+                name: `**#${i + 1}・${title}${mods ? ` +${mods}` : ""}**`,
                 value: `${rank?.toString()}**・${pp}・${accuracy}・${combo}・**\`${total_score}\`**・${statistics}・**${timestamp}`,
             }
         }))

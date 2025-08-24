@@ -16,7 +16,6 @@ export abstract class DBManager {
     static async getLinkedUser(discord_user: User, server: DroidServer = "ibancho") {
         const DroidServerUser = server == "ibancho" ? DroidBanchoUser : DroidRXUser;
         const ServerDocuments = server == "ibancho" ? BanchoUserLink : RXUserLink;
-
         const inCache = CacheManager.getLinkedUser(discord_user, server);
         if (inCache) return await DroidServerUser.get({ uid: inCache });
         const user_id = (await ServerDocuments.findOne({ discord_id: discord_user.id }))?.uid;

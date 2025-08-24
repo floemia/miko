@@ -15,12 +15,12 @@ export abstract class DroidHelper {
             const str = InteractionHelper.getLocaleResponses(input);
             const mentionUser = input.options.getUser("user");
             let inputServer = input.options.getString("server") as DroidServer | undefined;
-
             // check by mentioned user
             if (mentionUser) {
                 if (!inputServer) inputServer = await DroidHelper.getDefaultServer(mentionUser);
                 const user = await DroidHelper.getUser(mentionUser, inputServer);
                 if (!user) throw new DroidUserNotFound(str.general.mention_no_link);
+                return user;
             }
 
             // check by passed uid or username
@@ -140,7 +140,8 @@ export abstract class DroidHelper {
         } else {
             title = `**${score.filename}`;
         }
-        title += ` +${score.mods.toString()}**`;
+        const mods = score.mods.toString();
+        title += mods ? ` +${mods}` : "";
         return title;
     }
 
