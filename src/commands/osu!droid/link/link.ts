@@ -15,7 +15,7 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 	const iBancho = user instanceof DroidBanchoUser;
 	const sv = iBancho ? client.config.servers.ibancho : client.config.servers.rx;
 	const color = await ColorHelper.getAverageColor(user.avatar_url);
-	embed.setColor(Number(`0x${color.hex.slice(1)}`))
+	embed.setColor(Number(`0x${color.slice(1)}`))
 	.setDescription(str.commands.link.success(user))
 	.setFooter({ text: `Server: ${sv.name}`, iconURL: sv.iconURL })
 	.setThumbnail(user.avatar_url);

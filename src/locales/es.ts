@@ -4,7 +4,6 @@ import { TimeHelper } from "@utils/helpers/TimeHelper";
 import { Localization } from "./Localization";
 import { DroidHelper, EmojiHelper } from "@utils/helpers";
 
-console.log(EmojiHelper)
 const cute_emoji = "<:miko01:1417587405124403280>";
 
 export const es: Localization = {

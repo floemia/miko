@@ -35,10 +35,10 @@ export class ScoreListEmbedBuilder extends EmbedBuilder {
 
     async setPlayer(player: DroidUser) {
         await DroidHelper.getAvatarURL(player);
-        const color = await ColorHelper.getAverageColor(player.avatar_url);
+        let color = await ColorHelper.getAverageColor(player.avatar_url)
         return this
             .setAuthor({ name: DroidHelper.userToString(player), iconURL: player.avatar_url, url: player.url })
-            .setColor(Number(`0x${color.hex.slice(1)}`));
+            .setColor(Number(`0x${color.slice(1)}`));
     }
 
     setPage(index: number) {

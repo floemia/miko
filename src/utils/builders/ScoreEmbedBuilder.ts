@@ -23,7 +23,7 @@ export class ScoreEmbedBuilder extends EmbedBuilder {
         const iBancho = score instanceof DroidBanchoScore;
         const server = iBancho ? client.config.servers.ibancho : client.config.servers.rx;
         let footer = server.name;
-        const color = score.beatmap ? (await ColorHelper.getAverageColor(`https://assets.ppy.sh/beatmaps/${score.beatmap.beatmapSetId}/covers/cover.jpg`)).hex : "#FFFFFF";
+        let color = score.beatmap ? (await ColorHelper.getAverageColor(`https://assets.ppy.sh/beatmaps/${score.beatmap.beatmapSetId}/covers/cover.jpg`)) : "#dedede";
         this.setDescription(description)
             .setTimestamp(score.played_at)
             .setColor(Number(`0x${color.slice(1)}`))

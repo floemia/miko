@@ -2,6 +2,8 @@ import { SlashCommand } from "@structures/core";
 import { MikoError } from "@structures/errors";
 import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
+export const developer: SlashCommand["developer"] = true;
+
 export const run: SlashCommand["run"] = async (client, interaction, str) => {
     const channel_id = interaction.options.getString("channel", true);
     const message = interaction.options.getString("message", true);

@@ -27,7 +27,7 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 	embed.setType(ResponseType.SUCCESS)
 		.setDescription(null)
 		.setImage(`attachment://${filename}`)
-		.setColor(Number(`0x${color.hex.slice(1)}`))
+		.setColor(Number(`0x${color.slice(1)}`))
 		.setTimestamp()
 		.setFooter({ iconURL: client.user?.displayAvatarURL(), text: `${client.user?.displayName} - beta! May contain errors.`});
 
