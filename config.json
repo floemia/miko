@@ -6,12 +6,12 @@
     ],
     "test_guild": "976981749848473610",
     "tracking": {
-        "enabled": false,
+        "enabled": true,
         "interval": 15
     },
     "servers": {
         "ibancho": {
-            "name": "iBancho",
+            "name": "osu!droid",
             "iconURL": "https://cdn.discordapp.com/icons/316545691545501706/a_2e882927641c2b4bb15e514d4e2829c7.webp"
         },
         "rx": {
@@ -36,6 +36,10 @@
             "2": "1369496051467288656",
             "3": "1369496051467288656",
             "4": "1369494384613130320"
+        },
+        "stats": {
+            "time": "<:time:1417866529579466913>",
+            "bpm": "<:bpm:1417866532251500674>"
         }
     }
 }

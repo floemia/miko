@@ -26,6 +26,7 @@ export interface Localization {
 		};
 		top: {
 			generating: (user: DroidUser) => string;
+			title: string;
 		};
 		uptime: {
 			response: (uptime: number) => string;
@@ -47,6 +48,10 @@ export interface Localization {
 		card: {
 			generating: (user: DroidUser) => string;
 		};
+		recent50: {
+			generating: (user: DroidUser) => string;
+			title: string;
+		}
 	};
 	tracking: {
 		message: (user: DroidUser) => string;

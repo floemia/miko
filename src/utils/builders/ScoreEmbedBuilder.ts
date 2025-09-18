@@ -22,19 +22,21 @@ export class ScoreEmbedBuilder extends EmbedBuilder {
         const description = await DroidHelper.createDescription(score);
         const iBancho = score instanceof DroidBanchoScore;
         const server = iBancho ? client.config.servers.ibancho : client.config.servers.rx;
+        let footer = server.name;
         const color = score.beatmap ? (await ColorHelper.getAverageColor(`https://assets.ppy.sh/beatmaps/${score.beatmap.beatmapSetId}/covers/cover.jpg`)).hex : "#FFFFFF";
         this.setDescription(description)
-            .setFooter({ text: `Server: ${server.name}`, iconURL: server.iconURL })
             .setTimestamp(score.played_at)
             .setColor(Number(`0x${color.slice(1)}`))
             .setTitle(await DroidHelper.createTitle(score));
         if (score.beatmap) {
-            this.setURL(`https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}`);
-            this.setImage(`https://assets.ppy.sh/beatmaps/${score.beatmap.beatmapSetId}/covers/cover.jpg`);
+            this.setURL(`https://osu.ppy.sh/beatmapsets/${score.beatmap.beatmapSetId}#osu/${score.beatmap.beatmapId}`)
+                .setImage(`https://assets.ppy.sh/beatmaps/${score.beatmap.beatmapSetId}/covers/cover.jpg`)
+            footer+=`・${score.beatmap.creator}'s mapset`
         } else {
-            this.setImage(null)
+            this.setImage(null);
             this.setURL(null);
         };
+        this.setFooter({ text: footer, iconURL: server.iconURL });
         CacheManager.setScoreEmbed(score, this);
         return this;
     }

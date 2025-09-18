@@ -4,10 +4,9 @@ import { Logger } from "@utils/logger";
 import { CommandHandler, EventHandler } from "@handlers";
 import { SlashCommand, Cooldown } from "@structures/core";
 import { OsuAPIRequestBuilder } from "@rian8337/osu-base";
-import { Tracking } from "./Tracking";
-import { DBManager } from "@utils/managers";
+import { DBManager, TrackingManager } from "@utils/managers";
 import { EmojiHelper } from "@utils/helpers";
-import { ClientConfig } from "./types/types";
+import { ClientConfig } from "@core/types";
 
 const env = process.env
 const token = env.TOKEN;
@@ -21,7 +20,6 @@ export class Bot extends Client {
 	public events = new Collection<keyof ClientEvents, (client: Bot, ...args: any) => Promise<any>>();
 	public cooldowns = new Collection<string, Cooldown[]>();
 	public current_pfp: string = "";
-	public tracking = new Tracking(this.config.tracking.interval);
 	constructor() {
 		super({
 			intents: ["Guilds", "GuildMembers", "GuildMessages", "MessageContent"]
@@ -29,9 +27,10 @@ export class Bot extends Client {
 	}
 
 	public async start() {
-		if (!token) throw new Error("No token provided (process.env.TOKEN).");
+		if (!token) throw new Error("No bot token provided (process.env.TOKEN).");
 		if (!osuAPIKey) throw new Error("No osu! API key provided (process.env.OSU_API_KEY).");
 		OsuAPIRequestBuilder.setAPIKey(osuAPIKey);
+
 		Logger.out({ prefix: "[DATABASE]", message: "Connecting to MongoDB...", color: "Blue", important: true });
 		await DBManager.connect();
 		Logger.out({ prefix: "[DATABASE]", message: `Success.`, color: "Blue" });
@@ -48,7 +47,7 @@ export class Bot extends Client {
 		await EmojiHelper.init();
 		
 		if (this.config.tracking.enabled) {
-			await this.tracking.start();
+			await TrackingManager.start();
 		}
 
 	}

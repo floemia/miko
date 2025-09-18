@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, User } from "discord.js";
 import { DroidBanchoScore, DroidBanchoUser, DroidRXUser, DroidScore, DroidUser } from "@floemia/osu-droid-utils";
-import { EmojiHelper, InteractionHelper, NumberHelper } from "@utils/helpers";
+import { EmojiHelper, InteractionHelper, NumberHelper, TimeHelper } from "@utils/helpers";
 import { CacheManager, DBManager } from "@utils/managers";
 import { client } from "@root";
 import { RankEmojis } from "@core";
@@ -89,12 +89,20 @@ export abstract class DroidHelper {
             const data = (await score.calculate())!;
             combo += `/${NumberHelper.toInt(score.beatmap.maxCombo!)}x`;
             let { ar, od, hp, cs } = data;
+            const bpm_emoji = client.config.emojis.stats.bpm;
+            const time_emoji = client.config.emojis.stats.time;
+            const total_length = TimeHelper.secondsToMapLength(score.beatmap.totalLength / score.getFinalSpeed());
             const bpm = (score.beatmap.bpm * score.getFinalSpeed()).toLocaleString("en-US", { maximumFractionDigits: 2 });
-            diff_string = `\n> \`BPM: ${bpm} AR: ${NumberHelper.toFixedClean(ar!)} OD: ${NumberHelper.toFixedClean(od!)} HP: ${NumberHelper.toFixedClean(hp!)} CS: ${NumberHelper.toFixedClean(cs!)}\``;
-            const dpp = iBancho ? NumberHelper.to2Decimal(data.performance.droid.total) : undefined;
+            diff_string = `\n${time_emoji} \`${total_length}\`**・**${bpm_emoji} \`${bpm}\`**・**\`AR ${NumberHelper.toFixedClean(ar!)}  OD ${NumberHelper.toFixedClean(od!)}  HP ${NumberHelper.toFixedClean(hp!)}  CS ${NumberHelper.toFixedClean(cs!)}\``;
+            let dpp = "";
+            if (score.pp)
+                dpp = NumberHelper.to2Decimal(score.pp);
+            else
+                dpp = NumberHelper.to2Decimal(data.performance.droid.total);
+
             const pp = NumberHelper.to2Decimal(data.performance.osu.total);
-            if (dpp) pp_string += `${dpp}dpp | `;
-            pp_string += `${pp}pp・${accuracy}`;
+            if (dpp && iBancho) pp_string += `${dpp}dpp・`;
+            pp_string += `${pp}pp⠀${accuracy}`;
             if (iBancho) {
                 if (!score.isFC()) {
                     const score_fc = DroidScore.toFC(score);
@@ -102,7 +110,7 @@ export abstract class DroidHelper {
                     const fc_dpp = NumberHelper.to2Decimal(data_fc!.performance.droid.total);
                     const fc_pp = NumberHelper.to2Decimal(data_fc!.performance.osu.total);
                     const fc_acc = NumberHelper.to2Decimal(score_fc.accuracy.value() * 100);
-                    pp_string += ` **(${iBancho ? `${fc_dpp}dpp | ` : ""}${fc_pp}pp ➜ FC ${fc_acc}%)`;
+                    pp_string += `\n**_(${iBancho ? `${fc_dpp}dpp・` : ""}${fc_pp}pp ➜ FC ${fc_acc}%)_`;
                 } else pp_string += `**`;
 
                 // if (score.replay) {
@@ -123,9 +131,8 @@ export abstract class DroidHelper {
             } else pp_string += `**`
         }
         if (!pp_string) pp_string = `${accuracy}**`;
-        if (!ur_penalties) ur_penalties = `**`;
-        description = `> ${rank?.toString()}**・${pp_string}
-		> ${total_score}**・**${statistics}**・${combo}${ur_penalties}${diff_string}`
+        description = `>>> ${rank}⠀**${pp_string}\n` +
+            `${total_score}⠀${statistics}⠀${combo}${ur_penalties}${diff_string}`
 
         return description;
     }
@@ -136,13 +143,13 @@ export abstract class DroidHelper {
         if (score.beatmap) {
             const stars = data!.difficulty.osu.starRating;
             const status_emoji = EmojiHelper.getStatusEmoji(score.beatmap.approved);
-            title = `**${status_emoji?.toString()}  ${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] [${NumberHelper.to2Decimal(stars)}⭐]`;
+            title = `**${status_emoji?.toString()}  ${score.beatmap.artist} - ${score.beatmap.title} [${score.beatmap.version}] [${NumberHelper.to2Decimal(stars)}⭐]**`;
         } else {
-            title = `**${score.filename}`;
+            title = `**${score.filename}**`;
         }
-        const mods = score.mods.toString();
-        title += mods ? ` +${mods}**` : "**";
-        return title;
+
+        const mods = "+" + score.mods.toString().replaceAll(",", "") || "NM";
+        return title + ` ${mods}`;
     }
 
     public static async getAvatarURL(user: DroidUser): Promise<string> {

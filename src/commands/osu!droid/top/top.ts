@@ -1,11 +1,8 @@
 import { SlashCommand } from "@structures/core";
-import { PaginationRowBuilder, ResponseEmbedBuilder, ResponseType, RowActions } from "@utils/builders";
+import { PaginationRowBuilder, ResponseEmbedBuilder, ScoreListEmbedBuilder, ResponseType, RowActions, ScoreListType } from "@utils/builders";
 import { SlashCommandBuilder } from "discord.js";
-import { ColorHelper, DroidHelper } from "@utils/helpers";
-import { DroidUserNotFound } from "@structures/errors";
-import { NoDroidScores } from "@structures/errors/NoDroidScores";
-import { DroidRXUser } from "@floemia/osu-droid-utils";
-import { ScoreListEmbedBuilder } from "@utils/builders/ScoreListEmbedBuilder";
+import { DroidHelper } from "@utils/helpers";
+import { DroidUserNotFound, NoDroidScores } from "@structures/errors";
 
 export const run: SlashCommand["run"] = async (client, interaction, str) => {
 	const user = await DroidHelper.getUser(interaction);
@@ -27,10 +24,9 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 		.setLength(max_pages)
 		.startTimeout();
 
-	const color = await ColorHelper.getAverageColor(user.avatar_url);
 	const embed_top = await new ScoreListEmbedBuilder()
+		.setType(ScoreListType.TOP)
 		.setScores(scores)
-		.setColor(Number(`0x${color.hex.slice(1)}`))
 		.setPage(page)
 		.setPlayer(user);
 

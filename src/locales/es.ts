@@ -2,7 +2,11 @@ import { DroidUser } from "@floemia/osu-droid-utils";
 import { client } from "@root";
 import { TimeHelper } from "@utils/helpers/TimeHelper";
 import { Localization } from "./Localization";
-import { DroidHelper } from "@utils/helpers";
+import { DroidHelper, EmojiHelper } from "@utils/helpers";
+
+console.log(EmojiHelper)
+const cute_emoji = "<:miko01:1417587405124403280>";
+
 export const es: Localization = {
 	general: {
 		disabled: "Este comando está temporalmente deshabilitado.",
@@ -21,14 +25,15 @@ export const es: Localization = {
 			response: (ping: number) => `El ping es \`${ping.toFixed(2)}ms\`.`,
 		},
 		recent: {
-			generating: (user: DroidUser) => `Obteniendo scores recientes de ${DroidHelper.userToString(user, false)}...`,
-			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente #${index + 1} de  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${es.general.scraping}` : ``}`,
+			generating: (user: DroidUser) => `${cute_emoji} | Obteniendo scores recientes de ${DroidHelper.userToString(user, false)}...`,
+			message: (user: DroidUser, index: number) => `${cute_emoji} | Score reciente #${index + 1} de  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${es.general.scraping}` : ``}`,
 		},
 		link: {
-			success: (user: DroidUser) => `Tu cuenta de Discord ha sido vinculada a  ${DroidHelper.userToString(user, false)}.`,
+			success: (user: DroidUser) => `Tu cuenta de Discord ha sido vinculada a  **${DroidHelper.userToString(user, false)}**.`,
 		},
 		top: {
-			generating: (user: DroidUser) => `Obteniendo top scores de  ${DroidHelper.userToString(user, false)}...`,
+			generating: (user: DroidUser) => `${cute_emoji}・Obteniendo top scores de  **${DroidHelper.userToString(user, false)}**...`,
+			title: "Top 50 scores"
 		},
 		uptime: {
 			response: (uptime: number) => `El tiempo de actividad de Miko es de \`${TimeHelper.msToTime(uptime)}\`.`,
@@ -48,10 +53,14 @@ export const es: Localization = {
 			response: (server: string) => `Tu servidor predeterminado de osu!droid ahora es ${server}.`,
 		},
 		card: {
-			generating: (user: DroidUser) => `Generando tarjeta de perfil de  ${DroidHelper.userToString(user, false)}...`,
+			generating: (user: DroidUser) => `${cute_emoji} | Generando tarjeta de perfil de  **${DroidHelper.userToString(user, false)}**...`,
+		},
+		recent50: {
+			generating: (user: DroidUser) => `${cute_emoji} | Obteniendo los 50 scores más recientes de  **${DroidHelper.userToString(user, false)}**...`,
+			title: "50 últimos scores"
 		}
 	},
 	tracking: {
-		message: (user: DroidUser) => `<:droid_simple:1021473577951821824>  **osu!droid・**Score reciente de  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${es.general.scraping}` : ``}`,
+		message: (user: DroidUser) => `${cute_emoji} | Score reciente de  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${es.general.scraping}` : ``}`,
 	}
 }

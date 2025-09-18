@@ -2,24 +2,25 @@ import { DroidBanchoUser } from "@floemia/osu-droid-utils";
 import { client } from "@root";
 import { Logger } from "@utils/logger";
 import { ScoreEmbedBuilder } from "@utils/builders";
-import { ChannelType, PermissionFlagsBits } from "discord.js";
+import { ChannelType, GuildMember, PermissionFlagsBits } from "discord.js";
 import { en, es } from "@locales";
 import { DBManager } from "@utils/managers";
-export class Tracking {
-	private cooldown: number = 10;
-	private running: boolean = false;
-	private page_down: boolean = false;
-	constructor(cooldown: number) {
-		this.cooldown = cooldown;
-	}
+export abstract class TrackingManager {
+	private static cooldown: number = 10;
+	private static running: boolean = false;
+	private static page_down: boolean = false;
 
-	public async start() {
+    static setCooldown(cooldown: number) {
+        this.cooldown = cooldown;
+    }
+
+	static async start() {
 		this.running = true;
-		if (!client.config.tracking.enabled) client.config.tracking.enabled = true;
+		client.config.tracking.enabled = true;
+
 		let tracking_users = await DBManager.getTrackingUsers();
 		Logger.out({ prefix: "[TRACKING]", message: `osu!droid tracking has started. Found ${tracking_users.length} entries.`, color: "Orange", important: true });
 		while (this.running) {
-			tracking_users = await DBManager.getTrackingUsers();
 			for (const dbuser of tracking_users) {
 				if (client.config.debug && dbuser.uid != 177955) continue;
 				await new Promise(resolve => setTimeout(resolve, this.cooldown * 1000));
@@ -28,10 +29,10 @@ export class Tracking {
 				try {
 					user = await DroidBanchoUser.get({ uid: dbuser.uid });
 				} catch (error: any) {
+					this.page_down = true;
 					Logger.err({ prefix: "[TRACKING]", message: `An error has occured. Page down?`, color: "Red", important: true });
 					Logger.err({ prefix: "[TRACKING]", message: `${error.stack}`, color: "Red" });
 					Logger.out({ prefix: "[TRACKING]", message: `Retry loop was started (Interval: 120s)`, color: "Orange", important: true });
-					this.page_down = true;
 					while (this.page_down && this.running) {
 						await new Promise(resolve => setTimeout(resolve, 120 * 1000));
 						try {
@@ -84,16 +85,17 @@ export class Tracking {
 					Logger.out({ prefix: "[TRACKING]", message: `The embed was sent and the entry was updated.`, color: "Orange" });
 				}
 			}
+			tracking_users = await DBManager.getTrackingUsers();
 		}
 	}
 
-	public stop() {
+	static stop() {
 		Logger.out({ prefix: "[TRACKING]", message: "Stopping osu!droid tracking system.", color: "Orange", important: true });
 		this.running = false;
 		client.config.tracking.enabled = false;
 	}
 
-	public async refresh(): Promise<boolean> {
+	static async refresh(): Promise<boolean> {
 		const status_before = this.running;
 		this.stop();
 		Logger.out({ prefix: "[TRACKING]", message: "Updating osu!droid tracking system's entries...", color: "Orange", important: true });
@@ -113,5 +115,13 @@ export class Tracking {
 		if (status_before)
 			this.start();
 		return true;
+	}
+
+    static async addUser(user: DroidBanchoUser, owner: GuildMember) {
+        return await DBManager.addTrackingUser(user, owner);
+    }
+
+	static async deleteUser(user: DroidBanchoUser, owner: GuildMember) {
+		return await DBManager.deleteTrackingUser(user, owner);
 	}
 }

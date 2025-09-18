@@ -3,7 +3,7 @@ import { BanchoUserLink, RXUserLink, DroidTrack, GuildConfig, UserServer } from 
 import { DroidServer } from "@structures/servers";
 import { DroidBanchoUser, DroidRXUser, DroidUser } from "@floemia/osu-droid-utils";
 import { CacheManager } from "./CacheManager";
-import { Guild, TextChannel, User } from "discord.js";
+import { Guild, GuildMember, TextChannel, User } from "discord.js";
 
 export abstract class DBManager {
     private static readonly mongoURI = process.env.MONGO_URI;
@@ -88,5 +88,32 @@ export abstract class DBManager {
             { uid: uid },
             { timestamp: timestamp },
         );
+    }
+
+    static async addTrackingUser(droid_user: DroidBanchoUser, user: GuildMember) {
+        return await DroidTrack.findOneAndUpdate(
+            { uid: droid_user.id },
+            {
+                $setOnInsert: {
+                    uid: droid_user.id,
+                    guilds: [{
+                        id: user.guild.id,
+                        owner_id: user.id
+                    }],
+                    timestamp: droid_user.getRecentScores()[0].played_at ?? new Date(),
+                },
+                $addToSet: {
+                    guilds: {
+                        id: user.guild.id,
+                        owner_id: user.id
+                    }
+                }
+            },
+            { upsert: true, new: true }
+        );
+    }
+
+    static async deleteTrackingUser(droid_user: DroidUser, user: GuildMember) {
+        return await DroidTrack.deleteOne({ uid: droid_user.id, guilds: { $elemMatch: { id: user.guild.id } } });
     }
 }

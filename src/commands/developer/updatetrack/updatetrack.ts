@@ -1,6 +1,7 @@
 import { SlashCommand } from "@structures/core";
 import { SlashCommandBuilder } from "discord.js";
 import { ResponseEmbedBuilder, ResponseType } from "@utils/builders";
+import { TrackingManager } from "@utils/managers";
 
 export const developer: SlashCommand["developer"] = true;
 
@@ -12,7 +13,7 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
         .setColor("Purple")
         .setTimestamp()
     await interaction.editReply({ embeds: [embed] });
-    await client.tracking.refresh();
+    await TrackingManager.refresh();
     embed.setDescription(`Successfully updated the tracking list.`);
     await interaction.editReply({ embeds: [embed] });
 

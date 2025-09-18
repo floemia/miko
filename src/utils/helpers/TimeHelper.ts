@@ -5,7 +5,7 @@ export abstract class TimeHelper {
     }
 
     static nowFormatted(): string {
-       return new Date().toLocaleString("es-ES", {
+        return new Date().toLocaleString("es-ES", {
             month: "numeric",
             day: "numeric",
             year: "numeric",
@@ -26,5 +26,14 @@ export abstract class TimeHelper {
         if (minutes > 0) str += `${minutes}m `;
         if (seconds > 0) str += `${seconds}s `;
         return str.trim();
+    }
+
+    static secondsToMapLength(seconds: number): string {
+        //returns mm:ss from seconds
+        const minutes = Math.floor(seconds / 60);
+        const secondsLeft = Math.ceil(seconds % 60);
+        const mm = `${minutes}`.padStart(2, "0");
+        const ss = `${secondsLeft}`.padStart(2, "0");
+        return `${mm}:${ss}`;
     }
 }

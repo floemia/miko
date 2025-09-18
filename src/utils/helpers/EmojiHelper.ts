@@ -5,6 +5,7 @@ import { ApplicationEmoji, Snowflake, Collection, Guild, Emoji } from "discord.j
 export abstract class EmojiHelper {
     private static app_emojis: Collection<Snowflake, ApplicationEmoji>;
     private static guild: Guild;
+    static readonly miko_emoji = "<:miko01:1417587405124403280>";
 
     static async init() {
         this.app_emojis = await client.application!.emojis.fetch();

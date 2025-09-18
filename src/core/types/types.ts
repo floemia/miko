@@ -24,16 +24,22 @@ export interface RankEmojis {
 	XH: string;
 }
 
-export interface StatusEmojis {
+export interface RankStatusEmojis {
 	4: string;
 	3: string;
 	2: string;
 	1: string;
 }
 
+export interface BeatmapStatsEmojis {
+	time: string;
+	bpm: string;
+}
+
 export interface Emojis {
 	ranks: RankEmojis;
-	status: StatusEmojis;
+	status: RankStatusEmojis;
+	stats: BeatmapStatsEmojis;
 }
 
 export interface ClientConfig {

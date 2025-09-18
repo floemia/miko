@@ -2,7 +2,9 @@ import { client } from "@root";
 import { DroidUser } from "@floemia/osu-droid-utils";
 import { TimeHelper } from "@utils/helpers/TimeHelper";
 import { Localization } from "./Localization";
-import { DroidHelper } from "@utils/helpers";
+import { DroidHelper, EmojiHelper } from "@utils/helpers";
+
+const cute_emoji = "<:miko01:1417587405124403280>";
 export const en: Localization = {
 	general: {
 		disabled: "This command is temporarily disabled.",
@@ -21,14 +23,15 @@ export const en: Localization = {
 			response: (ping: number) => `The ping is \`${ping.toFixed(2)}ms\`.`,
 		},
 		recent: {
-			generating: (user: DroidUser) => `Getting recent scores of ${DroidHelper.userToString(user, false)}...`,
-			message: (user: DroidUser, index: number) => `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score #${index + 1} from  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`,
+			generating: (user: DroidUser) => `${cute_emoji} | Getting recent scores of ${DroidHelper.userToString(user, false)}...`,
+			message: (user: DroidUser, index: number) => `${cute_emoji} | Recent score #${index + 1} from  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`,
 		},
 		link: {
-			success: (user: DroidUser) => `Your Discord account has been linked to  ${DroidHelper.userToString(user, false)}.`,
+			success: (user: DroidUser) => `Your Discord account has been linked to  **${DroidHelper.userToString(user, false)}**.`,
 		},
 		top: {
-			generating: (user: DroidUser) => `Getting top scores of  ${DroidHelper.userToString(user, false)}...`,
+			generating: (user: DroidUser) => `${cute_emoji} | Getting top scores of  **${DroidHelper.userToString(user, false)}**...`,
+			title: "Top 50 scores"
 		},
 		uptime: {
 			response: (uptime: number) => `Miko's uptime is \`${TimeHelper.msToTime(uptime)}\`.`,
@@ -48,11 +51,15 @@ export const en: Localization = {
 			response: (server: string) => `Your default osu!droid server has been set to ${server}.`,
 		},
 		card: {
-			generating: (user: DroidUser) => `Generating profile card of  ${DroidHelper.userToString(user, false)}...`,
+			generating: (user: DroidUser) => `${cute_emoji} | Generating profile card of  **${DroidHelper.userToString(user, false)}**...`,
+		},
+		recent50: {
+			generating: (user: DroidUser) => `${cute_emoji} | Getting the 50 most recent scores of  **${DroidHelper.userToString(user, false)}**...`,
+			title: "Recent 50 scores"
 		}
 	},
 	tracking: {
-		message: (user: DroidUser) => `<:droid_simple:1021473577951821824>  **osu!droid・**Recent score from  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`
+		message: (user: DroidUser) => `${cute_emoji} | Recent score from  **${DroidHelper.userToString(user, false)}:**${client.config.scraping ? `\n-# ${en.general.scraping}` : ``}`
 
 	}
 }
