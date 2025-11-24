@@ -1,8 +1,4 @@
 node_modules/
 dist/
-
 .env
-
-debug.log
-errors.log
 .vscode/

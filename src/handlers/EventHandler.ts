@@ -2,10 +2,14 @@ import { Event } from "@structures/core";
 import path from "path";
 import { client } from "@root";
 import { FileManager } from "@utils/managers";
+import { Logger as log } from "@utils/helpers";
+
 const eventsPath = path.join(__dirname, "../events");
 
 export abstract class EventHandler {
 	public static async registerEvents() {
+		log.out({ prefix: "CLIENT", message: "Registering events..." });
+
 		const eventsFiles = FileManager.getJSFiles(eventsPath);
 		for (const file of eventsFiles) {
 			const event = await import(file) as Event<any>;
@@ -21,6 +25,7 @@ export abstract class EventHandler {
 				}
 			}
 		}
+		log.out({ prefix: "CLIENT", message: `${client.events.size} events registered!`, important: true });
 	}
 }
 

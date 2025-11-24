@@ -1,21 +1,17 @@
 import { SlashCommand } from "@structures/core";
-import { PaginationRowBuilder, ResponseEmbedBuilder, ScoreListEmbedBuilder, ResponseType, RowActions, ScoreListType } from "@utils/builders";
+import { PaginationRowBuilder, ScoreListEmbedBuilder, RowActions, ScoreListType, InteractionEmbedBuilder } from "@utils/builders";
 import { SlashCommandBuilder } from "discord.js";
-import { DroidHelper } from "@utils/helpers";
-import { DroidUserNotFound, NoDroidScores } from "@structures/errors";
+import { DroidHelper , InteractionHelper } from "@utils/helpers";
 
-export const run: SlashCommand["run"] = async (client, interaction, str) => {
+export const run: SlashCommand["run"] = async (client, interaction) => {
+	const t = InteractionHelper.getLocale(interaction);
 	const user = await DroidHelper.getUser(interaction);
-	if (!user) throw new DroidUserNotFound(str.general.user_dne);
+	if (!user) return;
 
-	const embed = new ResponseEmbedBuilder()
-		.setUser(interaction.user)
-		.setDescription(str.commands.top.generating(user))
-		.setType(ResponseType.PROCESS);
-	const response = await interaction.editReply({ embeds: [embed] });
+	const response = await InteractionHelper.replyProcess(interaction, t.commands.top.responses.process(user));
 	const scores = await user.getTopScores();
 
-	if (scores.length == 0) throw new NoDroidScores(str.general.no_scores(user));
+	if (scores.length == 0) return await InteractionHelper.replyError(interaction, t.general.no_scores);
 
 	const max_pages = Math.ceil(scores.length / 5);
 	let page = 0;
@@ -25,26 +21,26 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 		.startTimeout();
 
 	const embed_top = await new ScoreListEmbedBuilder()
-		.setType(ScoreListType.TOP)
+		.setTitle(`**Top 50 plays**`)
 		.setScores(scores)
 		.setPage(page)
 		.setPlayer(user);
 
-	await response.edit({ embeds: [embed_top], components: [row] });
+	await InteractionHelper.reply(interaction, { embeds: [embed_top], components: [row] });
 	row.collector.on("collect", async (i) => {
 		await i.deferUpdate();
 		if (i.user.id != interaction.user.id || !i.customId.includes(row.ID)) return
 		const action = i.customId.split("-")[0] as RowActions;
 		row.handleAction(action);
 		embed_top.setPage(row.index);
-		await response.edit({ embeds: [embed_top], components: [row] });
+		await InteractionHelper.reply(interaction, { embeds: [embed_top], components: [row] });
 	})
 }
 export const data: SlashCommand["data"] =
 	new SlashCommandBuilder()
 		.setName("top")
-		.setDescription("🔘 Get the top scores from yourself or a player.")
-		.setDescriptionLocalization("es-ES", "🔘 Obtener los mejores scores tuyos o de un jugador.")
+		.setDescription("🟣 Get the top scores from an osu!droid player.")
+		.setDescriptionLocalization("es-ES", "🟣 Obtener los mejores scores de un jugador de osu!droid.")
 		.addUserOption(option => option.setName("user")
 			.setDescription("The Discord user linked to the osu!droid account.")
 			.setDescriptionLocalization("es-ES", "El usuario de Discord vinculado a la cuenta de osu!droid."))

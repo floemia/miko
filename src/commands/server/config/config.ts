@@ -1,10 +1,10 @@
 import { SlashCommand } from "@structures/core";
 import { ChannelType, InteractionContextType, PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import { tracking } from "./subCommandsGroups/";
-export const run: SlashCommand["run"] = async (client, interaction, str) => {
+export const run: SlashCommand["run"] = async (client, interaction) => {
 	// const subcommandGroup = interaction.options.getSubcommandGroup();
 	// no more subcommandroups for now
-	tracking(client, interaction, str);
+	await tracking(client, interaction);
 }
 
 export const data: SlashCommand["data"] =

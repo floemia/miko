@@ -1,12 +1,13 @@
 import { SlashCommand } from "@structures/core";
-import { DBManager } from "@utils/managers";
-import { ResponseEmbedBuilder } from "@utils/builders";
+import { DatabaseManager } from "@utils/managers";
+import { InteractionEmbedBuilder } from "@utils/builders";
+import { InteractionHelper } from "@utils/helpers";
 
-export const status: SlashCommand["run"] = async (client, interaction, str) => {
+export const status: SlashCommand["run"] = async (client, interaction) => {
+	const t = InteractionHelper.getLocale(interaction);
 	const enabled = interaction.options.getString("status", true) == "enabled";
-	const embed = new ResponseEmbedBuilder()
-		.setUser(interaction.user)
-		.setDescription(str.commands.config.track.enabled(enabled));
+	const embed = new InteractionEmbedBuilder(interaction)
+		.setDescription(t.commands.config.track.status(enabled));
 	await interaction.editReply({ embeds: [embed] });
-	await DBManager.setTrackingStatus(interaction.guild!, enabled);
+	await DatabaseManager.setTrackingStatus(interaction.guild!, enabled);
 }

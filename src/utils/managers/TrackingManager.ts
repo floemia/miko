@@ -1,127 +1,151 @@
 import { DroidBanchoUser } from "@floemia/osu-droid-utils";
-import { client } from "@root";
-import { Logger } from "@utils/logger";
+import { DatabaseManager } from "./DatabaseManager";
+import { Logger as log } from "@utils/helpers";
+import { ChannelType, Guild, PermissionFlagsBits, TextChannel } from "discord.js";
+import { Config } from "@core/Config";
+import { DroidTrackingEntry } from "@structures/database";
 import { ScoreEmbedBuilder } from "@utils/builders";
-import { ChannelType, GuildMember, PermissionFlagsBits } from "discord.js";
-import { en, es } from "@locales";
-import { DBManager } from "@utils/managers";
+import { client } from "@root";
+
 export abstract class TrackingManager {
-	private static cooldown: number = 10;
-	private static running: boolean = false;
-	private static page_down: boolean = false;
+    /**
+     * Whether the tracking system is enabled or not.
+     */
+    static enabled = Config.tracking.enabled;
 
-    static setCooldown(cooldown: number) {
-        this.cooldown = cooldown;
+    /**
+     * Whether the tracking system is running or not.
+     */
+    static running: boolean = false;
+
+    /**
+     * The interval in milliseconds between each step.
+     */
+    static interval = Config.tracking.interval;
+
+    /**
+     * The entries of the osu!droid score tracking system.
+     */
+    static entries: DroidTrackingEntry[] = [];
+
+
+    /**
+     * Gets all users tracked by the osu!droid score tracking system.
+     * @returns An array of `DroidTrackingEntry` objects.
+     */
+    static async getUsers(): Promise<DroidTrackingEntry[]> {
+        return await DatabaseManager.getTrackingUsers();
+    }
+    /**
+     * Adds a user to the tracking system.
+     * @param user The `DroidBanchoUser` to add.
+     * @param guild The `Guild` this user will be tracked in.
+     * @returns `true` if the user was added, `false` if the user was already in.
+     */
+    static async addUser(user: DroidBanchoUser, guild: Guild): Promise<boolean> {
+        return await DatabaseManager.addTrackingUser(user, guild);
     }
 
-	static async start() {
-		this.running = true;
-		client.config.tracking.enabled = true;
-
-		let tracking_users = await DBManager.getTrackingUsers();
-		Logger.out({ prefix: "[TRACKING]", message: `osu!droid tracking has started. Found ${tracking_users.length} entries.`, color: "Orange", important: true });
-		while (this.running) {
-			for (const dbuser of tracking_users) {
-				if (client.config.debug && dbuser.uid != 177955) continue;
-				await new Promise(resolve => setTimeout(resolve, this.cooldown * 1000));
-				if (!this.running) break;
-				let user: DroidBanchoUser | undefined;
-				try {
-					user = await DroidBanchoUser.get({ uid: dbuser.uid });
-				} catch (error: any) {
-					this.page_down = true;
-					Logger.err({ prefix: "[TRACKING]", message: `An error has occured. Page down?`, color: "Red", important: true });
-					Logger.err({ prefix: "[TRACKING]", message: `${error.stack}`, color: "Red" });
-					Logger.out({ prefix: "[TRACKING]", message: `Retry loop was started (Interval: 120s)`, color: "Orange", important: true });
-					while (this.page_down && this.running) {
-						await new Promise(resolve => setTimeout(resolve, 120 * 1000));
-						try {
-							user = await DroidBanchoUser.get({ uid: dbuser.uid });
-							this.page_down = false;
-						} catch (error: any) {
-							// page still down, retry
-						}
-					}
-					Logger.out({ prefix: "[TRACKING]", message: `Page up! Continuing...`, color: "Orange", important: true });
-				}
-				// continue
-				if (!user) continue;
-				this.page_down = false;
-
-				const scores = user.getRecentScores();
-				for (const score of scores) {
-					if (!score || score.played_at <= dbuser.timestamp) continue;
-					Logger.out({ prefix: "[TRACKING]", message: `Creating score embed for ${user.username}...`, color: "Orange", important: true });
-					Logger.out({ prefix: "[TRACKING]", message: `Beatmap: ${score.filename}`, color: "Orange" });
-					Logger.out({ prefix: "[TRACKING]", message: `Guilds: ${dbuser.guilds.map(g => g.id)}`, color: "Orange" });
-					await DBManager.updateTrackingEntry(dbuser.uid, score.played_at);
-					for (const guild of dbuser.guilds) {
-						if (client.config.debug && guild.id != client.config.test_guild) continue;
-						const actual_guild = client.guilds.cache.get(guild.id);
-						if (!actual_guild) continue;
-
-						let dbguild = await DBManager.getGuildConfig(actual_guild);
-						if (!dbguild || !dbguild.tracking_enabled) continue;
-
-						const track_channel = client.channels.cache.get(dbguild.channel.track);
-						if (!track_channel || track_channel.type != ChannelType.GuildText) continue
-
-						const cache_guild = client.guilds.cache.get(guild.id);
-						if (!cache_guild) continue;
-
-						const bot_member = cache_guild.members.me!;
-						if (!bot_member.permissionsIn(track_channel).has(PermissionFlagsBits.SendMessages)) continue;
-
-						const guild_locale = cache_guild.preferredLocale;
-						const spanish = guild_locale.includes("es");
-						const str = spanish ? es : en;
-
-						const embed = await new ScoreEmbedBuilder()
-							.setPlayer(user)
-							.setScore(score);
-
-						await track_channel.send({ content: str.tracking.message(user), embeds: [embed] });
-					}
-					Logger.out({ prefix: "[TRACKING]", message: `The embed was sent and the entry was updated.`, color: "Orange" });
-				}
-			}
-			tracking_users = await DBManager.getTrackingUsers();
-		}
-	}
-
-	static stop() {
-		Logger.out({ prefix: "[TRACKING]", message: "Stopping osu!droid tracking system.", color: "Orange", important: true });
-		this.running = false;
-		client.config.tracking.enabled = false;
-	}
-
-	static async refresh(): Promise<boolean> {
-		const status_before = this.running;
-		this.stop();
-		Logger.out({ prefix: "[TRACKING]", message: "Updating osu!droid tracking system's entries...", color: "Orange", important: true });
-		const tracking_users = await DBManager.getTrackingUsers();
-		let i = 1;
-		for (const dbuser of tracking_users) {
-			await new Promise(resolve => setTimeout(resolve, 3000));
-			const user = await DroidBanchoUser.get({ uid: dbuser.uid });
-			if (!user) continue;
-			const score = user.getRecentScores()[0];
-			Logger.out({ prefix: "[TRACKING]", message: `(${i++} of ${tracking_users.length}) Updating tracking entry for ${user.username}...`, color: "Orange", important: true });
-			Logger.out({ prefix: "[TRACKING]", message: `Timestamp: ${score.played_at}`, color: "Orange" });
-			await DBManager.updateTrackingEntry(dbuser.uid, score.played_at);
-			Logger.out({ prefix: "[TRACKING]", message: `Saved.`, color: "Orange", important: true });
-		}
-		Logger.out({ prefix: "[TRACKING]", message: `Successfully updated ${tracking_users.length} entries.`, color: "Orange" });
-		if (status_before)
-			this.start();
-		return true;
-	}
-
-    static async addUser(user: DroidBanchoUser, owner: GuildMember) {
-        return await DBManager.addTrackingUser(user, owner);
+    /**
+     * Deletes a user from the tracking system.
+     * @param user The `DroidBanchoUser` to delete.
+     * @param guild The `Guild` this user is tracked in.
+     */
+    static async deleteUser(user: DroidBanchoUser, guild: Guild): Promise<boolean> {
+        return await DatabaseManager.deleteTrackingUser(user, guild);
     }
 
-	static async deleteUser(user: DroidBanchoUser, owner: GuildMember) {
-		return await DBManager.deleteTrackingUser(user, owner);
-	}
+
+    private static async getUser(user: DroidTrackingEntry): Promise<DroidBanchoUser | undefined> {
+        try {
+            return await DroidBanchoUser.get({ uid: user.uid });
+        } catch (error) {
+            this.running = false;
+            log.err({ prefix: "TRACKING", message: `osu!droid score tracking system stopped due to an error.`, error: error });
+        }
+    }
+
+    /**
+     * Gets the score tracking channel for a given `Guild`.
+     * @param guild The Discord `Guild`.
+     * @returns The `TextChannel` set as the score tracking channel.
+     */
+    static async getTrackingChannel(guild: Guild): Promise<TextChannel | undefined> {
+        const guild_config = await DatabaseManager.getGuildConfig(guild);
+        if (!guild_config) return;
+
+        const channel = guild.channels.cache.get(guild_config.channel.track);
+        return channel?.type == ChannelType.GuildText ? channel : undefined;
+    }
+
+    /**
+     * Starts the score tracking system.
+     */
+    static async start(): Promise<void> {
+        this.running = true;
+        this.entries = await DatabaseManager.getTrackingUsers();
+        log.out({ prefix: "TRACKING", message: `The osu!droid score tracking system is starting with ${this.entries.length} entries.` });
+        while (this.running) {
+            for (const dbuser of this.entries) {
+                if (!this.running || !this.enabled) break;
+                await new Promise(resolve => setTimeout(resolve, this.interval));
+                const user = await this.getUser(dbuser);
+                if (!user) continue;
+                let scores = user.getRecentScores().filter(score => score.played_at > dbuser.timestamp).slice(0, 3).reverse();
+                if (!scores.length) continue;
+
+                log.out({ prefix: "TRACKING", message: `Processing ${scores.length} scores from ${dbuser.username}...` });
+                for (const score of scores) {
+                    if (!this.running || !this.enabled) break;
+                    if (score == scores[scores.length - 1]) await DatabaseManager.updateTrackingEntry(dbuser.uid, score.played_at);
+                    const embed = await new ScoreEmbedBuilder()
+                        .setUser(user)
+                        .setScore(score)
+                    log.out({ prefix: "TRACKING", message: `${score.filename} + ${score.mods.toString() || "NM"}` });
+                    for (const dbguild of dbuser.guilds) {
+                        const guild = client.guilds.cache.get(dbguild);
+                        if (!guild) continue;
+
+                        const track_channel = await this.getTrackingChannel(guild);
+                        if (!track_channel) continue;
+
+                        const bot_member = guild.members.me!;
+                        if (!bot_member.permissionsIn(track_channel).has(PermissionFlagsBits.SendMessages)) continue;
+                        await track_channel.send({ embeds: [embed] });
+                    }
+
+                    // little delay to avoid flooding the channel with ten quintillion embeds at once
+                    if (scores.length > 1) await new Promise(resolve => setTimeout(resolve, 5000));
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates all of the osu!droid score tracking system's entries.
+     */
+    static async update(): Promise<void> {
+        this.entries = await DatabaseManager.getTrackingUsers();
+        const prev_state = this.running;
+        this.stop();
+        log.out({ prefix: "TRACKING", message: `Updating ${this.entries.length} entries...` });
+        for (const entry of this.entries) {
+            const user = await this.getUser(entry);
+            if (!user) continue;
+            const score = user.getRecentScores()[0];
+            if (!score) continue;
+            await DatabaseManager.updateTrackingEntry(entry.uid, score.played_at);
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+        log.out({ prefix: "TRACKING", message: "The osu!droid score tracking system's entries has been updated." });
+        if (prev_state) this.start();
+    }
+
+    /**
+     * Stops the score tracking system.
+     */
+    static stop(): void {
+        if (this.running) log.out({ prefix: "TRACKING", message: "The osu!droid score tracking system has been stopped." });
+        this.running = false;
+    }
 }

@@ -1,23 +1,19 @@
 import { SlashCommand } from "@structures/core";
 import { SlashCommandBuilder } from "discord.js";
-import { DroidHelper } from "@utils/helpers";
-import { ScoreEmbedBuilder, PaginationRowBuilder, ResponseEmbedBuilder, ResponseType, RowActions } from "@utils/builders";
-import { DroidUserNotFound } from "@structures/errors";
-import { NoDroidScores } from "@structures/errors/NoDroidScores";
-import { DroidRXUser } from "@floemia/osu-droid-utils";
+import { DroidHelper, InteractionHelper } from "@utils/helpers";
+import { ScoreEmbedBuilder, PaginationRowBuilder, RowActions } from "@utils/builders";
 
-export const run: SlashCommand["run"] = async (client, interaction, str) => {
+export const run: SlashCommand["run"] = async (client, interaction) => {
+	const t = InteractionHelper.getLocale(interaction);
 	let index = (interaction.options.getInteger("index") || 1) - 1;
 	const user = await DroidHelper.getUser(interaction);
-	if (!user) throw new DroidUserNotFound(str.general.user_dne);
-	const embed = new ResponseEmbedBuilder()
-		.setType(ResponseType.PROCESS)
-		.setDescription(str.commands.recent.generating(user));
-	const response = await interaction.editReply({ embeds: [embed] });
+	if (!user) return;
 
+	const response = await InteractionHelper.replyProcess(interaction, t.commands.recent.responses.process(user));
 	const scores = await user.getRecentScores();
-	
-	if (scores.length == 0) throw new NoDroidScores(str.general.no_scores(user));
+
+	if (scores.length == 0) return await InteractionHelper.replyError(interaction, t.general.no_scores);
+
 
 	const row = new PaginationRowBuilder(response)
 		.setIndex(index)
@@ -25,26 +21,26 @@ export const run: SlashCommand["run"] = async (client, interaction, str) => {
 		.startTimeout();
 
 	const score_embed = await new ScoreEmbedBuilder()
-		.setPlayer(user)
-		.setScore(scores[row.index])
+		.setUser(user)
+		.setScore(scores[row.index]!)
 
-	await response.edit({ content: str.commands.recent.message(user, index), embeds: [score_embed], components: [row] });
+	await InteractionHelper.reply(interaction, { embeds: [score_embed], components: [row] });
 	row.collector.on("collect", async (i) => {
 		await i.deferUpdate();
 		if (i.user.id != interaction.user.id || !i.customId.includes(row.ID)) return
 
 		const action = i.customId.split("-")[0] as RowActions;
 		row.handleAction(action);
-		await score_embed.setScore(scores[row.index])
-		await response.edit({ content: str.commands.recent.message(user, row.index), embeds: [score_embed], components: [row] });
+		await score_embed.setScore(scores[row.index]!)
+		await InteractionHelper.reply(interaction, { embeds: [score_embed], components: [row] });
 	})
 }
 
 export const data: SlashCommand["data"] =
 	new SlashCommandBuilder()
 		.setName("recent")
-		.setDescription("🔘 Get the most recent scores from yourself or a player.")
-		.setDescriptionLocalization("es-ES", "🔘 Obtener los úlimos scores tuyos o de un jugador.")
+		.setDescription("🟣 Get the most recent scores from an osu!droid player.")
+		.setDescriptionLocalization("es-ES", "🟣 Obtener los úlimos scores de un jugador de osu!droid.")
 		.addUserOption(option => option.setName("user")
 			.setDescription("The Discord user linked to the osu!droid account.")
 			.setDescriptionLocalization("es-ES", "El usuario de Discord vinculado a la cuenta de osu!droid."))

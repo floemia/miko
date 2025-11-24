@@ -1,5 +1,6 @@
-export * from "./models/UserServer";
-export * from "./models/BanchoUserLink";
-export * from "./models/RXUserLink";
-export * from "./models/DroidTrack";
-export * from "./models/GuildConfig";
+export * from "./UserServer";
+export * from "./RXUserLink";
+export * from "./BanchoUserLink";
+export * from "./GuildConfig";
+export * from "./DroidTrack";
+

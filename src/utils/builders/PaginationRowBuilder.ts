@@ -1,15 +1,15 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CacheType, ComponentType, InteractionCollector, Message, PermissionFlagsBits } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CacheType, ComponentType, InteractionCollector, InteractionResponse, Message, PermissionFlagsBits } from "discord.js";
 export type RowActions = "first" | "back" | "next" | "last";
 
 export class PaginationRowBuilder extends ActionRowBuilder<ButtonBuilder> {
 	public index: number;
 	public length: number;
 	public ID: string;
-	private message: Message;
+	private message: Message | InteractionResponse;
 	public collector: InteractionCollector<ButtonInteraction<CacheType>>;
 	private collector_timeout: NodeJS.Timeout | null;
 
-	constructor(message: Message) {
+	constructor(message: Message | InteractionResponse) {
 		super()
 		this.ID = Math.floor(Math.random() * 10000000).toString();
 		this.index = 0;
@@ -63,7 +63,7 @@ export class PaginationRowBuilder extends ActionRowBuilder<ButtonBuilder> {
 			next: () => { this.index++ },
 			last: () => { this.index = this.length - 1 },
 		};
-		actions[action]();
+		actions[action]!();
 		if (this.index < 0) this.index = this.length - 1;
 		if (this.index > this.length - 1) this.index = 0;
 		this.updateButtons();
@@ -90,9 +90,9 @@ export class PaginationRowBuilder extends ActionRowBuilder<ButtonBuilder> {
 	}
 
 	private updateButtons() {
-		this.components[0].setDisabled(this.index == 0 ? true : false)
-		this.components[2].setLabel(`${this.index + 1}/${this.length}`)
-		this.components[4].setDisabled(this.index == this.length - 1 ? true : false)
+		this.components[0]!.setDisabled(this.index == 0 ? true : false)
+		this.components[2]!.setLabel(`${this.index + 1}/${this.length}`)
+		this.components[4]!.setDisabled(this.index == this.length - 1 ? true : false)
 		return this;
 	}
 }

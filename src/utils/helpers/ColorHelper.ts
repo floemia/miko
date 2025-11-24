@@ -1,55 +1,29 @@
+import { RGBColor } from "@rian8337/osu-base";
 import { getAverageColor } from "fast-average-color-node";
-
-export type Color = | 'Red' | 'Orange' | 'Yellow' | 'Green' | 'Blue' | 'Purple' | 'White'
-
+/**
+ * Utility class for color operations.
+ */
 export abstract class ColorHelper {
-	public static getHexColor(color: Color): string {
-		switch (color) {
-			case "Red":
-				return "#FF0000";
-			case "Orange":
-				return "#FFA500";
-			case "Yellow":
-				return "#FFFF00";
-			case "Green":
-				return "#00FF00";
-			case "Blue":
-				return "#0000FF";
-			case "Purple":
-				return "#800080";
-			case "White":
-				return "#FFFFFF";
-			default:
-				return "#FFFFFF";
-		}
-	}
+    /**
+     * Converts a hex color to a number.
+     * @param hex The hex color.
+     * @returns The number representation of the hex color.
+    */
+    static hexToNumber(hex: string): number {
+        return parseInt(hex.replace("#", ""), 16);
+    }
 
-	public static getCircleEmoji(color: Color) {
-		switch (color.toLowerCase()) {
-			case 'red':
-				return '🔴';
-			case 'orange':
-				return '🟠';
-			case 'yellow':
-				return '🟡';
-			case 'green':
-				return '🟢';
-			case 'blue':
-				return '🔵';
-			case 'purple':
-				return '🟣';
-			default:
-				return '⚪';
-		}
-	};
+    static async getAverageColor(source: string | Buffer<ArrayBufferLike>): Promise<number> {
+        try {
+            const color = await getAverageColor(source);
+            return this.hexToNumber(color.hex);
+        } catch (error: any) {
+            return 0xFFFFFF;
+        }
+    }
 
-	public static async getAverageColor(imageURL: string | Buffer) {
-		try {
-			const averageColor = await getAverageColor(imageURL, { defaultColor: [255, 255, 255, 255] });
-			return averageColor.hex;
-		} catch (error) {
-			return "#dedede";
+    static rgbToNumber(color: RGBColor): number {
+        return (color.r << 16) + (color.g << 8) + color.b;
+    }
 
-		}
-	}
 }

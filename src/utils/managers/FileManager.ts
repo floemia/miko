@@ -1,11 +1,16 @@
 import fs from "fs";
 import path from "path";
 
+/**
+ * Utility class for managing files.
+ */
 export abstract class FileManager {
-    static getAvatarList() {
-        return fs.readdirSync("./assets/avatars/").map(file => `./assets/avatars/${file}`);
-    }
-
+    /**
+     * Recursively scans a directory and its subdirectories for JavaScript files.
+     * @param dir The main directory.
+     * @param jsFiles An array to store the found JavaScript files.
+     * @returns The found JavaScript files.
+     */
     static getJSFiles(dir: string, jsFiles: string[] = []) {
         const entries = fs.readdirSync(dir, { withFileTypes: true });
         for (const entry of entries) {

@@ -1,18 +1,23 @@
+/**
+ * Utility class for time-related operations.
+ */
 export abstract class TimeHelper {
+
+    /**
+     * A basic timer method.
+     * @returns The time in seconds since the timer started.
+     */
     static startTimer(): () => number {
         const start = Date.now();
         return () => ((Date.now() - start) / 1000);
     }
 
+    /**
+     * Returns The time in "es-ES" format.
+     * @returns The current time in a formatted string.
+    */
     static nowFormatted(): string {
-        return new Date().toLocaleString("es-ES", {
-            month: "numeric",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-            second: "numeric"
-        });
+        return new Date().toISOString()
     }
 
     static msToTime(ms: number): string {

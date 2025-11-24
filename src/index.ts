@@ -1,13 +1,13 @@
 import "dotenv/config";
 import 'module-alias/register';
 
-import { Bot } from "@core/Bot";
-import { Logger } from "@utils/logger";
+import { MikoClient } from "@core/MikoClient";
+import { Logger as log } from "@utils/helpers";
 
-const client = new Bot();
+const client = new MikoClient();
 
 client.start().catch(err => {
-	Logger.err({ prefix: "[ERROR]", message: `An error has occurred.`, important: true })
-	Logger.err({ prefix: "[ERROR]", message: err.stack })
+    log.err({ prefix: "CLIENT", message: "An error has occurred.", error: err });
 });
+
 export { client };
