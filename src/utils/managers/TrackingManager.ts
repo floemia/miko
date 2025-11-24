@@ -86,7 +86,7 @@ export abstract class TrackingManager {
         this.entries = await DatabaseManager.getTrackingUsers();
         log.out({ prefix: "TRACKING", message: `The osu!droid score tracking system is starting with ${this.entries.length} entries.` });
         while (this.running) {
-            for (const dbuser of this.entries) {
+            for (const dbuser of this.entries) {                
                 if (!this.running || !this.enabled) break;
                 await new Promise(resolve => setTimeout(resolve, this.interval));
                 const user = await this.getUser(dbuser);
@@ -118,6 +118,7 @@ export abstract class TrackingManager {
                     if (scores.length > 1) await new Promise(resolve => setTimeout(resolve, 5000));
                 }
             }
+            this.entries = await this.getUsers();
         }
     }
 

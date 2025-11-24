@@ -18,8 +18,8 @@ export const data: SlashCommand["data"] =
 			.setDescription("really, this is unreachable")
 			.addSubcommand(sub => sub
 				.setName("status")
-				.setDescription("⚙️ Set the osu!droid scores tracking status.")
-				.setDescriptionLocalization("es-ES", "⚙️ Cambiar el estado del sistema de tracking de scores de osu!droid.")
+				.setDescription("Set the osu!droid scores tracking status.")
+				.setDescriptionLocalization("es-ES", "Cambiar el estado del sistema de tracking de scores de osu!droid.")
 				.addStringOption(option =>
 					option.setName("status")
 						.setDescription("The desired status of the tracking system.")
@@ -30,8 +30,8 @@ export const data: SlashCommand["data"] =
 							{ name: "disabled", value: "disabled", name_localizations: { "es-ES": "desactivado" } })))
 			.addSubcommand(sub => sub
 				.setName("channel")
-				.setDescription("⚙️ Set the osu!droid scores tracking channel.")
-				.setDescriptionLocalization("es-ES", "⚙️ Cambiar el canal de tracking de scores de osu!droid.")
+				.setDescription("Set the osu!droid scores tracking channel.")
+				.setDescriptionLocalization("es-ES", "Cambiar el canal de tracking de scores de osu!droid.")
 				.addChannelOption(option =>
 					option.setName("channel")
 						.addChannelTypes(ChannelType.GuildText)

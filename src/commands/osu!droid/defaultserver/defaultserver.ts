@@ -21,8 +21,8 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 export const data: SlashCommand["data"] =
 	new SlashCommandBuilder()
 		.setName("defaultserver")
-		.setDescription("🟣 Set your default osu!droid server.")
-		.setDescriptionLocalization("es-ES", "🟣 Establece tu servidor predeterminado de osu!droid.")
+		.setDescription(" Set your default osu!droid server.")
+		.setDescriptionLocalization("es-ES", " Establece tu servidor predeterminado de osu!droid.")
 		.addStringOption(option =>
 			option.setName("server")
 				.setDescription("The desired server.")

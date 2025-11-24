@@ -1,5 +1,5 @@
 import { Config } from "@core/Config";
-import { ColorHelper } from "@utils/helpers";
+import { ColorHelper, EmojiHelper } from "@utils/helpers";
 import { EmbedBuilder, Interaction, User } from "discord.js";
 
 /**
@@ -46,11 +46,11 @@ export class InteractionEmbedBuilder extends EmbedBuilder {
             return this.setMessage(`\`${input.stack}\``)
                 .setTitle(`${input}`)
         }
-        return this.setMessage(input)
+        const emoji = EmojiHelper.getResponseEmoji("error");
+        return this.setMessage(emoji?.toString() + " " + input);
     }
-
-
-
-
-
 }
+
+
+
+

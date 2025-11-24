@@ -47,7 +47,7 @@ export abstract class Config {
         connection: "#7ED9C8",
         debug: "#F2BBC9",
         default: "#A9D979",
-        error: "#FF0000",
+        error: "#FF4141",
         tracking: "#AD82D9",
     }
 
@@ -85,6 +85,16 @@ export abstract class Config {
      * Length emoji ID.
      */
     static length_emoji = "1417866529579466913";
+
+    /**
+     * Success emoji ID.
+     */
+    static ok_emoji = "1442621330678616156";
+
+    /**
+     * Error emoji ID.
+     */
+    static error_emoji = "1442621301104709692";
 
     /**
      * The data of the supported osu!droid servers.

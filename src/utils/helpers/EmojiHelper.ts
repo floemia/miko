@@ -17,6 +17,11 @@ export abstract class EmojiHelper {
         return client.emojis.cache.find(emoji => emoji.id == Config.rank_emojis[rank])
     }
 
+    static getResponseEmoji(type: "success" | "error") : Emoji | undefined {
+        const emoji = type == "success" ? Config.ok_emoji : Config.error_emoji;
+        return client.emojis.cache.find(e => e.id == emoji);
+    }
+
 
     /**
      * Get the emoji of a specific osu! beatmap ranking status.

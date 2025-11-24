@@ -39,8 +39,8 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 export const data: SlashCommand["data"] =
 	new SlashCommandBuilder()
 		.setName("top")
-		.setDescription("🟣 Get the top scores from an osu!droid player.")
-		.setDescriptionLocalization("es-ES", "🟣 Obtener los mejores scores de un jugador de osu!droid.")
+		.setDescription(" Get the top scores from an osu!droid player.")
+		.setDescriptionLocalization("es-ES", " Obtener los mejores scores de un jugador de osu!droid.")
 		.addUserOption(option => option.setName("user")
 			.setDescription("The Discord user linked to the osu!droid account.")
 			.setDescriptionLocalization("es-ES", "El usuario de Discord vinculado a la cuenta de osu!droid."))

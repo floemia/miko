@@ -7,9 +7,6 @@ export const tracking_start: SlashCommand["run"] = async (client, interaction) =
     if (TrackingManager.running) return await InteractionHelper.replyError(interaction, "The osu!droid score tracking system is already running.");
     TrackingManager.start();
 
-    const embed = new InteractionEmbedBuilder(interaction)
-        .setMessage("The osu!droid score tracking system has been started.")
-
-    await InteractionHelper.reply(interaction, { embeds: [embed] });
+    await InteractionHelper.replySuccess(interaction, "The osu!droid score tracking system has been started.");
 
 }

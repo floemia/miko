@@ -6,9 +6,6 @@ import { TrackingManager } from "@utils/managers";
 export const tracking_update: SlashCommand["run"] = async (client, interaction) => {
     await InteractionHelper.replyProcess(interaction, "Updating the osu!droid score tracking system's entries...");
     await TrackingManager.update();
-    const embed = new InteractionEmbedBuilder(interaction)
-        .setMessage("The osu!droid score tracking system's entries have been updated.")
 
-    await InteractionHelper.reply(interaction, { embeds: [embed] });
-
+    await InteractionHelper.replySuccess(interaction, "The osu!droid score tracking system's entries have been updated.");
 }

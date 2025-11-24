@@ -28,8 +28,8 @@ export const run: SlashCommand["run"] = async (client, interaction) => {
 export const data: SlashCommand["data"] =
 	new SlashCommandBuilder()
 		.setName("link")
-		.setDescription("🟣 Link your Discord to an osu!droid account.")
-		.setDescriptionLocalization("es-ES", "🟣 Vincula tu Discord a una cuenta de osu!droid.")
+		.setDescription("Link your Discord to an osu!droid account.")
+		.setDescriptionLocalization("es-ES", "Vincula tu Discord a una cuenta de osu!droid.")
 		.addIntegerOption(option => option.setName("uid")
 			.setDescription("The UID of the player.")
 			.setDescriptionLocalization("es-ES", "El UID del jugador."))
